@@ -187,7 +187,23 @@
 
 .tourCard { background: linear-gradient(120deg, #eef4fc, #fff 68%); }
 .tourCard:has(.dateDisclosure[open]) { border-color: #9db3cd; }
-.countryResult .facts svg { color: #25466e; }
+.tourInformation .facts > div {
+  justify-items: center;
+  align-content: center;
+  gap: .25rem;
+  padding: .42rem .35rem;
+  border-radius: .55rem;
+  background: #f6f9fd;
+  text-align: center;
+}
+.tourInformation .facts > div > svg {
+  width: 2rem;
+  height: 2rem;
+  padding: .43rem;
+  border-radius: 50%;
+  background: #e7effa;
+  color: #25466e;
+}
 .dateToggle { background: #eaf1fa; color: #102747; }
 .dateDisclosure[open] .dateToggle { background: #102747; color: #fff; }
 .dateDisclosure > summary:focus-visible,

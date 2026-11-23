@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ClockIcon, LocationIcon, PlaneIcon, SuitcaseIcon } from "@/components/layout/site-icons";
+import { CalendarIcon, ClockIcon, LocationIcon, PlaneTakeoffIcon } from "@/components/layout/site-icons";
 import { TourResultDates } from "./tour-result-dates";
 import styles from "./catalog-layout.module.css";
 
@@ -9,14 +9,14 @@ type CountryDateRange = { native: boolean; departure: string | null; returning: 
 export function TourResultRow({ title, slug, summary, imageUrl, destination, date, duration, airline, price, countryDates }: { title: string; slug: string; summary: string | null; imageUrl: string | null; destination: string; date: string; duration: number | null; airline: string; price: string; countryDates?: CountryDateRange }) {
   const href = `/tours/${slug}/`;
   const facts = [
-    { label: "تاریخ حرکت", value: date, Icon: ClockIcon },
+    { label: "تاریخ حرکت", value: date, Icon: CalendarIcon },
     { label: "مقصد", value: destination, Icon: LocationIcon },
-    { label: "مدت سفر", value: duration ? `${duration.toLocaleString("fa-IR")} روز` : "با استعلام", Icon: SuitcaseIcon },
-    { label: "حمل‌ونقل", value: airline, Icon: PlaneIcon },
+    { label: "مدت سفر", value: duration ? `${duration.toLocaleString("fa-IR")} روز` : "با استعلام", Icon: ClockIcon },
+    { label: "حمل‌ونقل", value: airline, Icon: PlaneTakeoffIcon },
   ];
   const information = (
     <div className={styles.tourInformation}><h2><Link href={href}>{title}</Link></h2>{summary && <p className="mt-2 line-clamp-2">{summary}</p>}
-      <div className={styles.facts}>{facts.map(({ label, value, Icon }) => <div key={label}><Icon className="size-5" /><strong className="line-clamp-2" title={value}>{value}</strong><span>{label}</span></div>)}</div>
+      <div className={styles.facts}>{facts.map(({ label, value, Icon }) => <div key={label}><Icon /><strong className="line-clamp-2" title={value}>{value}</strong><span>{label}</span></div>)}</div>
       <div className={styles.price}><span className="text-xs font-normal text-muted">شروع قیمت از</span><strong>{price}</strong></div>
     </div>
   );
