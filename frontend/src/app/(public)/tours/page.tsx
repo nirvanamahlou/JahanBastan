@@ -250,7 +250,6 @@ export default async function ToursPage({ searchParams }: { searchParams: Promis
           <div className={styles.field}><span>مبدأ</span><SiteSelect ariaLabel="مبدأ" defaultValue={departure} id="tour-origin" name="departure" options={[{ label: "همه مبدأها", value: "" }, ...options.origins]} searchable /></div>
           <CountryCityFields key={country + destination} id="tour" countries={countries.items} cities={destinations.items.map((item) => ({ title: item.title, value: item.slug, country: item.country }))} country={country} city={destination} />
           <div className={`${styles.field} ${styles.tourSearchDates}`}><JalaliDateRangeInput key={`${departureFrom}:${departureTo}`} compact initialDeparture={departureFrom || null} initialReturn={departureTo || null} showTripType={false} dateLabels={{ field: "بازهٔ تاریخ حرکت", departure: "از تاریخ", return: "تا تاریخ" }} /></div>
-          <label>تعداد مسافر<input className={field} defaultValue={passengerCount} min={1} max={20} name="passengerCount" type="number" /></label>
           <button type="submit" className={styles.tourSearchButton}><SearchIcon className="size-4" />جست‌وجوی تور</button>
         </div>
         <details className={styles.tourSearchAdvanced} open={Boolean(airline || hotelStars || tourType || transportation || minPrice || maxPrice || search || featured || installmentOnly || directFlight || lastMinute)}>
@@ -265,6 +264,7 @@ export default async function ToursPage({ searchParams }: { searchParams: Promis
           <fieldset className="grid gap-3 border-t border-border pt-4"><legend className="sr-only">ویژگی‌های تور</legend>{[["featured", "فقط پرفروش", featured], ["installmentOnly", "خرید اقساطی", installmentOnly], ["directFlight", "پرواز مستقیم", directFlight], ["lastMinute", "لحظه‌آخری", lastMinute]].map(([name, label, checked]) => <label key={String(name)} className="!flex items-center gap-2"><input defaultChecked={Boolean(checked)} name={String(name)} type="checkbox" value="true" />{label}</label>)}</fieldset>
           </div>
         </details>
+        {passengerCount && <input type="hidden" name="passengerCount" value={passengerCount} />}
         <input type="hidden" name="sort" value={sort} />
         {hasFilters ? <Link className="mt-2 inline-block text-xs font-bold text-muted" href={countryHref}>پاک کردن فیلترها</Link> : null}
     </form>
