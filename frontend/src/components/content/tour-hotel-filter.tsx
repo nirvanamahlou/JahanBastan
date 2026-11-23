@@ -480,7 +480,6 @@ function RoomPrice({ offer, room }: { offer: HotelPrice; room: typeof rooms[numb
   if (room.key === "infant" || (room.key === "childWithBed" && isFinalLocalTourPrice(offer.childWithBedCurrency ?? offer.packageCurrency)) || (room.key === "childWithoutBed" && !isForeignTourPrice(offer.childWithoutBedCurrency))) {
     return <>
       <strong className="block text-sm text-brand">{hotelPrice}</strong>
-      {room.key === "infant" ? <span>هزینه نوزاد</span> : null}
       {room.key === "childWithBed" ? <span>مبلغ نهایی</span> : null}
     </>;
   }
