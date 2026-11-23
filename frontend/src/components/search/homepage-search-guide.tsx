@@ -33,17 +33,43 @@ export function HomepageSearchGuide({ content }: { content: Record<string, strin
   const parts = body.replace(/\r\n/g, "\n").split(/\n### /);
   const introduction = parts.shift() || "";
   const heading = introduction.match(/^## ([^\n]+)/)?.[1] || `راهنمای ${guide.label}`;
-  const introBody = introduction.replace(/^## [^\n]+\n*/, "");
+  const introBody = introduction.replace(/^## [^\n]+\n*/, "").trim();
+  const group = `home-search-guide-${serviceType}`;
+
   return (
     <section className={styles.section} aria-labelledby="home-search-guide-title" data-search-guide={serviceType} dir="rtl">
       <Container className={styles.layout}>
-        <div className={styles.intro}><span>با آگاهی سفر کنید</span><h2 id="home-search-guide-title">{heading}</h2><RichText content={introBody} /><a href="/contact/">از کارشناس سفر بپرسید ←</a></div>
-        {parts.length ? <div className={styles.details}>{parts.map((part, index) => {
-          const firstLine = part.indexOf("\n");
-          const title = firstLine < 0 ? part : part.slice(0, firstLine);
-          return <details key={`${serviceType}-${index}`}><summary>{title}</summary><RichText content={firstLine < 0 ? "" : part.slice(firstLine).trim()} /></details>;
-        })}</div> : null}
+        <header className={styles.header}>
+          <h2 id="home-search-guide-title">{heading}</h2>
+          <a href="/contact/">از کارشناس سفر بپرسید <span aria-hidden="true">←</span></a>
+        </header>
+        {(parts.length > 0 || introBody) && (
+          <div className={styles.entries} key={serviceType}>
+            {introBody && <GuideEntry group={group} title="دربارهٔ این راهنما" content={introBody} />}
+            {parts.map((part, index) => {
+              const firstLine = part.indexOf("\n");
+              const title = firstLine < 0 ? part : part.slice(0, firstLine);
+              return (
+                <GuideEntry
+                  key={index}
+                  group={group}
+                  title={title}
+                  content={firstLine < 0 ? "" : part.slice(firstLine).trim()}
+                />
+              );
+            })}
+          </div>
+        )}
       </Container>
     </section>
+  );
+}
+
+function GuideEntry({ group, title, content }: { group: string; title: string; content: string }) {
+  return (
+    <details name={group} className={styles.entry}>
+      <summary>{title}</summary>
+      <RichText className={styles.answer} content={content} />
+    </details>
   );
 }
