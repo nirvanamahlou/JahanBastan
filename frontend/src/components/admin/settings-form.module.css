@@ -1,0 +1,26 @@
+.form { display: grid; gap: 1.5rem; }
+.layout { display: grid; gap: 1.5rem; align-items: start; grid-template-columns: 15rem minmax(0, 1fr); }
+.navigation { position: sticky; top: 6rem; display: grid; gap: .5rem; padding: 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 1.25rem; }
+.navigation h2 { font-size: 1.15rem; font-weight: 900; }
+.navigation > p { color: var(--muted); font-size: .8rem; margin-bottom: .5rem; }
+.navigation button { display: grid; gap: .35rem; padding: .85rem; text-align: start; border: 1px solid transparent; border-radius: .85rem; }
+.navigation button strong { font-size: .95rem; }
+.navigation button span { color: var(--muted); font-size: .72rem; line-height: 1.8; }
+.navigation button[aria-pressed="true"] { background: var(--brand); color: var(--surface); border-color: var(--brand); }
+.navigation button[aria-pressed="true"] span { color: inherit; opacity: .8; }
+.navigation button:focus-visible { outline: 3px solid var(--accent-strong); outline-offset: 3px; }
+.content { min-width: 0; }
+.group { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; }
+.group[hidden] { display: none; }
+.group > fieldset { min-width: 0; }
+.groupHeading { grid-column: 1 / -1; padding: .3rem .25rem; }
+.groupHeading h2 { font-size: 1.5rem; font-weight: 900; }
+.groupHeading p { margin-top: .4rem; font-size: .85rem; color: var(--muted); }
+.guide { border: 1px solid var(--border); border-radius: 1rem; background: var(--surface); overflow: clip; }
+.guide summary { padding: 1rem; font-weight: 800; cursor: pointer; }
+.guide[open] summary { border-bottom: 1px solid var(--border); background: var(--surface-muted); }
+.notes { padding: 1rem; border: 1px solid var(--border); border-radius: 1rem; background: var(--surface); }
+.saveBar { position: sticky; bottom: 1rem; z-index: 20; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; border: 1px solid var(--border); border-radius: 1rem; padding: 1rem 1.25rem; background: var(--surface); box-shadow: 0 8px 28px #01256920; }
+.saveBar p { font-size: .85rem; color: var(--muted); }
+@media (max-width: 1199px) { .layout { grid-template-columns: 1fr; }.navigation { position: static; grid-template-columns: repeat(3, minmax(0, 1fr)); }.navigation > h2,.navigation > p { grid-column: 1 / -1; }.navigation button span { display: none; }.group { grid-template-columns: 1fr; }.group > fieldset { grid-column: 1 / -1; } }
+@media (max-width: 639px) { .navigation { grid-template-columns: repeat(2, minmax(0, 1fr)); }.navigation button { padding: .75rem .5rem; }.saveBar { bottom: .5rem; padding: .8rem; }.saveBar button { width: 100%; } }

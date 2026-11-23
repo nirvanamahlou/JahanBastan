@@ -1,0 +1,664 @@
+.routeSection {
+  overflow: hidden;
+  padding: 1rem;
+  border-color: #bfd5ef;
+  background:
+    radial-gradient(circle at 8% 5%, rgb(231 76 148 / 10%), transparent 25%),
+    linear-gradient(145deg, #f8fbff 0%, #ffffff 45%, #f5f9ff 100%);
+}
+
+.routeSectionHeader {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.4rem 0.2rem 1.1rem;
+  border-bottom: 1px solid #d8e5f4;
+}
+.routeSectionHeader p { color: #d83583; font-size: 0.75rem; font-weight: 900; }
+.routeSectionHeader h2 { margin-top: 0.1rem; color: #012569; font-size: clamp(1.25rem, 2vw, 1.65rem); font-weight: 950; }
+.routeSectionHeader > span {
+  border: 1px solid #c9dced;
+  border-radius: 999px;
+  background: #fff;
+  color: #315884;
+  padding: 0.45rem 0.8rem;
+  font-size: 0.75rem;
+  font-weight: 900;
+  box-shadow: 0 5px 14px rgb(1 37 105 / 7%);
+}
+.routeHeadingIcon {
+  display: grid;
+  width: 3rem;
+  height: 3rem;
+  place-items: center;
+  border-radius: 1rem;
+  background: linear-gradient(145deg, #012569, #2863a2);
+  color: #fff;
+  box-shadow: 0 9px 20px rgb(1 37 105 / 20%);
+}
+
+.routeList {
+  display: grid;
+  gap: 0.8rem;
+  margin-top: 0.9rem;
+}
+.routeCard {
+  --leg-accent: #2863a2;
+  --leg-deep: #012569;
+  --leg-soft: #eaf4ff;
+  --leg-line: #b9d5f2;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--leg-line);
+  border-radius: 1.35rem;
+  background: linear-gradient(145deg, var(--leg-soft), #fff 58%);
+  box-shadow: 0 12px 28px rgb(1 37 105 / 9%);
+}
+.routeCard:nth-child(3n + 2) {
+  --leg-accent: #d97706;
+  --leg-deep: #7c3f00;
+  --leg-soft: #fff5df;
+  --leg-line: #f1cf91;
+}
+.routeCard:nth-child(3n) {
+  --leg-accent: #0f9274;
+  --leg-deep: #075945;
+  --leg-soft: #e7fbf5;
+  --leg-line: #a9e2d2;
+}
+.routeCard::before {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 0.32rem;
+  background: linear-gradient(var(--leg-accent), #e74c94);
+  content: "";
+}
+
+.routeHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.7rem 0.9rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--leg-line) 80%, white);
+  background: rgb(255 255 255 / 62%);
+}
+.stageIdentity { display: flex; min-width: 0; align-items: center; gap: 0.65rem; }
+.stageIdentity p { color: var(--leg-accent); font-size: 0.68rem; font-weight: 900; }
+.stageIdentity h3 { margin-top: 0.1rem; color: var(--leg-deep); font-size: 0.95rem; font-weight: 950; }
+.stageNumber {
+  display: grid;
+  width: 1.7rem;
+  height: 1.7rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--leg-deep);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 950;
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--leg-accent) 24%, transparent);
+}
+.transportIcon {
+  display: grid;
+  width: 2.2rem;
+  height: 2.2rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--leg-line);
+  border-radius: 0.85rem;
+  background: #fff;
+  color: var(--leg-accent);
+}
+.stageBadges { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 0.45rem; }
+.transportBadge,
+.dateBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 999px;
+  padding: 0.38rem 0.7rem;
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+.transportBadge { background: var(--leg-deep); color: #fff; }
+.dateBadge { border: 1px solid var(--leg-line); background: #fff; color: var(--leg-deep); }
+
+.routePath {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(5rem, 0.55fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.75rem 0.9rem;
+}
+.place {
+  display: flex;
+  min-height: 4.2rem;
+  align-items: center;
+  gap: 0.55rem;
+  border: 1px solid rgb(255 255 255 / 90%);
+  border-radius: 1rem;
+  background: rgb(255 255 255 / 80%);
+  padding: 0.65rem;
+  box-shadow: 0 7px 18px rgb(1 37 105 / 6%);
+}
+.placeIcon {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 0.75rem;
+  background: var(--leg-soft);
+  color: var(--leg-accent);
+}
+.place p { color: var(--leg-accent); font-size: 0.68rem; font-weight: 900; }
+.place strong { display: block; margin-top: 0.1rem; color: var(--leg-deep); font-size: 0.95rem; }
+.place > div > span { display: block; margin-top: 0.2rem; color: #65758b; font-size: 0.72rem; }
+.pathLine { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; color: var(--leg-accent); }
+.pathLine span { height: 1px; background: var(--leg-line); }
+.pathLine svg {
+  margin-inline: 0.35rem;
+  border: 1px solid var(--leg-line);
+  border-radius: 999px;
+  background: #fff;
+  padding: 0.25rem;
+  box-sizing: content-box;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.55rem;
+  padding: 0 0.9rem 0.8rem;
+}
+.fact {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid var(--leg-line);
+  border-radius: 0.85rem;
+  background: rgb(255 255 255 / 78%);
+  padding: 0.65rem;
+}
+.factIcon { display: grid; flex: 0 0 auto; place-items: center; color: var(--leg-accent); }
+.fact dt { color: #718096; font-size: 0.62rem; }
+.fact dd { overflow: hidden; margin-top: 0.1rem; color: var(--leg-deep); font-size: 0.72rem; font-weight: 900; text-overflow: ellipsis; white-space: nowrap; }
+
+.times {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0 0.9rem 0.8rem;
+  border: 1px solid var(--leg-line);
+  border-radius: 0.9rem;
+  background: var(--leg-deep);
+  color: #fff;
+  padding: 0.5rem 0.7rem;
+  font-size: 0.75rem;
+}
+.times > span { display: inline-flex; gap: 0.35rem; }
+.times i { width: 1px; height: 1rem; background: rgb(255 255 255 / 38%); }
+.routeDescription {
+  margin: 0 0.9rem 0.8rem;
+  border: 1px dashed var(--leg-line);
+  border-radius: 0.9rem;
+  background: rgb(255 255 255 / 68%);
+  padding: 0.65rem;
+  color: #52647b;
+  font-size: 0.78rem;
+  line-height: 1.65;
+}
+
+@media (max-width: 47.99rem) {
+  .routeSection { padding: 0.75rem; }
+  .routeSectionHeader { grid-template-columns: auto minmax(0, 1fr); }
+  .routeSectionHeader > span { grid-column: 1 / -1; width: fit-content; margin-inline-start: auto; }
+  .routeHeader { align-items: flex-start; }
+  .stageBadges { width: 100%; justify-content: flex-start; }
+  .routePath { grid-template-columns: minmax(0, 1fr); }
+  .pathLine { width: 3rem; grid-template-columns: 1fr auto 1fr; transform: rotate(90deg); justify-self: center; }
+  .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+:global(html[data-theme="night"]) .routeSection {
+  border-color: #31557e;
+  background: linear-gradient(145deg, #0b2346, #102b52);
+}
+:global(html[data-theme="night"]) .routeSectionHeader { border-color: #31557e; }
+:global(html[data-theme="night"]) .routeSectionHeader h2 { color: #e8f1ff; }
+:global(html[data-theme="night"]) .routeSectionHeader > span,
+:global(html[data-theme="night"]) .transportIcon,
+:global(html[data-theme="night"]) .dateBadge,
+:global(html[data-theme="night"]) .place,
+:global(html[data-theme="night"]) .pathLine svg,
+:global(html[data-theme="night"]) .fact,
+:global(html[data-theme="night"]) .routeDescription { background: rgb(11 35 70 / 88%); color: #dce9fb; }
+
+/* Rich tour information cards */
+.contentStack {
+  display: grid;
+  gap: 1.15rem;
+}
+
+.contentStack > * {
+  animation: contentRise 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.contentStack > :nth-child(2) { animation-delay: 70ms; }
+.contentStack > :nth-child(3) { animation-delay: 140ms; }
+.contentStack > :nth-child(4) { animation-delay: 210ms; }
+.contentStack > :nth-child(5) { animation-delay: 280ms; }
+.contentStack > :nth-child(6) { animation-delay: 350ms; }
+
+.departuresCard,
+.combinedSection,
+.legacyHotelsCard {
+  overflow: hidden;
+  border-color: #cbdaf0;
+  border-radius: 1.5rem;
+  background:
+    radial-gradient(circle at 4% 0%, rgb(124 58 237 / 10%), transparent 24%),
+    linear-gradient(145deg, #fff, #f5f8ff);
+}
+
+.departureItem,
+.legacyHotelItem {
+  overflow: hidden;
+  border: 1px solid #d8e3f2;
+  border-radius: 1.15rem;
+  background: rgb(255 255 255 / 88%);
+  padding: 1rem;
+  box-shadow: 0 10px 24px rgb(1 37 105 / 7%);
+}
+
+.infoCard {
+  --info-accent: #2563eb;
+  --info-deep: #0b3b83;
+  --info-soft: #eaf3ff;
+  --info-line: #bad6fa;
+  --info-shadow: rgb(37 99 235 / 14%);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid var(--info-line);
+  border-radius: 1.55rem;
+  background:
+    radial-gradient(circle at 4% -15%, color-mix(in srgb, var(--info-accent) 17%, transparent), transparent 34%),
+    linear-gradient(135deg, color-mix(in srgb, var(--info-soft) 78%, white), #fff 62%);
+  box-shadow: 0 16px 38px var(--info-shadow);
+  padding: clamp(1rem, 2.6vw, 1.45rem);
+  transition: transform 320ms ease, border-color 320ms ease, box-shadow 320ms ease;
+}
+
+.infoCard::before {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 0.34rem;
+  background: linear-gradient(180deg, var(--info-accent), #e74c94);
+  content: "";
+}
+
+.infoGlow {
+  position: absolute;
+  z-index: -1;
+  inset-block-start: -5rem;
+  inset-inline-end: -4rem;
+  width: 12rem;
+  height: 12rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--info-accent) 9%, transparent);
+  filter: blur(2px);
+  transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.infoViolet {
+  --info-accent: #7c3aed;
+  --info-deep: #4c1d95;
+  --info-soft: #f3e8ff;
+  --info-line: #d8c3fb;
+  --info-shadow: rgb(109 40 217 / 14%);
+}
+.infoAmber {
+  --info-accent: #d97706;
+  --info-deep: #7c3f00;
+  --info-soft: #fff3d6;
+  --info-line: #f4cf8a;
+  --info-shadow: rgb(217 119 6 / 13%);
+}
+.infoBlue {
+  --info-accent: #2563eb;
+  --info-deep: #0b3b83;
+  --info-soft: #e4f1ff;
+  --info-line: #b8d6fb;
+  --info-shadow: rgb(37 99 235 / 14%);
+}
+.infoEmerald {
+  --info-accent: #059669;
+  --info-deep: #065f46;
+  --info-soft: #dcfced;
+  --info-line: #a7e5cf;
+  --info-shadow: rgb(5 150 105 / 13%);
+}
+.infoRose {
+  --info-accent: #db2777;
+  --info-deep: #8f174c;
+  --info-soft: #ffe5f1;
+  --info-line: #f5b8d4;
+  --info-shadow: rgb(219 39 119 / 13%);
+}
+
+.infoHeader {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  border-bottom: 1px dashed var(--info-line);
+  padding-bottom: 0.9rem;
+}
+.infoIcon {
+  display: grid;
+  width: 3.1rem;
+  height: 3.1rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--info-accent) 28%, white);
+  border-radius: 1rem;
+  background: linear-gradient(145deg, var(--info-accent), var(--info-deep));
+  color: #fff;
+  box-shadow: 0 9px 22px var(--info-shadow);
+  transition: transform 320ms ease;
+}
+.infoHeader p {
+  color: var(--info-accent);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+.infoHeader h2 {
+  margin-top: 0.15rem;
+  color: var(--info-deep);
+  font-size: clamp(1.15rem, 2.5vw, 1.45rem);
+  font-weight: 950;
+}
+.infoBody {
+  position: relative;
+  padding-top: 1rem;
+  color: #34455e;
+}
+.infoRichText {
+  color: #34455e;
+  font-size: 0.9rem;
+  line-height: 2;
+}
+
+.documentList {
+  display: grid;
+  gap: 0.65rem;
+}
+.documentList li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  border: 1px solid color-mix(in srgb, var(--info-line) 75%, white);
+  border-radius: 0.9rem;
+  background: rgb(255 255 255 / 72%);
+  padding: 0.72rem 0.8rem;
+  line-height: 1.75;
+  transition: transform 220ms ease, background 220ms ease;
+}
+.documentList li > span:first-child {
+  display: grid;
+  width: 1.45rem;
+  height: 1.45rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--info-accent);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 950;
+}
+
+.itineraryList { display: grid; gap: 0.65rem; }
+.itineraryDay {
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--info-line) 80%, white);
+  border-radius: 1rem;
+  background: rgb(255 255 255 / 76%);
+  transition: border-color 220ms ease, box-shadow 220ms ease;
+}
+.itineraryDay[open] {
+  border-color: var(--info-accent);
+  box-shadow: 0 10px 24px var(--info-shadow);
+}
+.itineraryDay summary {
+  display: flex;
+  cursor: pointer;
+  list-style: none;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.8rem;
+}
+.itineraryDay summary::-webkit-details-marker { display: none; }
+.dayBadge {
+  border-radius: 999px;
+  background: var(--info-soft);
+  color: var(--info-deep);
+  padding: 0.35rem 0.65rem;
+  font-size: 0.72rem;
+  font-weight: 950;
+}
+.dayTitle { flex: 1; color: var(--info-deep); font-weight: 900; }
+.dayArrow {
+  color: var(--info-accent);
+  font-size: 1.3rem;
+  transition: transform 250ms ease;
+}
+.itineraryDay[open] .dayArrow { transform: rotate(180deg); }
+.itineraryDescription {
+  margin: 0 0.8rem 0.8rem;
+  border-radius: 0.85rem;
+  background: var(--info-soft);
+  padding: 0.9rem;
+}
+
+/* Tour page surfaces that share the same visual language. */
+.heroShell {
+  box-shadow: 0 25px 70px rgb(1 37 105 / 20%);
+}
+.heroImage {
+  animation: heroBreath 16s ease-in-out infinite alternate;
+}
+.heroAura {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 20%, rgb(231 76 148 / 22%), transparent 28%),
+    linear-gradient(105deg, rgb(1 37 105 / 26%), transparent 48%);
+  pointer-events: none;
+}
+
+.factsPanel {
+  border-color: #c7d9ee;
+  background:
+    radial-gradient(circle at 5% 0%, rgb(231 76 148 / 12%), transparent 22%),
+    linear-gradient(145deg, #fff, #eef5ff);
+  box-shadow: 0 18px 44px rgb(1 37 105 / 13%);
+}
+.factCard {
+  --fact-accent: #2563eb;
+  --fact-soft: #e6f1ff;
+  border: 1px solid color-mix(in srgb, var(--fact-accent) 22%, white);
+  border-radius: 1rem;
+  background: rgb(255 255 255 / 82%);
+  padding: 1rem;
+  transition: transform 280ms ease, box-shadow 280ms ease, border-color 280ms ease;
+}
+.factCard:nth-child(2) { --fact-accent: #7c3aed; --fact-soft: #f1e8ff; }
+.factCard:nth-child(3) { --fact-accent: #059669; --fact-soft: #def8ed; }
+.factCard:nth-child(4) { --fact-accent: #db2777; --fact-soft: #ffe5f1; }
+.factIcon {
+  display: grid;
+  width: 2.65rem;
+  height: 2.65rem;
+  place-items: center;
+  border-radius: 0.9rem;
+  background: var(--fact-soft);
+  color: var(--fact-accent);
+  font-size: 1.2rem;
+  font-weight: 950;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fact-accent) 12%, transparent);
+}
+
+.overviewCard {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #bfd6f1;
+  border-radius: 1.55rem;
+  background:
+    radial-gradient(circle at 0% 0%, rgb(37 99 235 / 12%), transparent 31%),
+    linear-gradient(145deg, #f6faff, #fff 58%);
+  box-shadow: 0 17px 42px rgb(1 37 105 / 10%);
+  padding: clamp(1rem, 2.5vw, 1.45rem);
+  animation: contentRise 580ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.overviewCard::before {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 0.34rem;
+  background: linear-gradient(#2563eb, #db2777);
+  content: "";
+}
+.overviewHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  border-bottom: 1px dashed #c8daf0;
+  padding-bottom: 0.9rem;
+}
+.overviewIcon {
+  display: grid;
+  width: 3rem;
+  height: 3rem;
+  place-items: center;
+  border-radius: 1rem;
+  background: linear-gradient(145deg, #2563eb, #012569);
+  color: #fff;
+  font-size: 1.25rem;
+  box-shadow: 0 10px 24px rgb(37 99 235 / 22%);
+}
+.overviewHeader p { color: #2563eb; font-size: 0.72rem; font-weight: 900; }
+.overviewHeader h2 { margin-top: 0.12rem; color: #012569; font-size: 1.4rem; font-weight: 950; }
+
+.serviceGrid { gap: 1rem; }
+.serviceCard {
+  --service-accent: #059669;
+  --service-deep: #065f46;
+  --service-soft: #e1faef;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--service-accent) 32%, white);
+  border-radius: 1.5rem;
+  background:
+    radial-gradient(circle at 5% 0%, color-mix(in srgb, var(--service-accent) 15%, transparent), transparent 34%),
+    linear-gradient(145deg, var(--service-soft), #fff 68%);
+  box-shadow: 0 16px 38px color-mix(in srgb, var(--service-accent) 14%, transparent);
+  padding: 1.15rem;
+  animation: contentRise 650ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  transition: transform 300ms ease, box-shadow 300ms ease;
+}
+.serviceExcluded {
+  --service-accent: #db2777;
+  --service-deep: #8f174c;
+  --service-soft: #ffe7f1;
+  animation-delay: 90ms;
+}
+.serviceHeader { display: flex; align-items: center; gap: 0.75rem; border-bottom: 1px dashed color-mix(in srgb, var(--service-accent) 30%, white); padding-bottom: 0.8rem; }
+.serviceIcon { display: grid; width: 2.8rem; height: 2.8rem; place-items: center; border-radius: 0.9rem; background: var(--service-accent); color: #fff; font-size: 1.25rem; font-weight: 950; box-shadow: 0 8px 20px color-mix(in srgb, var(--service-accent) 24%, transparent); }
+.serviceHeader p { color: var(--service-accent); font-size: 0.7rem; font-weight: 900; }
+.serviceHeader h2 { margin-top: 0.1rem; color: var(--service-deep); font-size: 1.2rem; font-weight: 950; }
+.serviceList { display: grid; gap: 0.55rem; margin-top: 0.9rem; }
+.serviceList li { display: flex; align-items: flex-start; gap: 0.55rem; border-radius: 0.8rem; background: rgb(255 255 255 / 68%); padding: 0.62rem 0.7rem; color: #34455e; font-size: 0.85rem; line-height: 1.7; }
+.serviceList li > span:first-child { color: var(--service-accent); font-weight: 950; }
+
+@media (hover: hover) {
+  .infoCard:hover,
+  .serviceCard:hover,
+  .overviewCard:hover {
+    transform: translateY(-0.3rem);
+  }
+  .infoCard:hover {
+    border-color: var(--info-accent);
+    box-shadow: 0 23px 52px var(--info-shadow);
+  }
+  .infoCard:hover .infoGlow { transform: scale(1.22) translate(-0.6rem, 0.8rem); }
+  .infoCard:hover .infoIcon { transform: rotate(-4deg) scale(1.06); }
+  .documentList li:hover { transform: translateX(-0.2rem); background: #fff; }
+  .factCard:hover { transform: translateY(-0.25rem); border-color: var(--fact-accent); box-shadow: 0 13px 28px color-mix(in srgb, var(--fact-accent) 16%, transparent); }
+  .serviceCard:hover { box-shadow: 0 24px 52px color-mix(in srgb, var(--service-accent) 20%, transparent); }
+}
+
+@keyframes contentRise {
+  from { opacity: 0; transform: translateY(1rem) scale(0.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes heroBreath {
+  from { transform: scale(1); }
+  to { transform: scale(1.045); }
+}
+
+@media (max-width: 39.99rem) {
+  .infoCard { border-radius: 1.25rem; }
+  .infoHeader { align-items: flex-start; }
+  .infoIcon { width: 2.7rem; height: 2.7rem; border-radius: 0.85rem; }
+  .documentList li { font-size: 0.82rem; }
+  .serviceCard { border-radius: 1.25rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contentStack > *,
+  .heroImage,
+  .overviewCard,
+  .serviceCard {
+    animation: none;
+  }
+  .infoCard,
+  .infoGlow,
+  .infoIcon,
+  .documentList li,
+  .factCard,
+  .serviceCard,
+  .dayArrow {
+    transition: none;
+  }
+}
+
+:global(html[data-theme="night"]) .infoCard,
+:global(html[data-theme="night"]) .departuresCard,
+:global(html[data-theme="night"]) .combinedSection,
+:global(html[data-theme="night"]) .legacyHotelsCard,
+:global(html[data-theme="night"]) .overviewCard,
+:global(html[data-theme="night"]) .factsPanel,
+:global(html[data-theme="night"]) .serviceCard {
+  background: linear-gradient(145deg, #10284b, #0b203e);
+  color: #dce9fb;
+}
+:global(html[data-theme="night"]) .infoHeader h2,
+:global(html[data-theme="night"]) .overviewHeader h2,
+:global(html[data-theme="night"]) .serviceHeader h2 { color: #eef5ff; }
+:global(html[data-theme="night"]) .infoBody,
+:global(html[data-theme="night"]) .infoRichText,
+:global(html[data-theme="night"]) .serviceList li { color: #c8d9ee; }
+:global(html[data-theme="night"]) .documentList li,
+:global(html[data-theme="night"]) .itineraryDay,
+:global(html[data-theme="night"]) .serviceList li,
+:global(html[data-theme="night"]) .factCard,
+:global(html[data-theme="night"]) .departureItem,
+:global(html[data-theme="night"]) .legacyHotelItem { background: rgb(9 31 60 / 84%); }

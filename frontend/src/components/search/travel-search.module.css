@@ -1,0 +1,199 @@
+.search {
+  container: travel-search / inline-size;
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  padding: .85rem 1rem 1.15rem;
+  border: 1px solid #edf0f5;
+  border-top: 0;
+  border-radius: 0 0 1.75rem 1.75rem;
+  background: #fff;
+  color: #10284c;
+  box-shadow: 0 16px 38px rgb(16 40 76 / 8%);
+}
+.tabs { position: relative; z-index: 2; }
+.tabRow { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: .6rem; padding-bottom: .9rem; border-bottom: 1px solid #f0f1f5; }
+.tab {
+  position: relative; display: flex; align-items: center; justify-content: center;
+  gap: 1rem; min-width: 0; min-height: 4.5rem; padding: .65rem;
+  border: 0; border-radius: .65rem; background: #fff; color: #10284c;
+  cursor: pointer; transition: background 180ms, color 180ms;
+}
+.tab:not(:last-child)::before { position: absolute; inset-inline-end: -.3rem; top: 25%; height: 50%; width: 1px; background: #dce0e9; content: ""; }
+.tab[aria-pressed="true"] { background: #10284c; color: #fff; }
+.tab[aria-pressed="true"]::after { position: absolute; inset: auto 0 -.3rem; height: .3rem; border-radius: 0 0 .5rem .5rem; background: #fc3486; content: ""; }
+.tab:not([aria-pressed="true"]):hover { background: #f4f6fa; }
+.tabIcon { display: grid; flex-shrink: 0; place-items: center; }
+.tabIcon svg { width: 2rem; height: 2rem; }
+.tabLabel { font-size: 1rem; font-weight: 700; white-space: nowrap; }
+.body { position: relative; padding-top: 1.4rem; }
+.form { display: grid; grid-template-columns: 1.1fr 2.8fr 2.1fr 1.1fr 1.3fr; align-items: end; gap: .65rem; }
+.form[data-service="flight"], .form[data-service="bus"], .form[data-service="train"] { grid-template-columns: 2.6fr 2.1fr 1.15fr 1.35fr; }
+.form[data-service="hotel"], .form[data-service="visa"] { grid-template-columns: 1.65fr 2.1fr 1.25fr 1.35fr; }
+.form > * { min-width: 0; grid-column: auto; }
+.route { display: grid; grid-template-columns: minmax(0,1fr) 2.75rem minmax(0,1fr); align-items: center; gap: .45rem; min-width: 0; }
+.field { position: relative; min-width: 0; border: 1px solid #dce0e9; border-radius: .7rem; background: #fff; }
+.field:has([aria-expanded="true"]) { z-index: 40; }
+.field > div { gap: 0; }
+.field label, .field [data-passenger-selector] > span { position: absolute; top: .55rem; right: .85rem; z-index: 1; color: #68748a; font-size: .75rem; font-weight: 500; pointer-events: none; }
+.field label > span { display: none; }
+.field [role="combobox"], .field [data-passenger-selector] > div > button {
+  min-height: 4.5rem; width: 100%; padding: 1.5rem .85rem .3rem 3.3rem;
+  border: 0; border-radius: .7rem; background: transparent; color: #10284c;
+  font-size: clamp(.85rem, 1.15vw, 1.15rem); font-weight: 700; box-shadow: none;
+}
+.field [role="combobox"] > span:last-child, .field [data-passenger-selector] > div > button > span:last-child { position: absolute; left: 2.65rem; top: 50%; color: #7c8799; font-size: 1rem; }
+.fieldIcon { position: absolute; left: .75rem; bottom: 1.25rem; z-index: 1; width: 1.45rem; height: 1.45rem; pointer-events: none; }
+.route > button { align-self: center; margin: 0; width: 2.75rem; height: 2.75rem; border: 1px solid #edf0f5; border-radius: 50%; background: #fff; color: #fc3486; font-size: 1.7rem; box-shadow: 0 5px 12px #10284c0d; }
+.form [data-date-range] { position: relative; height: auto; grid-column: auto; gap: 0; }
+.form [data-date-range] > div { gap: 0; }
+.form [data-date-range] > div > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.form [data-date-controls] { display: block; }
+.form [data-date-values] { display: grid; gap: .65rem; min-height: 4.5rem; overflow: visible; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.form [data-date-values] > button { position: relative; min-width: 0; min-height: 4.5rem; gap: .2rem; padding: .55rem .85rem .3rem 2.6rem; border: 1px solid #dce0e9; border-radius: .7rem; background: #fff; color: #10284c; }
+.form [data-date-values] small { color: #68748a; font-size: .75rem; }
+.form [data-date-values] strong, .form [data-date-placeholder] { font-size: clamp(.85rem, 1.1vw, 1.1rem); white-space: nowrap; }
+.form [data-date-placeholder] { color: #8790a2; }
+.form [data-date-icon] { position: absolute; left: .7rem; bottom: 1.25rem; width: 1.35rem; height: 1.35rem; }
+.form [data-trip-type] { position: absolute; left: 0; top: -1.4rem; display: flex; gap: .25rem; width: auto; min-height: 0; padding: 0; overflow: visible; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.form [data-trip-type] > button { min-height: 1.1rem; padding: 0 .35rem; border-radius: .25rem; font-size: .65rem; line-height: 1.1rem; }
+.form [data-trip-type] > button[aria-pressed="true"] { background: #fce4ef; color: #10284c; box-shadow: none; }
+.submit { display: flex; align-items: end; }
+.search .form :global(.search-action) { display: flex; gap: .5rem; justify-content: center; min-height: 4.5rem; padding: .6rem; border: 0; border-radius: .8rem; background: linear-gradient(115deg,#f83991,#fc277a) !important; color: #fff !important; font-size: clamp(.85rem,1.1vw,1.1rem); font-weight: 700; white-space: nowrap; box-shadow: none; }
+.search .form :global(.search-action)::after { display: none; }
+.search .form :global(.search-action):hover { background: #df1d69 !important; }
+.search :is(button,input):focus-visible { outline: 3px solid #ed6aa3; outline-offset: 3px; }
+@media(max-width: 79.99rem) {
+  .tab { gap: .65rem; min-height: 4rem; }
+  .tabLabel { font-size: .9rem; }
+  .form, .form[data-service="flight"], .form[data-service="train"], .form[data-service="bus"] { grid-template-columns: repeat(4,minmax(0,1fr)); row-gap: 1.4rem; }
+  .form > .route { grid-column: span 3; }
+  .form:not([data-service="tour"]) > .route { grid-column: 1 / -1; }
+  .form > [data-date-range] { grid-column: span 2; }
+  .form[data-service="hotel"], .form[data-service="visa"] { grid-template-columns: 1.5fr 2fr 1.2fr 1.3fr; }
+  .form[data-service="hotel"] > [data-date-range], .form[data-service="visa"] > [data-date-range] { grid-column: auto; }
+  .field [role="combobox"], .field [data-passenger-selector] > div > button { font-size: .9rem; }
+}
+@media(max-width: 63.99rem) {
+  .search { padding: .6rem .85rem 1rem; border-radius: 0 0 1.25rem 1.25rem; }
+  .tab { gap: .5rem; min-height: 3.8rem; }
+  .tabIcon svg { width: 1.65rem; height: 1.65rem; }
+  .tabLabel { font-size: .8rem; }
+  .form[data-service="hotel"], .form[data-service="visa"] { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .form[data-service="hotel"] > [data-country-field] { grid-column: 1 / -1; }
+  .form[data-service="hotel"] > [data-date-range], .form[data-service="visa"] > [data-date-range] { grid-column: span 2; }
+  .form [data-date-values] strong, .form [data-date-placeholder] { font-size: 1rem; }
+}
+@media(max-width: 47.99rem) {
+  .search { padding: .5rem .65rem .85rem; border-radius: 0 0 1rem 1rem; }
+  .tabRow { gap: .15rem; padding-bottom: .65rem; }
+  .tab { flex-direction: column; gap: .3rem; min-height: 3.6rem; padding: .4rem .1rem; border-radius: .45rem; }
+  .tabLabel { font-size: .68rem; }
+  .tabIcon svg { width: 1.4rem; height: 1.4rem; }
+  .tab:not(:last-child)::before { display: none; }
+  .tab[aria-pressed="true"]::after { height: .2rem; inset-block-end: -.15rem; }
+  .body { padding-top: 1rem; }
+  .form, .form[data-service] { grid-template-columns: repeat(2,minmax(0,1fr)); gap: .75rem .5rem; }
+  .form > .route, .form:not([data-service="tour"]) > .route, .form > [data-date-range] { grid-column: 1 / -1; }
+  .form > [data-vehicle-field], .form > [data-country-field] { grid-column: 1 / -1; }
+  .form > .submit { grid-column: 1 / -1; }
+  .form > [data-guests-field] { grid-column: 1 / -1; }
+  .route { grid-template-columns: minmax(0,1fr) 2rem minmax(0,1fr); gap: .25rem; }
+  .route > button { width: 2rem; height: 2rem; font-size: 1.3rem; }
+  .field [role="combobox"], .field [data-passenger-selector] > div > button { min-height: 4.25rem; padding-inline-end: 2.6rem; font-size: .85rem; }
+  .field [role="combobox"] > span:last-child, .field [data-passenger-selector] > div > button > span:last-child { left: 1.85rem; }
+  .fieldIcon { left: .5rem; width: 1.15rem; height: 1.15rem; }
+  .field label, .field [data-passenger-selector] > span { font-size: .68rem; }
+  .form [data-date-values] { gap: .5rem; }
+  .form [data-date-values] > button { min-height: 4.25rem; }
+  .form [data-trip-type] { position: static; margin-bottom: .4rem; }
+  .form [data-trip-type] > button { min-height: 2rem; padding: .2rem .65rem; font-size: .7rem; }
+  .search .form :global(.search-action) { min-height: 3.5rem; font-size: 1rem; }
+}
+@media(prefers-reduced-motion:reduce) { .tab { transition: none; } }
+
+.form[data-service="visa"] { grid-template-columns: 1.5fr 1.25fr 1.15fr 1.3fr; }
+@media(max-width:63.99rem) { .form[data-service="visa"] { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media(max-width:47.99rem) { .form[data-service="visa"] > .field { grid-column: 1 / -1; } }
+
+/* Keep this artwork's navy/white/pink palette independent of legacy seasonal controls. */
+:global(#trip-search) .search { background: #fff !important; border-color: #edf0f5 !important; box-shadow: 0 16px 38px rgb(16 40 76 / 8%) !important; }
+:global(#trip-search) .search .tab[aria-pressed="true"] { border-color: #10284c !important; background: #10284c !important; color: #fff !important; box-shadow: none !important; }
+:global(#trip-search) .search .tab[aria-pressed="true"]::after { inset-inline: 0; bottom: -.3rem; background: #fc3486 !important; }
+:global(#trip-search) .search .tabLabel { font-weight: 700 !important; }
+:global(#trip-search) .form > * { padding: 0; transform: none; }
+:global(#trip-search) .field [role="combobox"],
+:global(#trip-search) .field [data-passenger-selector] > div > button,
+:global(#trip-search) .form [data-date-values] > button { background: #fff !important; color: #10284c !important; border-color: #dce0e9 !important; box-shadow: none !important; }
+:global(#trip-search) .field [role="combobox"] > span:first-child,
+:global(#trip-search) .field [data-passenger-selector] > div > button > span:first-child { font-weight: 700 !important; }
+:global(#trip-search) .route > button { background: #fff !important; color: #fc3486 !important; border-color: #edf0f5 !important; }
+:global(#trip-search) .form [data-trip-type] > button { background: transparent !important; color: #68748a !important; box-shadow: none !important; }
+:global(#trip-search) .form [data-trip-type] > button[aria-pressed="true"] { background: #fce4ef !important; color: #10284c !important; }
+:global(#trip-search) .search .form :global(.search-action) { background: linear-gradient(115deg,#f83991,#fc277a) !important; color: #fff !important; box-shadow: none !important; }
+:global(#trip-search) .search .form :global(.search-action):hover { background: #df1d69 !important; }
+@media(max-width:47.99rem) { :global(#trip-search) .search .tab[aria-pressed="true"]::after { bottom: -.15rem; } }
+
+/* Final rev48: separate banner, white tab rail, and compact search panel. */
+:global(#trip-search) .search { padding:0; border:0; border-radius:0; background:transparent!important; box-shadow:none!important; }
+.tabRow { gap:.3rem; padding:.3rem .6rem 0; border:1px solid #e3e7ed; border-radius:.85rem; background:#fff; box-shadow:0 8px 24px #1027470b; }
+.tab { min-height:3.6rem; gap:.4rem; border-radius:0; }
+.tabIcon svg { width:1.5rem; height:1.5rem; stroke-width:1.55; }
+.tabLabel { font-size:.75rem; }
+.tab:not(:last-child)::before { background:#edf0f4; }
+:global(#trip-search) .search .tab[aria-pressed="true"] { background:#fff!important; color:#102747!important; }
+:global(#trip-search) .search .tab[aria-pressed="true"] .tabIcon { color:#f23c7e; }
+:global(#trip-search) .search .tab[aria-pressed="true"]::after { bottom:0; height:3px; border-radius:0; background:#f23c7e!important; }
+:global(#trip-search) .search .tabLabel { font-weight:500!important; }
+:global(#trip-search) .search .tab[aria-pressed="true"] .tabLabel { font-weight:650!important; }
+.body { margin-top:.65rem; padding:1rem; border:1px solid #e3e7ed; border-radius:.85rem; background:#fff; box-shadow:0 8px 24px #1027470b; }
+.form { gap:.5rem; }
+.field { border-radius:.6rem; }
+.field label, .field [data-passenger-selector] > span { top:.45rem; font-size:.625rem; }
+:global(#trip-search) .field [role="combobox"], :global(#trip-search) .field [data-passenger-selector] > div > button { min-height:3.5rem; padding-top:1.2rem; padding-bottom:.2rem; font-size:.75rem; font-weight:400; }
+:global(#trip-search) .field [role="combobox"] > span:first-child, :global(#trip-search) .field [data-passenger-selector] > div > button > span:first-child { font-weight:400!important; }
+.fieldIcon { width:1.15rem; height:1.15rem; bottom:1rem; }
+.form [data-date-values], .form [data-date-values] > button { min-height:3.5rem; }
+.form [data-date-values] small { font-size:.625rem; }
+.form [data-date-values] strong, .form [data-date-placeholder] { font-size:.75rem; }
+.form [data-date-icon] { bottom:1rem; width:1.1rem; height:1.1rem; }
+.route { grid-template-columns:minmax(0,1fr) 2rem minmax(0,1fr); }
+.route > button { width:2rem; height:2rem; font-size:1.2rem; }
+.search .form :global(.search-action) { min-height:3.5rem; font-size:.75rem; border-radius:.6rem; }
+.form [data-trip-type] { position:static; margin-bottom:.5rem; }
+.form [data-trip-type] > button { min-height:1.5rem; }
+.form:has([data-trip-type]) { align-items:end; }
+@media(min-width:1150px) {
+ .form[data-service="tour"] { grid-template-columns:1.1fr 2.8fr 2.1fr 1.1fr 1.2fr; }
+ .form[data-service="flight"], .form[data-service="bus"], .form[data-service="train"] { grid-template-columns:2.8fr 2.1fr 1.1fr 1.2fr; }
+ .form[data-service] > .route, .form[data-service] > [data-date-range] { grid-column:auto; }
+}
+@media(max-width:760px) {
+ .tabRow { gap:0; padding:.25rem .2rem 0; }
+ .tab { min-height:3.5rem; gap:.1rem; }
+ .tabLabel { font-size:.625rem; }
+ .tabIcon svg { width:1.3rem; height:1.3rem; }
+ .body { margin-top:.5rem; padding:.65rem; }
+ .form, .form[data-service] { gap:.5rem; }
+ .form > [data-vehicle-field], .form > [data-guests-field] { grid-column:auto; }
+ .form > .route { grid-column:1/-1; }
+ .search .form :global(.search-action) { min-height:2.9rem; font-size:.8rem; }
+ .field label, .field [data-passenger-selector] > span { font-size:.625rem; }
+ .form [data-date-values] strong, .form [data-date-placeholder] { font-size:.75rem; }
+}
+
+:global(#trip-search) .form [data-date-values] > button { flex-direction:column; align-items:flex-start; justify-content:center; }
+
+@media(max-width:760px) {
+ .search { padding:.4rem; border-radius:1rem; }
+ .tabRow { grid-template-columns:repeat(3,minmax(0,1fr)); gap:.35rem; }
+ .tab { flex-direction:row; min-height:2.8rem; padding:.4rem; }
+ .tabLabel { font-size:.75rem; }
+ .tab:not(:last-child)::before { display:none; }
+ .body { padding:.5rem 0 0; }
+ .form, .form[data-service] { grid-template-columns:minmax(0,1fr); }
+ .form[data-service] > *, .form > .route { grid-column:1/-1; }
+ .route { grid-template-columns:minmax(0,1fr); gap:.4rem; }
+ .route > button { justify-self:center; transform:rotate(90deg); }
+ .field { min-height:3.2rem; }
+}

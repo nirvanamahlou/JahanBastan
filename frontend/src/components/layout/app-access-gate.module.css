@@ -1,0 +1,6 @@
+.ready,.pending{display:contents}
+.hidden,.pendingMessage{display:none}
+@media(display-mode:standalone){
+  .pending{display:none}
+  .pendingMessage{display:contents}
+}

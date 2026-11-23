@@ -1,0 +1,206 @@
+/* Keep card sizing local to the public website, including installed web apps. */
+.public-shell .web-country-media {
+  position: relative;
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+  min-height: 100%;
+  overflow: hidden;
+}
+
+.public-shell [data-web-card-grid="countries"] > a > div {
+  grid-row: 1;
+}
+
+@media (min-width: 48rem) {
+  .public-shell .catalog-card {
+    min-width: 0;
+    min-height: 0;
+    height: 100%;
+    border-radius: 1.25rem;
+    box-shadow: 0 6px 24px rgb(1 37 105 / 6%);
+  }
+
+  .public-shell .catalog-card .catalog-card__media {
+    aspect-ratio: 16 / 10;
+  }
+
+  .public-shell .catalog-card .catalog-card__body {
+    min-width: 0;
+    padding: 1.25rem;
+  }
+
+  .public-shell .catalog-card .catalog-card__body :is(h2, h3) {
+    min-width: 0;
+    min-height: 0;
+    font-size: 1.125rem;
+    line-height: 1.8;
+    overflow-wrap: anywhere;
+  }
+
+  .public-shell .catalog-card .catalog-card__facts {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 0;
+    gap: .625rem;
+    margin-block: 1rem;
+  }
+
+  .public-shell .catalog-card .catalog-card__facts > div {
+    display: flex;
+    min-width: 0;
+    flex-direction: row;
+    align-items: start;
+    justify-content: space-between;
+    gap: .75rem;
+    padding: 0 0 .625rem;
+    border: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .public-shell .catalog-card .catalog-card__facts dt {
+    flex-shrink: 0;
+    font-size: .75rem;
+  }
+
+  .public-shell .catalog-card .catalog-card__facts dd {
+    display: block;
+    min-width: 0;
+    max-width: 65%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    overflow: visible;
+    text-align: end;
+    font-size: .8125rem;
+    line-height: 1.8;
+  }
+
+  .public-shell .catalog-card .catalog-card__summary {
+    min-height: 0;
+    margin-bottom: 1rem;
+  }
+
+  .public-shell .catalog-card .catalog-card__footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+    padding-top: 1rem;
+  }
+
+  .public-shell .catalog-card .catalog-card__footer > div {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .public-shell .catalog-card .catalog-card__footer strong {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    font-size: 1.125rem;
+    line-height: 1.8;
+  }
+
+  .public-shell .catalog-card .catalog-card__footer a {
+    flex: 1;
+    justify-content: center;
+    min-height: 2.875rem;
+  }
+
+  .public-shell [data-web-card-grid] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+    align-items: stretch;
+  }
+
+  .public-shell [data-web-card-grid="countries"] > a {
+    min-height: 11rem;
+    grid-template-columns: minmax(0, 1fr) 40%;
+  }
+
+  .public-shell [data-web-card-grid="countries"] h3 {
+    flex-wrap: wrap;
+    font-size: 1.25rem;
+    line-height: 1.8;
+  }
+
+  .public-shell [data-web-card-grid="countries"] strong {
+    font-size: .875rem;
+    line-height: 1.8;
+  }
+
+  .public-shell [data-web-card-grid="recommendations"] > article {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 0;
+    overflow: hidden;
+    border-radius: 1.25rem;
+  }
+
+  .public-shell [data-web-card-grid="recommendations"] > article > a {
+    order: -1;
+    flex: 0 0 auto;
+    aspect-ratio: 16 / 9;
+    min-height: 0;
+    border-radius: 0;
+  }
+
+  .public-shell [data-web-card-grid="recommendations"] > article > div {
+    padding: 1.25rem;
+    gap: .625rem;
+    overflow-wrap: anywhere;
+  }
+
+  .public-shell [data-web-card-grid="recommendations"] h3 {
+    font-size: 1.0625rem;
+    line-height: 1.8;
+  }
+
+  .public-shell [data-web-card-grid="recommendations"] strong {
+    font-size: 1.125rem;
+    line-height: 1.8;
+  }
+
+  .public-shell [data-web-card-grid="recommendations"] > article > div > a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.875rem;
+    margin-top: auto;
+  }
+
+  .public-shell [data-web-tour-row] {
+    gap: 1.5rem;
+    padding: 1.25rem;
+    margin-block: .5rem;
+    border: 1px solid var(--border);
+    border-radius: 1.25rem;
+    background: var(--surface);
+    box-shadow: 0 4px 16px rgb(1 37 105 / 4%);
+  }
+
+  .public-shell [data-web-tour-row] > div {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .public-shell [data-web-tour-row] > div:last-child > a:last-child {
+    min-height: 2.875rem;
+  }
+}
+
+@media (min-width: 48rem) and (max-width: 74.99rem) {
+  .public-shell [data-country-explorer] > div:has(> .catalog-card) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .public-shell [data-web-tour-row] {
+    grid-template-columns: minmax(0, 1fr) minmax(10rem, 34%);
+    gap: 1rem;
+  }
+}
+
+@media (min-width: 75rem) {
+  .public-shell [data-web-card-grid] {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

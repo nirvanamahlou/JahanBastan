@@ -1,0 +1,42 @@
+.layout{display:grid;grid-template-columns:280px minmax(0,1fr);gap:28px;align-items:start;direction:rtl}
+.sidebar{min-width:0;border:1px solid #e1e7f0;border-radius:18px;padding:20px;background:#fff;position:sticky;top:24px;color:var(--brand)}
+.sidebar form,.sidebar form>div,.sidebar label{min-width:0}
+.sidebar input:not([type=checkbox]):not([type=radio]),.sidebar select{max-width:100%;min-width:0;box-sizing:border-box}
+.sidebar h2{font-size:18px;font-weight:900}
+.sidebar form{display:grid;gap:18px;margin-top:20px}
+.sidebar label,.field{display:grid;gap:8px;font-size:13px;font-weight:700}
+.sidebar button[type=submit]{width:100%;min-height:44px;border-radius:10px;background:var(--brand);color:#fff;font-weight:800}
+.flightSidebar{padding:16px;background:var(--surface)}
+.flightSidebar summary{padding:4px 2px 8px}
+.flightSidebar .flightFilters{grid-template-columns:minmax(0,1fr);gap:14px;margin-top:8px}
+.flightFilterGroup{display:grid;grid-template-columns:minmax(0,1fr);gap:11px;min-width:0;border:1px solid var(--border);border-radius:14px;padding:10px 12px 13px;background:color-mix(in srgb,var(--surface-muted) 64%,var(--surface))}
+.flightFilterGroup legend{padding-inline:6px;font-size:13px;font-weight:800}
+.flightFilterGroup > [data-date-range]{height:auto;grid-column:1/-1}
+.flightFilters .flightCheckbox{display:flex;align-items:center;gap:8px}
+.content{min-width:0}
+.heading{display:flex;align-items:center;gap:12px;margin-bottom:24px;min-width:0}
+.heading h1{font-size:28px;font-weight:900;overflow-wrap:anywhere}
+.heading p{font-size:13px;color:var(--muted);margin-top:6px}
+.results{display:grid;gap:0}
+.row{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:28px;padding:22px 0;border-bottom:1px solid #e5eaf1;min-width:0;color:var(--brand)}
+.row h2{font-size:20px;line-height:1.8;font-weight:900;overflow-wrap:anywhere}
+.row p{font-size:13px;line-height:2;color:var(--muted)}
+.rowMedia{min-width:0;display:grid;gap:10px;align-content:start}
+.photo{position:relative;display:block;aspect-ratio:1.65;overflow:hidden;border-radius:12px;background:#edf3f9}
+.photo img{object-fit:cover}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:22px;font-size:12px;line-height:1.9}
+.facts>div{min-width:0;overflow-wrap:anywhere;display:grid;gap:5px}
+.facts span{color:var(--muted);font-size:11px}
+.price{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:20px;font-weight:900;font-size:18px}
+.details{display:flex;align-items:center;justify-content:center;min-height:42px;border-radius:9px;background:var(--brand);color:#fff;font-size:13px;font-weight:800}
+.sort{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #e1e7f0;padding-bottom:16px}
+.sort form{display:flex;align-items:center;gap:8px;max-width:100%}
+@media(max-width:1100px){.layout{grid-template-columns:250px minmax(0,1fr);gap:18px}.row{grid-template-columns:minmax(0,1fr) 220px;gap:16px}.facts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:800px){.layout{grid-template-columns:minmax(0,1fr)}.sidebar{position:static;padding:16px}.row{grid-template-columns:minmax(0,1fr) 220px}.heading h1{font-size:24px}}
+@media(max-width:540px){.row{grid-template-columns:minmax(0,1fr)}.rowMedia{grid-row:1}.facts{margin-top:14px}.heading h1{font-size:22px}.sort form{width:100%;flex-wrap:wrap}}
+.tourContainer.tourContainer{max-width:100rem;width:100%;padding-inline:clamp(1rem,2.5vw,3rem);box-sizing:border-box}
+
+/* Give flight controls room without changing other service sidebars. */
+.flightLayout{grid-template-columns:320px minmax(0,1fr)}
+@media(max-width:1100px){.flightLayout{grid-template-columns:290px minmax(0,1fr)}}
+@media(max-width:800px){.flightLayout{grid-template-columns:minmax(0,1fr)}}

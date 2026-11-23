@@ -1,0 +1,17 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { PUBLIC_API_BASE_URL } from "@/lib/api/client";
+
+type TravelLoaderProps = { label?: string; compact?: boolean };
+type Settings = { socialLinks?: Record<string, string> };
+const loadingImages = (links: Record<string, string>) => ["loadingImage1Id", "loadingImage2Id", "loadingImage3Id"].map((key) => Number(links[key])).filter((id) => Number.isInteger(id) && id > 0).map((id) => PUBLIC_API_BASE_URL + "/media/" + id);
+
+export function TravelLoader({ label = "در حال آماده‌سازی سفر شما", compact = false }: TravelLoaderProps) {
+  const [images, setImages] = useState<string[]>([]);
+  const [index, setIndex] = useState(0);
+  useEffect(() => { void fetch(PUBLIC_API_BASE_URL + "/settings", { cache: "no-store" }).then((response) => response.ok ? response.json() as Promise<Settings> : null).then((settings) => setImages(loadingImages(settings?.socialLinks ?? {}))).catch(() => setImages([])); }, []);
+  useEffect(() => { if (images.length < 2) return; const rotation = window.setInterval(() => setIndex((current) => (current + 1) % images.length), 1000); return () => window.clearInterval(rotation); }, [images.length]);
+  const image = images[index];
+  return <div aria-label={label} className={"travel-loader " + (compact ? "travel-loader--compact" : "")} role="status" aria-live="polite" aria-atomic="true"><div aria-hidden="true" className="travel-loader__scene">{image ? <div className="travel-loader__image" key={image} style={{ backgroundImage: "url(" + image + ")" }} /> : <div className="travel-loader__gradient" />}<div className="travel-loader__shade" /><span className="travel-loader__brand">جهان باستان</span><div className="travel-loader__progress"><span /></div></div><p className="travel-loader__label">{label}</p><style>{".travel-loader{display:grid;place-items:center;gap:.7rem;padding:1.5rem;color:#012569}.travel-loader__scene{position:relative;width:min(100%,24rem);aspect-ratio:4/3;overflow:hidden;border-radius:1.5rem;background:#012569;box-shadow:0 18px 40px rgba(1,37,105,.16)}.travel-loader--compact .travel-loader__scene{width:12rem;border-radius:1rem}.travel-loader__image,.travel-loader__gradient{position:absolute;inset:0;background-position:center;background-size:cover;animation:travel-loader-slide .45s ease-out both}.travel-loader__gradient{background:radial-gradient(circle at 18% 18%,rgba(235,93,159,.7),transparent 33%),linear-gradient(135deg,#012569,#2b69b2)}.travel-loader__shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(1,37,105,.12),rgba(1,37,105,.64))}.travel-loader__brand{position:absolute;right:1rem;bottom:1rem;color:white;font-size:.9rem;font-weight:800}.travel-loader__progress{position:absolute;top:1rem;right:1rem;left:1rem;height:.22rem;overflow:hidden;border-radius:999px;background:rgba(255,255,255,.35)}.travel-loader__progress span{display:block;width:65%;height:100%;border-radius:inherit;background:#ec5f9f;animation:travel-loader-progress 1s linear infinite}.travel-loader__label{font-size:1.125rem;font-weight:800}@keyframes travel-loader-slide{from{opacity:0;transform:scale(1.05)}to{opacity:1;transform:scale(1)}}@keyframes travel-loader-progress{from{transform:translateX(55%)}to{transform:translateX(-155%)}}@media(prefers-reduced-motion:reduce){.travel-loader__image,.travel-loader__gradient,.travel-loader__progress span{animation:none}}"}</style></div>;
+}
