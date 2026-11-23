@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { CalendarIcon } from "@/components/layout/site-icons";
+import { TravelSearchIcon } from "@/components/search/travel-search-icon";
 
 import { JalaliCalendarModal } from "@/components/ui/jalali-calendar-modal";
 import {
@@ -187,13 +187,13 @@ export function JalaliDateRangeInput({
         <button aria-label="انتخاب تاریخ بلیت رفت" className={`flex min-w-0 flex-col justify-center px-3 text-right transition ${buttonTheme} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset ${tripType === "round_trip" ? "border-l-2 border-brand/15" : ""} ${open && selectionStep === "departure" ? "bg-accent/45" : ""}`} onClick={() => openPicker("departure")} type="button">
           <small className={"whitespace-nowrap text-[10px] " + (isDark ? "text-white/70" : "text-muted")}>{labels.departure}</small>
           {departureLabel ? <strong className="truncate font-bold">{departureLabel}</strong> : layout === "hero" ? <span data-date-placeholder>انتخاب تاریخ</span> : null}
-          {layout === "hero" ? <CalendarIcon data-date-icon /> : null}
+          {layout === "hero" ? <TravelSearchIcon icon="calendar" data-date-icon /> : null}
         </button>
         {tripType === "round_trip" ? (
           <button aria-label="انتخاب تاریخ بلیت برگشت" className={`flex min-w-0 flex-col justify-center px-3 text-right transition ${buttonTheme} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset ${open && selectionStep === "return" ? "bg-accent/45" : ""}`} onClick={() => openPicker("return")} type="button">
             <small className={"whitespace-nowrap text-[10px] " + (isDark ? "text-white/70" : "text-muted")}>{labels.return}</small>
             {returnLabel ? <strong className="truncate font-bold">{returnLabel}</strong> : layout === "hero" ? <span data-date-placeholder>انتخاب تاریخ</span> : null}
-            {layout === "hero" ? <CalendarIcon data-date-icon /> : null}
+            {layout === "hero" ? <TravelSearchIcon icon="calendar" data-date-icon /> : null}
           </button>
         ) : null}
       </div>
