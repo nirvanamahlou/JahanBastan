@@ -145,6 +145,15 @@
 .booking[open] summary::after { transform: rotate(225deg); }
 .booking summary:focus-visible { outline: 2px solid var(--accent-strong); outline-offset: 2px; }
 .bookingBody { display: grid; gap: .6rem; padding-top: .55rem; }
+.inlineBooking {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: .65rem;
+  padding: .7rem .8rem;
+  border-block-start: 1px solid var(--border);
+}
 .bookingUnavailable { margin: 0 .8rem .75rem; padding: .45rem; border-radius: .5rem; background: var(--surface-muted); color: var(--muted); font-size: .69rem; text-align: center; }
 
 @media (min-width: 680px) {

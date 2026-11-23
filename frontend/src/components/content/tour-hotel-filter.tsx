@@ -109,6 +109,17 @@ const rooms: Array<{
   { key: "infant", label: "نوزاد", price: "infantPrice", currency: "infantCurrency" },
 ];
 
+function isBaseRoom(key: keyof RoomSelection) {
+  return key === "double" || key === "single";
+}
+
+function roomQuantityLimit(selection: RoomSelection, key: keyof RoomSelection, capacity: number | null) {
+  const roomCount = selection.double + selection.single;
+  if (key === "extra") return roomCount > 0 ? 20 : 0;
+  if (!isBaseRoom(key)) return Math.min(20, roomCount);
+  return capacity === null ? 20 : Math.min(20, capacity - roomCount + selection[key]);
+}
+
 function normalizeHotelQuery(value: string) {
   return value
     .trim()
@@ -248,13 +259,22 @@ export function TourHotelFilter({
       )].sort((first, second) => first.localeCompare(second, "fa")),
     [activeDepartureId, packageOffers],
   );
-  function updateQuantity(offerId: number, key: keyof RoomSelection, delta: number) {
+  function updateQuantity(offer: DatedHotelOffer, room: typeof rooms[number], delta: number) {
+    if (!offer.isAvailable || offer.capacityRemaining === 0 || !(Number(offer[room.price]) > 0)) return;
     setSelections((current) => {
-      const value = current[offerId] ?? emptySelection;
-      return {
-        ...current,
-        [offerId]: { ...value, [key]: Math.max(0, Math.min(20, value[key] + delta)) },
-      };
+      const value = current[offer.id] ?? emptySelection;
+      const key = room.key;
+      const quantity = value[key] + delta;
+      if (quantity < 0 || quantity > roomQuantityLimit(value, key, offer.capacityRemaining)) return current;
+      const next = { ...value, [key]: quantity };
+      if (delta < 0 && isBaseRoom(key)) {
+        for (const { key: addOn } of rooms) {
+          if (!isBaseRoom(addOn)) {
+            next[addOn] = Math.min(next[addOn], roomQuantityLimit(next, addOn, offer.capacityRemaining));
+          }
+        }
+      }
+      return { ...current, [offer.id]: next };
     });
   }
 
@@ -331,7 +351,8 @@ export function TourHotelFilter({
             const availableRooms = offer.isAvailable && offer.capacityRemaining !== 0
               ? showRooms.filter(room => Number(offer[room.price]) > 0)
               : [];
-            const selectedCount = Object.values(selection).reduce((sum, value) => sum + value, 0);
+            const canSelectRoom = availableRooms.some(room => isBaseRoom(room.key));
+            const roomCount = selection.double + selection.single;
             const selectionTotal = rooms.reduce<number | null>((total, room) => {
               if (total === null || !selection[room.key]) return total;
               const roomAmount = tourPriceToToman(String(offer[room.price]), String(offer[room.currency] ?? offer.packageCurrency), exchangeRates);
@@ -356,47 +377,36 @@ export function TourHotelFilter({
                   rates={<div className={hotelStyles.rateGrid} aria-label="نرخ‌های اتاق و مسافر">
                     {showRooms.map((room) => {
                       const available = availableRooms.includes(room);
+                      const quantity = selection[room.key];
+                      const double = room.key === "double";
                       return (
-                        <div className={hotelStyles.rateTile} data-primary={room.key === "double" && available} data-active={selection[room.key] > 0} data-unavailable={!available} key={room.key}>
-                          <p className={hotelStyles.rateLabel}>{room.label}{room.key === "double" ? " (۲ نفر)" : ""}</p>
+                        <div className={hotelStyles.rateTile} data-room-kind={room.key} data-primary={double && available} data-active={quantity > 0} data-unavailable={!available} key={room.key}>
+                          <p className={hotelStyles.rateLabel}>{room.label}{double ? " (۲ نفر)" : ""}</p>
                           <div className={hotelStyles.ratePrice}>
                             {available ? <RoomPrice offer={offer} room={room} /> : <span className="font-bold text-muted">ناموجود</span>}
                           </div>
+                          {available && canSelectRoom ? (
+                            <div className={hotelStyles.rateControl}>
+                              <button aria-label={double ? "کم کردن یک اتاق دوتخته" : `کم کردن ${room.label}`} className="hover:bg-surface-muted disabled:opacity-35" disabled={!quantity} onClick={() => updateQuantity(offer, room, -1)} type="button">−</button>
+                              <output aria-label={double ? "تعداد مسافر اتاق دوتخته" : `تعداد ${room.label}`}>{(double ? quantity * 2 : quantity).toLocaleString("fa-IR")}</output>
+                              <button aria-label={double ? "افزودن یک اتاق دوتخته" : `افزودن ${room.label}`} className="hover:bg-surface-muted disabled:opacity-35" disabled={quantity >= roomQuantityLimit(selection, room.key, offer.capacityRemaining)} onClick={() => updateQuantity(offer, room, 1)} type="button">+</button>
+                            </div>
+                          ) : null}
                         </div>
                       );
                     })}
                   </div>} />
-                {availableRooms.length ? (
-                  <details className={hotelStyles.booking} data-hotel-booking>
-                    <summary>انتخاب اتاق و رزرو</summary>
-                    <div className={hotelStyles.bookingBody}>
-                      <div className={hotelStyles.rateGrid} aria-label="تعداد مسافران">
-                        {availableRooms.map(room => {
-                          const quantity = selection[room.key];
-                          const double = room.key === "double";
-                          return <div className={hotelStyles.rateTile} data-active={quantity > 0} key={room.key}>
-                            <p className={hotelStyles.rateLabel}>{room.label}</p>
-                            <div className={hotelStyles.rateControl}>
-                              <button aria-label={double ? "کم کردن ۲ نفر از اتاق دوتخته" : `کم کردن ${room.label}`} className="hover:bg-surface-muted disabled:opacity-35" disabled={!quantity} onClick={() => updateQuantity(offer.id, room.key, -1)} type="button">−</button>
-                              <output aria-label={double ? "تعداد مسافر اتاق دوتخته" : `تعداد ${room.label}`}>{(double ? quantity * 2 : quantity).toLocaleString("fa-IR")}</output>
-                              <button aria-label={double ? "افزودن ۲ نفر به اتاق دوتخته" : `افزودن ${room.label}`} className="hover:bg-surface-muted disabled:opacity-35" disabled={quantity >= 20} onClick={() => updateQuantity(offer.id, room.key, 1)} type="button">+</button>
-                            </div>
-                          </div>;
-                        })}
-                      </div>
-                      <div className="flex flex-wrap items-center justify-between gap-3">
-                    {selectedCount ? (
+                {canSelectRoom ? (
+                  <div className={hotelStyles.inlineBooking} data-inline-hotel-booking>
+                    {roomCount ? (
                       <div className="rounded-2xl bg-gradient-to-l from-[#f12b75] to-[#ff6da3] px-4 py-3 text-sm text-white shadow-[0_10px_20px_rgba(241,43,117,.2)]">
                         <strong>{"\u062c\u0645\u0639 \u0642\u0627\u0628\u0644 \u067e\u0631\u062f\u0627\u062e\u062a: "}</strong>
                         {selectionTotal === null ? "\u0646\u0631\u062e \u0627\u0631\u0632 \u0628\u0631\u0627\u06cc \u0645\u062d\u0627\u0633\u0628\u0647 \u0646\u0647\u0627\u06cc\u06cc \u0646\u06cc\u0627\u0632 \u0627\u0633\u062a." : formatCurrency(selectionTotal, "IRT")}
                         {selection.childWithoutBed ? <span className="mr-2 text-xs text-white/75">{isForeignTourPrice(offer.childWithoutBedCurrency) ? "به نرخ ارزی کودک بدون تخت، هزینه پرواز کودک افزوده شده است." : "نرخ تومانی کودک بدون تخت نهایی است و هزینه پرواز جداگانه ندارد."}</span> : null}
                       </div>
-                    ) : null}
-                    <p className="text-xs text-muted">شمارنده اتاق دوتخته بر اساس تعداد مسافر است و هر بار ۲ نفر تغییر می‌کند.</p>
-                    <CartAddButton className="w-full sm:mr-auto sm:max-w-sm" buttonClassName="!rounded-2xl !bg-[#f12b75] !text-white hover:!bg-[#d91d62]" disabled={!selectedCount || !offer.isAvailable || offer.capacityRemaining === 0 || (offer.capacityRemaining !== null && selection.double + selection.single > offer.capacityRemaining)} idleLabel={!offer.isAvailable || offer.capacityRemaining === 0 ? "تکمیل ظرفیت" : "افزودن انتخاب‌ها به سبد خرید"} itemType="tour" roomSelection={selection} tourDepartureId={offer.departure.id} tourHotelPriceId={offer.id} tourId={tourId} />
-                      </div>
-                    </div>
-                  </details>
+                    ) : <p className="text-xs text-muted">ابتدا یک اتاق یک‌تخته یا دوتخته انتخاب کنید.</p>}
+                    <CartAddButton className="w-full sm:mr-auto sm:max-w-sm" buttonClassName="!rounded-2xl !bg-[#f12b75] !text-white hover:!bg-[#d91d62]" disabled={!roomCount || (offer.capacityRemaining !== null && roomCount > offer.capacityRemaining)} idleLabel="افزودن انتخاب‌ها به سبد خرید" itemType="tour" roomSelection={selection} tourDepartureId={offer.departure.id} tourHotelPriceId={offer.id} tourId={tourId} />
+                  </div>
                 ) : <p className={hotelStyles.bookingUnavailable}>{!offer.isAvailable || offer.capacityRemaining === 0 ? "تکمیل ظرفیت" : "استعلام قیمت و ظرفیت"}</p>}
               </article>
             );
@@ -488,9 +498,7 @@ function RoomPrice({ offer, room }: { offer: HotelPrice; room: typeof rooms[numb
           <span>{flightPrice}</span>
         </>
       ) : null}
-      <span className="basis-full text-[11px] font-medium text-muted">
-        {hasFlight ? "هتل + پرواز" : "هزینه هتل"}
-      </span>
+      {!hasFlight ? <span className="basis-full text-[11px] font-medium text-muted">هزینه هتل</span> : null}
     </div>
   );
 }
