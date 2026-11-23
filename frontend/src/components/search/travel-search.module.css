@@ -201,3 +201,98 @@
  .route > button { justify-self:center; transform:rotate(90deg); }
  .field { min-height:3.2rem; }
 }
+
+/* Match the compact homepage search controls across service tabs. */
+.body {
+  padding: .75rem;
+  border-radius: 1rem;
+  background: #fff;
+}
+.form[data-service] { gap: .7rem .55rem; }
+.form .route { align-items: end; }
+.form .route > button { align-self: end; margin-block-end: .45rem; }
+.form :is(.field, [data-date-range]) { margin-block-start: .9rem; }
+.form .field { min-height: 0; }
+.form :is(.field label, .field [data-passenger-selector] > span, [data-date-values] small) {
+  position: absolute;
+  inset: auto .15rem calc(100% + .16rem) auto;
+  color: #526581;
+  font-size: .65rem;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+:global(#trip-search) .form[data-service] .field :is([role="combobox"], [data-passenger-selector] > div > button) {
+  min-height: 2.45rem;
+  padding: .25rem .48rem .25rem .42rem;
+  padding-inline-start: 1.65rem;
+  gap: .28rem;
+}
+.form .field [data-select-empty],
+.form [data-date-placeholder] { visibility: hidden; }
+.form .field:has([data-select-empty]) label,
+:global(#trip-search) .form [data-date-values] > button:not(:has(strong)) small {
+  top: 50%;
+  bottom: auto;
+  transform: translateY(-50%);
+  font-size: .75rem;
+}
+.form .field:has([data-select-empty]) label { right: 1.65rem; }
+:global(#trip-search) .form [data-date-values] > button:not(:has(strong)) small { right: .4rem; }
+.form .fieldIcon {
+  inline-size: .9rem;
+  block-size: .9rem;
+  inset: 50% .45rem auto auto;
+  transform: translateY(-50%);
+  color: #2a4974;
+}
+.form .field :is([role="combobox"], [data-passenger-selector] > div > button) > span:last-child {
+  position: static;
+  display: grid;
+  place-items: center;
+  color: #526581;
+  line-height: 1;
+}
+.form [data-date-values] {
+  gap: 0;
+  min-height: 2.5rem;
+  border: 1px solid #dce0e9;
+  border-radius: .65rem;
+}
+.form [data-date-values] > button {
+  min-height: 2.5rem;
+  padding: .25rem .4rem .25rem 1.55rem;
+  border-width: 0 !important;
+  border-radius: 0;
+}
+.form [data-date-values] > button:first-child { border-start-start-radius: .55rem; border-end-start-radius: .55rem; }
+.form [data-date-values] > button:last-child { border-start-end-radius: .55rem; border-end-end-radius: .55rem; }
+.form [data-date-values] > button + button { border-inline-start-width: 1px !important; }
+.form [data-date-values] strong { direction: ltr; unicode-bidi: isolate; }
+.form [data-date-icon] { left: .4rem; bottom: auto; top: 50%; transform: translateY(-50%); }
+.form [data-trip-type] { margin-bottom: .9rem; }
+.form [data-trip-type] > button { font-weight: 650; }
+.search .form[data-service] :global(.search-action) { min-height: 2.5rem; gap: .35rem; }
+
+@media (min-width: 1150px) {
+  .form[data-service]:has(> .route) { grid-template-columns: minmax(0, 2.6fr) minmax(0, 2fr) minmax(0, 1fr) minmax(0, .9fr); }
+  .form[data-service]:has(> [data-vehicle-field]) { grid-template-columns: minmax(0, 1.1fr) minmax(0, 2.7fr) minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr); }
+  .form[data-service]:not(:has(> .route)) { grid-template-columns: minmax(0, 1.45fr) minmax(0, 2fr) minmax(0, 1fr) minmax(0, .9fr); }
+}
+
+@media (min-width: 761px) and (max-width: 1149px) {
+  .form[data-service] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .form[data-service] > .route { grid-column: 1 / -1; }
+  .form[data-service]:not(:has(> .route)) > :is([data-country-field], [data-date-range]) { grid-column: auto; }
+  .form[data-service="hotel"] { grid-template-columns: 1.3fr 1.8fr 1fr 1fr; }
+}
+
+@media (max-width: 760px) {
+  .form[data-service] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .form[data-service] > :is(.field, .submit) { grid-column: auto; }
+  .form[data-service="hotel"] > [data-country-field] { grid-column: 1 / -1; }
+}
+
+@media (min-width: 420px) and (max-width: 760px) {
+  .form > .route { grid-template-columns: minmax(0, 1fr) 2rem minmax(0, 1fr); }
+  .form > .route > button { transform: none; }
+}

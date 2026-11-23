@@ -7,6 +7,7 @@ import { JalaliDateRangeInput } from "@/components/search/jalali-date-range-inpu
 import { PassengerSelector } from "@/components/search/passenger-selector";
 import { SearchableRouteSelect } from "@/components/search/searchable-route-select";
 import { TravelSearchIcon } from "@/components/search/travel-search-icon";
+import { CompassIcon, LocationIcon, PassportIcon, SearchIcon, UsersIcon } from "@/components/layout/site-icons";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/input";
 import styles from "./travel-search.module.css";
@@ -139,7 +140,7 @@ function RouteSelector({
 }) {
   return (
     <div data-search-route className={styles.route}>
-      <div className={styles.field}><TravelSearchIcon icon="location" className={styles.fieldIcon} />
+      <div className={styles.field}><CompassIcon className={styles.fieldIcon} />
       <SearchableRouteSelect
         id={originId}
         name="departure"
@@ -165,7 +166,7 @@ function RouteSelector({
       >
         <TravelSearchIcon icon="swap" className="size-5" />
       </button>
-      <div className={styles.field}><TravelSearchIcon icon="location" className={styles.fieldIcon} />
+      <div className={styles.field}><LocationIcon className={styles.fieldIcon} />
       <SearchableRouteSelect
         id={destinationId}
         name="destination"
@@ -400,7 +401,7 @@ export function TravelSearch({
           ) : null}
           {serviceType === "hotel" || serviceType === "visa" ? (
             <div className={styles.field} data-country-field>
-              <TravelSearchIcon icon="location" className={styles.fieldIcon} />
+              <LocationIcon className={styles.fieldIcon} />
               <Select id={`${serviceType}-destination`} name="country" label="کشور مقصد"
                 options={serviceType === "hotel" ? hotelCountries : visaCountries}
                 placeholder="انتخاب کشور مقصد" className={fieldClassName} searchable />
@@ -417,7 +418,7 @@ export function TravelSearch({
           )}
           {serviceType === "visa" ? (
             <div className={styles.field}>
-              <TravelSearchIcon icon="visa" className={styles.fieldIcon} />
+              <PassportIcon className={styles.fieldIcon} />
               <Select id="visa-type" name="visaType" label="نوع ویزا" placeholder="همه انواع ویزا"
                 options={[
                   { value: "tourist", label: "گردشگری" }, { value: "business", label: "تجاری" },
@@ -432,12 +433,12 @@ export function TravelSearch({
               ? { departure: "تاریخ ورود", return: "تاریخ خروج", field: "تاریخ اقامت" }
               : { departure: "تاریخ رفت", return: "تاریخ برگشت", field: "تاریخ سفر" }} />}
           <div className={styles.field} data-guests-field>
-            <TravelSearchIcon icon="travelers" className={styles.fieldIcon} />
+            <UsersIcon className={styles.fieldIcon} />
             <PassengerSelector label={serviceType === "visa" ? "تعداد متقاضیان" : "مسافران"} required={serviceType === "flight"} />
           </div>
           <div className={styles.submit}>
             <Button type="submit" loading={searching} className="search-action w-full">
-              <TravelSearchIcon icon="search" className="size-6" />
+              <SearchIcon className="size-4 shrink-0" />
               <span>جستجوی {serviceTabs.find(tab => tab.key === serviceType)?.label}</span>
             </Button>
           </div>
