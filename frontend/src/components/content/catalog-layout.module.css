@@ -84,12 +84,38 @@
 .dateDisclosure[open] .hideDates { display: inline; }
 .dateDisclosure summary:focus-visible, .countryHero a:focus-visible, .dateLink:focus-visible { outline: 2px solid #d33d7a; outline-offset: 2px; }
 .dateBody { padding: 0 .75rem .6rem; }
-.dateRanges { display: grid; gap: .35rem; }
-.dateRanges li { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem 1rem; padding: .45rem .55rem; border-radius: .44rem; background: #f3f6fa; color: #102747; font-size: .68rem; }
-.dateRanges li > div { display: flex; align-items: baseline; gap: .35rem; }
-.dateRanges li > div span { color: #526581; }
-.dateRanges li > strong { margin-inline-start: auto; }
-.dateLink { display: inline-flex; align-items: center; min-height: 44px; color: #a11652; font-size: .7rem; font-weight: 700; }
+.dateBody .dateHeading { margin-bottom: .38rem; font-size: .74rem; font-weight: 750; color: #102747; }
+.dateRanges { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .48rem; }
+.dateRange {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr) minmax(0, 1fr);
+  align-items: stretch;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #e1e8f3;
+  border-radius: .65rem;
+  background: #f6f8fc;
+  color: #102747;
+}
+.datePoint, .datePrice {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  min-width: 0;
+  gap: .17rem;
+  padding: .5rem .22rem;
+  text-align: center;
+}
+.datePrice { border-inline: 1px dashed #dce5f1; }
+.datePoint span, .datePrice span { color: #526581; font-size: .59rem; }
+.datePoint :is(time, strong), .datePrice strong { font-size: .71rem; line-height: 1.5; overflow-wrap: anywhere; }
+.datePoint time { font-weight: 650; }
+.datePrice strong { font-size: .76rem; }
+.dateRangeBest { border-color: #edb7ce; background: #fff6fa; }
+.dateRangeBest .datePrice { border-color: #efcedc; }
+.dateBestLabel { grid-column: 1 / -1; padding: .2rem .45rem; background: #fbe3ee; color: #95174f; font-size: .59rem; font-weight: 750; }
+.dateLink { display: inline-flex; align-items: center; min-height: 44px; margin-top: .15rem; color: #a11652; font-size: .7rem; font-weight: 700; }
+@media (max-width: 1100px) { .dateRanges { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 940px) { .countryLayout { grid-template-columns: 220px minmax(0, 1fr); } .countryResult .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 800px) { .countryLayout { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 600px) {
