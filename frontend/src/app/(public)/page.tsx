@@ -305,7 +305,7 @@ export default async function HomePage() {
     const destination = searchDestinationPayload.items.find((item) => normalizeCountryName(item.country) === group.country && item.imageId);
     return { id: group.country, title: group.country, country: group.country, flagId: flag?.imageId, href: `${href}${href.includes("?") ? "&" : "?"}country=${encodeURIComponent(group.country)}`, imageUrl: destinationPhoto ? mediaUrl(destination?.imageId ?? null) ?? group.imageUrl : group.imageUrl ?? mediaUrl(destination?.imageId ?? null), subtitle: `${group.count.toLocaleString("fa-IR")} ${label}`, price: group.cheapest?.amount ? formatCurrency(group.cheapest.amount, group.cheapest.currency) : null };
   });
-  const countryTiles = countryTilesFor(tourPayload.items.flatMap((tour) => (tour.routeDestinations?.length ? tour.routeDestinations : tour.destination ? [tour.destination] : []).map((destination) => ({ id: tour.id, country: destination.country, imageUrl: mediaUrl(tour.imageId), amount: tour.priceAmount, currency: tour.currency }))), "/tours/", "تور فعال", true);
+  const countryTiles = countryTilesFor(tourPayload.items.flatMap((tour) => (tour.routeDestinations?.length ? tour.routeDestinations : tour.destination ? [tour.destination] : []).map((destination) => ({ id: tour.id, country: destination.country, imageUrl: mediaUrl(tour.imageId), amount: tour.priceAmount, currency: tour.currency }))), "/tours/", "تور منتشرشده", true);
   const hotelCountriesTiles = mergeCountryCounts(hotelDirectory).map((item) => ({
     id: item.country, title: item.country, country: item.country,
     flagId: countryCards.find(country => normalizeCountryName(country.name) === normalizeCountryName(item.country))?.imageId,
@@ -313,27 +313,16 @@ export default async function HomePage() {
     imageUrl: mediaUrl(item.imageId), subtitle: `${item.count.toLocaleString("fa-IR")} هتل`,
   }));
   const visaTiles = countryTilesFor(servicePayload.items.filter((service) => service.serviceType === "visa").map((service) => ({ id: service.id, country: service.country ?? "", imageUrl: mediaUrl(service.imageId), amount: service.basePrice, currency: service.currency })), "/services/?type=visa&showResults=1", "ویزای منتشرشده");
-  const orderedHomeTours = [...tourPayload.items].sort((a, b) => Number(b.isHomeRecommended) - Number(a.isHomeRecommended));
-  const tourRows = orderedHomeTours.flatMap(tour => {
+  const recommendedCountries = [...new Set(tourPayload.items.filter(tour => tour.isHomeRecommended).flatMap(tour => {
     const destinations = tour.routeDestinations?.length ? tour.routeDestinations : tour.destination ? [tour.destination] : [];
-    return Array.from(new Set(destinations.map(destination => normalizeCountryName(destination.country)))).filter(isHomepageCountry).map(country => ({
-      id: `${tour.id}-${country}`, country, recommended: tour.isHomeRecommended,
-      title: tour.title,
-      href: `/tours/${tour.slug}/`, imageUrl: mediaUrl(tour.imageId),
-      date: tour.departureDate ? formatPersianDate(tour.departureDate) : null,
-      durationDays: tour.durationDays,
-      durationLabel: tour.title.match(/[0-9۰-۹٠-٩]+\s*و\s*[0-9۰-۹٠-٩]+\s*شب/)?.[0] ?? null,
-      airline: tour.airlineName || tour.transportation,
-      airlineLogo: mediaUrl(tour.airlineLogoImageId ?? null),
-      price: tour.priceAmount !== null ? formatCurrency(tour.priceAmount, tour.currency) : null,
-    }));
-  });
+    return destinations.map(destination => normalizeCountryName(destination.country));
+  }))];
   const countryRank = new Map(countryCards.map((country, index) => [normalizeCountryName(country.name), index]));
   const compareCountries = (a: { country?: string }, b: { country?: string }) => (countryRank.get(normalizeCountryName(a.country ?? "")) ?? Number.MAX_SAFE_INTEGER) - (countryRank.get(normalizeCountryName(b.country ?? "")) ?? Number.MAX_SAFE_INTEGER);
   countryTiles.sort(compareCountries);
   hotelCountriesTiles.sort(compareCountries);
   const showcasePanels: Record<string, ShowcasePanel> = {
-    tour: { tourRows, title: "تور بر اساس کشور", eyebrow: "مقصد بعدی شما", description: "", href: "/tours/", action: "مشاهده تورها", tiles: countryTiles, recommendations: spotlightTours.map((tour) => tourCards.find((card) => card.id === `tour-${tour.id}`)!).filter(Boolean) },
+    tour: { recommendedCountries, title: "تور بر اساس کشور", eyebrow: "مقصد بعدی شما", description: "", href: "/tours/", action: "مشاهده تورها", tiles: countryTiles, recommendations: spotlightTours.map((tour) => tourCards.find((card) => card.id === `tour-${tour.id}`)!).filter(Boolean) },
     visa: { title: "ویزا بر اساس کشور", eyebrow: "خدمات ویزا", description: "", href: "/services/?type=visa&showResults=1", action: "مشاهده ویزا", tiles: visaTiles, recommendations: visaExplorerItems.map((visa) => ({ id: `visa-${visa.id}`, title: visa.title, href: visa.href, imageUrl: visa.imageUrl, subtitle: visa.country, price: visa.price })) },
     hotel: { title: "هتل بر اساس کشور", eyebrow: "اقامت بعدی شما", description: "", href: "/hotels/", action: "مشاهده هتل‌ها", tiles: hotelCountriesTiles, recommendations: hotelCards },
   };

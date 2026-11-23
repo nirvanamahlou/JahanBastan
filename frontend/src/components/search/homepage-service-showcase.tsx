@@ -4,13 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { useHomepageSearchService } from "./homepage-search-guide";
-import { selectHomepageCountryRows } from "@/lib/homepage-tours";
 import { CountryFlag } from "@/components/content/country-flag";
 import styles from "./homepage-showcase-rev48.module.css";
 
 export type ShowcaseCard = { id: string; title: string; href: string; imageUrl: string | null; subtitle?: string | null; price?: string | null; country?: string; flagId?: number | null; international?: boolean; stars?: number };
-export type ShowcaseTourRow = { recommended?: boolean; id: string; country: string; title: string; href: string; imageUrl: string | null; date: string | null; durationDays?: number | null; durationLabel?: string | null; airline: string | null; airlineLogo: string | null; price: string | null };
-export type ShowcasePanel = { title: string; eyebrow: string; description: string; href: string; action: string; tiles: ShowcaseCard[]; recommendations: ShowcaseCard[]; tourRows?: ShowcaseTourRow[] };
+export type ShowcasePanel = { title: string; eyebrow: string; description: string; href: string; action: string; tiles: ShowcaseCard[]; recommendations: ShowcaseCard[]; recommendedCountries?: string[] };
 function ShowcaseImage({ src, sizes }: { src: string | null; sizes: string }) {
   const [failed, setFailed] = useState(false);
   return src && !failed ? <Image src={src} alt="" fill sizes={sizes} onError={() => setFailed(true)} /> : <div className={styles.noImage} />;
@@ -21,25 +19,23 @@ export function HomepageServiceShowcase({ panels }: { panels: Record<string, Sho
   const panel = panels[serviceType];
   if (!panel) return null;
   const cards = panel.tiles;
-  return <section data-service-showcase={serviceType} className={styles.section}><div className={styles.panel}>
+  const isTour = serviceType === "tour";
+  const preview = cards.filter((card, index) => index < 6 || panel.recommendedCountries?.includes(card.id));
+  return <section id={isTour ? "tour-countries" : undefined} data-service-showcase={serviceType} className={styles.section}><div className={styles.panel}>
     <header className={styles.heading}><span>{panel.eyebrow}</span><h2>{panel.title}</h2>{panel.description ? <p>{panel.description}</p> : null}</header>
     <div className={styles.controls}><Link href={panel.href}>همه کشورها</Link></div>
-    {serviceType === "tour" && panel.tourRows?.length ? <div className={styles.countryLists}>
-      {cards.filter((country, index) => expanded || index < 6 || panel.tourRows?.some(row => row.country === country.title && row.recommended)).map(country => <article key={country.id} className={styles.countryList}>
-        <Link href={country.href} className={styles.countryHeader}>
-          <CountryFlag country={country.title} imageId={country.flagId} />
-          <span><b>{country.title}</b><small>تورهای شهرهای محبوب</small></span><i>←</i>
-        </Link>
-        <div className={styles.countryRows}>{selectHomepageCountryRows(panel.tourRows!, country.title).map(row => <Link key={row.id} href={row.href} className={styles.countryRow}>
-          <span className={styles.cityImage}><ShowcaseImage src={row.imageUrl} sizes="(max-width:760px) 96px, 112px" /></span>
-          <strong className={styles.cityTitle}>{row.title}</strong>
-          <span className={styles.rowMeta}><small>حرکت</small><b>{row.date || "استعلام تاریخ"}</b></span>
-          <span className={styles.rowMeta}><small>مدت اقامت</small><b>{row.durationLabel || (row.durationDays ? row.durationDays > 1 ? `${(row.durationDays - 1).toLocaleString("fa-IR")} شب و ${row.durationDays.toLocaleString("fa-IR")} روز` : "۱ روز" : "استعلام مدت")}</b></span>
-          <span className={styles.rowMeta}><small>شرکت / وسیله</small><b>{row.airlineLogo ? <Image src={row.airlineLogo} width={27} height={27} alt="" /> : null}{row.airline || "اطلاعات در جزئیات"}</b></span>
-          <span className={styles.rowPrice}>{row.price || "استعلام قیمت"}</span>
-          <span className={styles.rowMore}>مشاهده بیشتر ←</span>
-        </Link>)}</div>
-      </article>)}
+    {isTour ? <div className={styles.countryGrid}>
+      {(expanded ? cards : preview).map(country => <Link key={country.id} href={country.href} className={styles.countryCard}>
+        <div className={styles.countryPhoto}><ShowcaseImage src={country.imageUrl} sizes="(max-width:760px) 36vw, 160px" /></div>
+        <div className={styles.countryCopy}>
+          <h3><CountryFlag country={country.title} imageId={country.flagId} />{country.title}</h3>
+          <p>{country.subtitle}</p>
+          <div className={styles.countryFoot}>
+            <span>{country.price ? <>از <b>{country.price}</b></> : "استعلام قیمت"}</span>
+            <span className={styles.countryArrow} aria-hidden="true">←</span>
+          </div>
+        </div>
+      </Link>)}
     </div> : <div className={styles.tiles}>
       {cards.slice(0, expanded ? undefined : 6).map((card) => <Link href={card.href} key={card.id} className={styles.tile}>
         <ShowcaseImage src={card.imageUrl} sizes="(max-width:760px) 45vw, 30vw" />
@@ -47,7 +43,7 @@ export function HomepageServiceShowcase({ panels }: { panels: Record<string, Sho
       </Link>)}
     </div>}
     {!cards.length ? <p className={styles.empty}>در حال حاضر گزینه‌ای برای این بخش منتشر نشده است.</p> : null}
-    {cards.length > 6 ? <button type="button" className={styles.more} onClick={() => setExpanded(!expanded)}>{expanded ? "نمایش کمتر" : "نمایش کشور‌های بیشتر"}</button> : null}
+    {cards.length > preview.length ? <button type="button" className={styles.more} aria-expanded={expanded} onClick={() => setExpanded(!expanded)}>{expanded ? "نمایش کمتر" : "نمایش کشورهای بیشتر"}</button> : null}
   </div></section>;
 }
 

@@ -1,7 +1,7 @@
-import { ResponsiveFilterPanel } from "@/components/content/responsive-filter-panel";
 import { CountryCityFields } from "@/components/content/country-city-fields";
 import { getDepartures, hotelImages } from "./departures/catalog";
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 
 import { TourResultRow } from "@/components/content/tour-result-row";
@@ -34,6 +34,7 @@ type ApiTour = {
   origin: string | null;
   durationDays: number | null;
   departureDate: string | null;
+  returnDate?: string | null;
   priceAmount: string | null;
   currency: string | null;
   transportation: string | null;
@@ -157,7 +158,7 @@ export default async function ToursPage({ searchParams }: { searchParams: Promis
       .catch(() => ({ destinations: [], origins: [], tourTypes: [], transportations: [], airlines: [], hotelStars: [] })),
     apiGet<{ items: CountryFlag[] }>("/countries", { cache: "no-store" })
       .catch(() => ({ items: [] })),
-    apiGet<{ items: { slug: string; title: string; country: string }[] }>("/destinations?pageSize=100", { cache: "no-store" }).catch(() => ({ items: [] })),
+    apiGet<{ items: { slug: string; title: string; country: string; imageId?: number | null }[] }>("/destinations?pageSize=100", { cache: "no-store" }).catch(() => ({ items: [] })),
     getDepartures().catch(() => []),
   ]);
   const selected = destinations.items.find(city => city.slug === destination);
@@ -187,6 +188,7 @@ export default async function ToursPage({ searchParams }: { searchParams: Promis
       imageId:null, imageUrl:tour.hotels.flatMap(hotelImages)[0], destination:{title:city,country:places[0]?.country.name || ""},
       durationDays:Math.round((Date.parse(tour.endsOn)-Date.parse(tour.startsOn))/86400000)+1,
       departureDate:date, origin:tour.outbound.originName, priceAmount:price === null ? null : String(price),
+      returnDate:tour.endsOn.slice(0,10),
       currency:comparable ? offers[0][0].currencyCode : null, airlineName:tour.outbound.carrierName,
       transportation:"پرواز", tourType:null, hotel:null, badgeLabel:null, isFeatured:false, isDirectFlight:false, isLastMinute:false, isInstallmentAvailable:false,
     });
@@ -227,35 +229,65 @@ export default async function ToursPage({ searchParams }: { searchParams: Promis
 
   const destinationLabel = options.destinations.find((option) => option.value === destination)?.label;
   const heading = destinationLabel ? `تورهای ${destinationLabel}` : country ? `تورهای ${country}` : "تورهای داخلی و خارجی";
+  const countryHref = country ? hrefWith(new URLSearchParams(), { country }) : "/tours/";
+  const countryPhoto = country ? destinations.items.find(item => normalizeCountryName(item.country) === country && item.imageId)?.imageId : null;
   const field = "min-h-12 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-brand outline-none transition focus:border-accent-strong focus:ring-4 focus:ring-accent/30";
-  return <section className="bg-white pt-2 pb-8 sm:pt-3 sm:pb-12"><Container className={styles.tourContainer}>
-    <header className={styles.heading}>{country ? <Flag country={country} imageId={countryFlagIds.get(country)} /> : null}<div><h1>{heading}</h1><p>{payload.total.toLocaleString("fa-IR")} تور منتشرشده</p></div><Link className="ms-auto shrink-0 text-sm font-bold text-brand" href="/">← همه کشورها</Link></header>
-    <Link href="/tours/departures/" className="mb-4 inline-flex rounded-xl bg-brand px-4 py-3 font-bold text-white">تورهای تاریخ‌دار</Link>
-    <div className={styles.layout}>
-      <aside className={styles.sidebar} aria-label="فیلتر تورها">
-        <ResponsiveFilterPanel title="فیلتر تورها">
-        <form action="/tours/">
-          <CountryCityFields key={country + destination} id="tour" countries={countries.items} cities={destinations.items.map((item) => ({ title: item.title, value: item.slug, country: item.country }))} country={country} city={destination} />
-          <div className={styles.field}><span>تاریخ سفر</span><JalaliDateRangeInput compact initialDeparture={departureFrom || null} initialReturn={departureTo || null} showTripType={false} /></div>
+  return <section className={country ? styles.countryPage : "bg-white pt-2 pb-8 sm:pt-3 sm:pb-12"}><Container className={country ? styles.countryContainer : styles.tourContainer}>
+    {country ? <header className={styles.countryHero}>
+      {countryPhoto && <div className={styles.countryHeroPhoto}><Image src={`${PUBLIC_API_BASE_URL}/media/${countryPhoto}`} alt="" fill sizes="(max-width:640px) 95vw, 520px" /></div>}
+      <div className={styles.countryHeroCopy}>
+        <Link href="/#tour-countries">← همه کشورها</Link>
+        <div className={styles.countryHeroTitle}><Flag country={country} imageId={countryFlagIds.get(country)} /><h1>{heading}</h1></div>
+        <p>{payload.total.toLocaleString("fa-IR")} تور برای این انتخاب</p>
+      </div>
+    </header> : <>
+      <header className={styles.heading}><div><h1>{heading}</h1><p>{payload.total.toLocaleString("fa-IR")} تور منتشرشده</p></div><Link className="ms-auto shrink-0 text-sm font-bold text-brand" href="/#tour-countries">← همه کشورها</Link></header>
+      <Link href="/tours/departures/" className="mb-4 inline-flex rounded-xl bg-brand px-4 py-3 font-bold text-white">تورهای تاریخ‌دار</Link>
+    </>}
+    <form action="/tours/" className={styles.tourSearch} aria-label="جست‌وجوی تور">
+        <div className={styles.tourSearchFields}>
           <div className={styles.field}><span>مبدأ</span><SiteSelect ariaLabel="مبدأ" defaultValue={departure} id="tour-origin" name="departure" options={[{ label: "همه مبدأها", value: "" }, ...options.origins]} searchable /></div>
+          <CountryCityFields key={country + destination} id="tour" countries={countries.items} cities={destinations.items.map((item) => ({ title: item.title, value: item.slug, country: item.country }))} country={country} city={destination} />
+          <div className={`${styles.field} ${styles.tourSearchDates}`}><JalaliDateRangeInput key={`${departureFrom}:${departureTo}`} compact initialDeparture={departureFrom || null} initialReturn={departureTo || null} showTripType={false} dateLabels={{ field: "بازهٔ تاریخ حرکت", departure: "از تاریخ", return: "تا تاریخ" }} /></div>
+          <label>تعداد مسافر<input className={field} defaultValue={passengerCount} min={1} max={20} name="passengerCount" type="number" /></label>
+          <button type="submit" className={styles.tourSearchButton}><SearchIcon className="size-4" />جست‌وجوی تور</button>
+        </div>
+        <details className={styles.tourSearchAdvanced} open={Boolean(airline || hotelStars || tourType || transportation || minPrice || maxPrice || search || featured || installmentOnly || directFlight || lastMinute)}>
+          <summary>فیلترهای بیشتر</summary>
+          <div className={styles.tourSearchExtras}>
           <div className={styles.field}><span>ایرلاین</span><SiteSelect ariaLabel="ایرلاین" defaultValue={airline} id="tour-airline" name="airline" options={[{ label: "همه ایرلاین‌ها", value: "" }, ...options.airlines]} searchable /></div>
           <div className={styles.field}><span>درجه هتل</span><SiteSelect ariaLabel="درجه هتل" defaultValue={hotelStars} id="tour-hotel-stars" name="hotelStars" options={[{ label: "همه", value: "" }, ...options.hotelStars]} /></div>
           <div className={styles.field}><span>نوع خدمات</span><SiteSelect ariaLabel="نوع خدمات" defaultValue={tourType} id="tour-service-type" name="tourType" options={[{ label: "همه خدمات", value: "" }, ...options.tourTypes]} /></div>
           <div className={styles.field}><span>وسیله سفر</span><SiteSelect ariaLabel="وسیله سفر" defaultValue={transportation} id="tour-transportation" name="transportation" options={[{ label: "همه", value: "" }, ...availableTransportations]} /></div>
           <fieldset className="grid min-w-0 grid-cols-2 gap-2"><legend className="mb-2 text-sm font-bold">محدوده قیمت</legend><label>از<input aria-label="حداقل قیمت" className={field} defaultValue={minPrice} min={0} name="minPrice" type="number" /></label><label>تا<input aria-label="حداکثر قیمت" className={field} defaultValue={maxPrice} min={0} name="maxPrice" type="number" /></label></fieldset>
           <label>نام تور<input className={field} defaultValue={search} minLength={2} name="search" placeholder="نام تور یا مقصد" type="search" /></label>
-          <label>تعداد مسافر<input className={field} defaultValue={passengerCount} min={1} max={20} name="passengerCount" type="number" /></label>
           <fieldset className="grid gap-3 border-t border-border pt-4"><legend className="sr-only">ویژگی‌های تور</legend>{[["featured", "فقط پرفروش", featured], ["installmentOnly", "خرید اقساطی", installmentOnly], ["directFlight", "پرواز مستقیم", directFlight], ["lastMinute", "لحظه‌آخری", lastMinute]].map(([name, label, checked]) => <label key={String(name)} className="!flex items-center gap-2"><input defaultChecked={Boolean(checked)} name={String(name)} type="checkbox" value="true" />{label}</label>)}</fieldset>
-          <input type="hidden" name="sort" value={sort} />
-          <button type="submit" className="flex items-center justify-center gap-2"><SearchIcon className="size-4" />اعمال فیلترها</button>
-          {hasFilters ? <Link className="text-center text-xs font-bold text-muted" href="/tours/">پاک کردن فیلترها</Link> : null}
-        </form></ResponsiveFilterPanel>
-      </aside>
+          </div>
+        </details>
+        <input type="hidden" name="sort" value={sort} />
+        {hasFilters ? <Link className="mt-2 inline-block text-xs font-bold text-muted" href={countryHref}>پاک کردن فیلترها</Link> : null}
+    </form>
       <div className={styles.content}>
         <div className={styles.sort}><span className="text-sm text-muted">{payload.total.toLocaleString("fa-IR")} تور موجود</span><form action="/tours/">{Array.from(current.entries()).filter(([key]) => key !== "sort").map(([key, value]) => <input key={key} name={key} type="hidden" value={value} />)}<label className="text-xs text-muted" htmlFor="tour-sort">مرتب‌سازی</label><SiteSelect ariaLabel="مرتب‌سازی تورها" defaultValue={sort} id="tour-sort" name="sort" options={sortOptions} /><button className="rounded-lg border border-border p-2 text-sm" type="submit">اعمال</button></form></div>
-        <section className={styles.results} aria-label="فهرست تورها">{payload.items.length ? payload.items.map((tour) => <TourResultRow key={tour.id} title={tour.title} slug={tour.slug} summary={tour.summary} imageUrl={tour.imageUrl || (tour.imageId ? `${PUBLIC_API_BASE_URL}/media/${tour.imageId}` : null)} destination={tour.destination?.title ?? "با استعلام"} date={tour.departureDate ? formatPersianDate(tour.departureDate) : "با استعلام"} duration={tour.durationDays} airline={tour.airlineName || tour.transportation || "با استعلام"} price={tour.priceAmount ? formatCurrency(tour.priceAmount, tour.currency) : "استعلام قیمت"} />) : <EmptyState title="توری با این فیلترها پیدا نشد" description="فیلترها را تغییر دهید یا همه را پاک کنید." action={<Link href="/tours/">همه تورها</Link>} />}</section>
+        <section className={country ? styles.countryResults : styles.results} aria-label="فهرست تورها">
+          {payload.items.length ? payload.items.map((tour) => {
+            const price = tour.priceAmount ? formatCurrency(tour.priceAmount, tour.currency) : null;
+            return <TourResultRow
+              key={tour.slug}
+              title={tour.title}
+              slug={tour.slug}
+              summary={tour.summary}
+              imageUrl={tour.imageUrl || (tour.imageId ? `${PUBLIC_API_BASE_URL}/media/${tour.imageId}` : null)}
+              destination={tour.destination?.title ?? "با استعلام"}
+              date={tour.departureDate ? formatPersianDate(tour.departureDate) : "با استعلام"}
+              duration={tour.durationDays}
+              airline={tour.airlineName || tour.transportation || "با استعلام"}
+              price={price ?? "استعلام قیمت"}
+              countryDates={country ? { native: !tour.slug.startsWith("departures/"), departure: tour.departureDate, returning: tour.returnDate ?? null, price } : undefined}
+            />;
+          }) : <EmptyState title="توری با این فیلترها پیدا نشد" description="فیلترها را تغییر دهید یا همه را پاک کنید." action={<Link href="/tours/">همه تورها</Link>} />}
+        </section>
         {pageCount > 1 ? <nav aria-label="صفحه‌بندی تورها" className="mt-8 flex flex-wrap justify-center gap-2">{Array.from({ length: pageCount }, (_, index) => index + 1).map((number) => <Link aria-current={number === page ? "page" : undefined} className={`grid size-11 place-items-center rounded-xl border text-sm font-black ${number === page ? "bg-brand text-white" : "text-brand"}`} href={hrefWith(current, { page: String(number) })} key={number}>{number.toLocaleString("fa-IR")}</Link>)}</nav> : null}
       </div>
-    </div>
   </Container></section>;
 }
