@@ -102,11 +102,9 @@ export function AvinaHotelSelection({ tour, exchangeRates }: { tour: Departure; 
             stars={hotel.starRating} summary={hotel.description} facilities={facilities}
             badges={tour.previewOnly ? <span className="rounded-xl bg-surface-muted px-3 py-2 text-xs font-bold">پیش‌نمایش</span> : null}
             amenities={<HotelAmenities description={facilities} region={hotel.region ?? null} roomType="" serviceType={hotel.serviceLevel || ""} variant="tour-card" />}
-            rates={<HotelRates rates={tour.rates.filter(rate => rate.hotelId === hotel.id)} hotelName={hotel.name} />} />
-          <div className="space-y-4 border-t border-border bg-surface-muted/40 p-3">
-            <HotelLocationMap compact name={hotel.englishName || hotel.name} address={hotel.address} region={hotel.region}
-              destination={city} country={hotel.city?.country.name} latitude={hotel.latitude} longitude={hotel.longitude} />
-          </div>
+            rates={<HotelRates rates={tour.rates.filter(rate => rate.hotelId === hotel.id)} hotelName={hotel.name} />}
+            locationMap={<HotelLocationMap compact name={hotel.englishName || hotel.name} address={hotel.address} region={hotel.region}
+              destination={city} country={hotel.city?.country.name} latitude={hotel.latitude} longitude={hotel.longitude} />} />
         </article>;
       })}
       {!visible.length && <p role="status" className="rounded-xl border p-5 text-muted">هتلی با این فیلترها پیدا نشد.</p>}

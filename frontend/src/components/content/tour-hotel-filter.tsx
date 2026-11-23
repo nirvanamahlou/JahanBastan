@@ -307,6 +307,7 @@ export function TourHotelFilter({
                 <TourHotelPresentation name={offer.hotel.name} href={`/hotels/${offer.hotel.slug}/?tour=${encodeURIComponent(tourSlug)}`}
                   images={[...new Set([offer.hotel.imageId,...(offer.hotel.galleryImageIds ?? [])])].filter(Boolean).map(id => `${PUBLIC_API_BASE_URL}/media/${id}`)}
                   location={[offer.hotel.region,destination,country].filter(Boolean).join("، ")}
+                  locationMap={<HotelLocationMap address={offer.hotel.address} compact country={country} destination={destination} name={offer.hotel.name} region={offer.hotel.region} />}
                   stars={offer.hotel.starRating} summary={offer.hotel.summary} facilities={offer.hotel.amenitiesDescription}
                   amenities={<HotelAmenities description={offer.hotel.amenitiesDescription} region={offer.hotel.region} roomType={offer.roomType} serviceType={offer.serviceType} variant="tour-card" />} badges={<><span className="inline-flex min-h-9 items-center rounded-xl border border-[#e3edf9] bg-[#f8fbff] px-3 text-xs font-bold text-brand">تاریخ برگزاری: {offer.departure.departureDate ? formatPersianDate(offer.departure.departureDate) : offer.departure.label}</span>
                         {offer.isBasePackage ? <span className="inline-flex min-h-9 items-center rounded-xl bg-brand px-3 text-xs font-black text-white">{"\u0647\u062a\u0644 \u067e\u0627\u06cc\u0647 \u067e\u06a9\u06cc\u062c"}</span> : null}
@@ -347,7 +348,6 @@ export function TourHotelFilter({
                     <p className="text-xs text-muted">شمارنده اتاق دوتخته بر اساس تعداد مسافر است و هر بار ۲ نفر تغییر می‌کند.</p>
                     <CartAddButton className="w-full sm:mr-auto sm:max-w-sm" buttonClassName="!rounded-2xl !bg-[#f12b75] !text-white hover:!bg-[#d91d62]" disabled={!selectedCount || !offer.isAvailable || offer.capacityRemaining === 0 || (offer.capacityRemaining !== null && selection.double + selection.single > offer.capacityRemaining)} idleLabel={!offer.isAvailable || offer.capacityRemaining === 0 ? "تکمیل ظرفیت" : "افزودن انتخاب‌ها به سبد خرید"} itemType="tour" roomSelection={selection} tourDepartureId={offer.departure.id} tourHotelPriceId={offer.id} tourId={tourId} />
                   </div>
-                  <div className="mt-5"><HotelLocationMap address={offer.hotel.address} compact country={country} destination={destination} name={offer.hotel.name} region={offer.hotel.region} /></div>
                 </div>
               </article>
             );
