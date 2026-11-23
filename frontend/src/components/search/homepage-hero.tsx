@@ -56,7 +56,7 @@ export function HomepageHero({
   return (
     <section data-homepage-hero className={styles.hero} aria-label="جستجوی خدمات سفر">
       <Container className={styles.layout}>
-        <div className={styles.visual}>
+        <div className={styles.visual} data-tour-panorama={serviceType === "tour" && visibleImage === homepageHeroAssets.tour ? "" : undefined}>
           <div className={styles.imageFrame}>
             <picture>
               <source media="(max-width: 760px)" srcSet={activeImage === homepageHeroAssets[serviceType] && !failedImages.has(activeImage) ? homepageMobileHeroAssets[serviceType] : visibleImage} />
