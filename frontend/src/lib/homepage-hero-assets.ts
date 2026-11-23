@@ -2,7 +2,7 @@ import type { ServiceType } from "@/components/search/travel-search";
 
 /** Panorama artwork shipped with the redesigned homepage, also available in admin. */
 export const homepageHeroAssets: Record<ServiceType, string> = {
-  tour: "/images/design-rev48/slider-tour.webp",
+  tour: "/images/design-rev48/slider-tour-coast.webp",
   hotel: "/images/design-rev48/slider-hotel.webp",
   flight: "/images/design-rev48/slider-flight.webp",
   train: "/images/design-rev48/slider-train.webp",
@@ -11,7 +11,7 @@ export const homepageHeroAssets: Record<ServiceType, string> = {
 };
 
 export const homepageMobileHeroAssets: Record<ServiceType, string> = {
-  tour: "/images/design-rev48/mobile-tour.webp",
+  tour: "/images/design-rev48/mobile-tour-coast.webp",
   hotel: "/images/design-rev48/mobile-hotel.webp",
   flight: "/images/design-rev48/mobile-flight.webp",
   train: "/images/design-rev48/mobile-train.webp",
