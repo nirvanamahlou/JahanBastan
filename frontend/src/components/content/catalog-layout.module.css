@@ -184,3 +184,15 @@
   .tourSearchFields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .tourSearchDates, .tourSearchButton { grid-column: 1 / -1; }
 }
+
+.tourCard { background: linear-gradient(120deg, #eef4fc, #fff 68%); }
+.tourCard:has(.dateDisclosure[open]) { border-color: #9db3cd; }
+.countryResult .facts svg { color: #25466e; }
+.dateToggle { background: #eaf1fa; color: #102747; }
+.dateDisclosure[open] .dateToggle { background: #102747; color: #fff; }
+.dateDisclosure > summary:focus-visible,
+.dateLink:focus-visible,
+.dateRange:focus-visible { outline-color: #25466e; }
+.dateRange:hover, .dateRange:focus-visible { border-color: #6586af; }
+.dateArrow, .dateLink { color: #25466e; }
+.dateNights { background: #e6eef9; }
