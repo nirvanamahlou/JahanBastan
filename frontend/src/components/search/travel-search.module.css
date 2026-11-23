@@ -152,6 +152,10 @@
 .field label, .field [data-passenger-selector] > span { top:.45rem; font-size:.625rem; }
 :global(#trip-search) .field [role="combobox"], :global(#trip-search) .field [data-passenger-selector] > div > button { min-height:3.5rem; padding-top:1.2rem; padding-bottom:.2rem; font-size:.75rem; font-weight:400; }
 :global(#trip-search) .field [role="combobox"] > span:first-child, :global(#trip-search) .field [data-passenger-selector] > div > button > span:first-child { font-weight:400!important; }
+:global(#trip-search) .form[data-service="tour"] :is(.route, [data-vehicle-field]) [role="combobox"] > span:first-child {
+  white-space: normal;
+  line-height: 1.2;
+}
 .fieldIcon { width:1.15rem; height:1.15rem; bottom:1rem; }
 .form [data-date-values], .form [data-date-values] > button { min-height:3.5rem; }
 .form [data-date-values] small { font-size:.625rem; }

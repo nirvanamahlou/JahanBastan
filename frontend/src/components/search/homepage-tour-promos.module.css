@@ -1,4 +1,4 @@
-.promos { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; width:calc(100% - 80px); max-width:90rem; margin:1.25rem auto 0; color:#fff; }
+.promos { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; width:calc(100% - 80px); max-width:var(--home-content-max, 90rem); margin:1.25rem auto 0; color:#fff; }
 .promo { position:relative; display:block; overflow:hidden; min-height:155px; aspect-ratio:4/1; border-radius:1rem; background:#102747; box-shadow:0 11px 27px #10274718; transition:transform .25s; }
 .promo:hover { transform:translateY(-3px); }.promo img { object-fit:cover; }
 .promo > span { position:relative; z-index:1; display:flex; flex-direction:column; align-items:start; justify-content:center; min-height:100%; padding:1rem 1.5rem 1rem 40%; }
