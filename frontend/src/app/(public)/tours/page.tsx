@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { TourResultRow } from "@/components/content/tour-result-row";
+import { TourSortSelect } from "@/components/content/tour-sort-select";
 import { CountryFlag as Flag } from "@/components/content/country-flag";
 import styles from "@/components/content/catalog-layout.module.css";
 import { JalaliDateRangeInput } from "@/components/search/jalali-date-range-input";
@@ -269,7 +270,13 @@ export default async function ToursPage({ searchParams }: { searchParams: Promis
         {hasFilters ? <Link className="mt-2 inline-block text-xs font-bold text-muted" href={countryHref}>پاک کردن فیلترها</Link> : null}
     </form>
       <div className={styles.content}>
-        <div className={styles.sort}><span className="text-sm text-muted">{payload.total.toLocaleString("fa-IR")} تور موجود</span><form action="/tours/">{Array.from(current.entries()).filter(([key]) => key !== "sort").map(([key, value]) => <input key={key} name={key} type="hidden" value={value} />)}<label className="text-xs text-muted" htmlFor="tour-sort">مرتب‌سازی</label><SiteSelect ariaLabel="مرتب‌سازی تورها" defaultValue={sort} id="tour-sort" name="sort" options={sortOptions} /><button className="rounded-lg border border-border p-2 text-sm" type="submit">اعمال</button></form></div>
+        <div className={styles.sort}>
+          <span className="text-sm text-muted">{payload.total.toLocaleString("fa-IR")} تور موجود</span>
+          <TourSortSelect value={sort} options={sortOptions.map((option) => ({
+            ...option,
+            href: hrefWith(current, { sort: option.value }),
+          }))} />
+        </div>
         <section className={country ? styles.countryResults : styles.results} aria-label="فهرست تورها">
           {payload.items.length ? payload.items.map((tour) => {
             const price = tour.priceAmount ? formatCurrency(tour.priceAmount, tour.currency) : null;
