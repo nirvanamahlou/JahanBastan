@@ -90,26 +90,8 @@ export function AvinaHotelSelection({ tour, exchangeRates }: { tour: Departure; 
       ((!minimum && !maximum) || (price !== undefined &&
         (!minimum || price >= Number(minimum)) && (!maximum || price <= Number(maximum))));
   });
-  return <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_16rem]">
-    <div className="min-w-0 space-y-4" id="avina-tour-hotel-results">
-      {visible.map(hotel => {
-        const facilities = hotel.facilities.map(item => item.facility.name).join("، ");
-        const city = hotel.city?.name ?? tour.outbound.destinationName;
-        return <article key={hotel.id} className="min-w-0 overflow-hidden rounded-[1.75rem] border border-[#ffd1e3] bg-white shadow-[0_16px_40px_rgba(241,43,117,.10)]">
-          <TourHotelPresentation name={hotel.name} images={hotelImages(hotel)}
-            href={hotel.profileSlug ? "/hotels/" + encodeURIComponent(hotel.profileSlug) + "/" : undefined}
-            location={[city, hotel.city?.country.name].filter(Boolean).join("، ")}
-            stars={hotel.starRating} summary={hotel.description} facilities={facilities}
-            badges={tour.previewOnly ? <span className="rounded-xl bg-surface-muted px-3 py-2 text-xs font-bold">پیش‌نمایش</span> : null}
-            amenities={<HotelAmenities description={facilities} region={hotel.region ?? null} roomType="" serviceType={hotel.serviceLevel || ""} variant="tour-card" />}
-            rates={<HotelRates rates={tour.rates.filter(rate => rate.hotelId === hotel.id)} hotelName={hotel.name} />}
-            locationMap={<HotelLocationMap compact name={hotel.englishName || hotel.name} address={hotel.address} region={hotel.region}
-              destination={city} country={hotel.city?.country.name} latitude={hotel.latitude} longitude={hotel.longitude} />} />
-        </article>;
-      })}
-      {!visible.length && <p role="status" className="rounded-xl border p-5 text-muted">هتلی با این فیلترها پیدا نشد.</p>}
-    </div>
-    <aside className="order-first h-fit rounded-[1.75rem] border border-[#ffd1e3] bg-gradient-to-b from-white to-[#fff6fa] p-4 lg:sticky lg:top-24 lg:order-last lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:overscroll-contain">
+  return <div className="grid gap-5 lg:grid-cols-[16rem_minmax(0,1fr)]">
+    <aside className="h-fit rounded-[1.75rem] border border-[#ffd1e3] bg-gradient-to-b from-white to-[#fff6fa] p-4 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:overscroll-contain">
       <header className="flex items-center justify-between border-b border-[#ffd7e6] pb-4">
         <h2 className="flex items-center gap-2 font-black text-brand"><span aria-hidden="true" className="grid size-8 place-items-center rounded-xl bg-[#ffe3ee] text-[#f12b75]">☷</span>فیلترها</h2>
         <button type="button" className="rounded-lg bg-[#fff0f6] px-2 py-1 text-xs font-bold text-[#e6236c]" onClick={() => { setQuery(""); setHotelId(""); setRegion(""); setStars(""); setAvailableOnly(false); setInstallmentOnly(false); setMinimum(""); setMaximum(""); }}>پاک کردن</button>
@@ -151,5 +133,23 @@ export function AvinaHotelSelection({ tour, exchangeRates }: { tour: Departure; 
         </fieldset>
       </div>
     </aside>
+    <div className="min-w-0 space-y-4" id="avina-tour-hotel-results">
+      {visible.map(hotel => {
+        const facilities = hotel.facilities.map(item => item.facility.name).join("، ");
+        const city = hotel.city?.name ?? tour.outbound.destinationName;
+        return <article key={hotel.id} className="min-w-0 overflow-hidden rounded-[1.75rem] border border-[#ffd1e3] bg-white shadow-[0_16px_40px_rgba(241,43,117,.10)]">
+          <TourHotelPresentation name={hotel.name} images={hotelImages(hotel)}
+            href={hotel.profileSlug ? "/hotels/" + encodeURIComponent(hotel.profileSlug) + "/" : undefined}
+            location={[city, hotel.city?.country.name].filter(Boolean).join("، ")}
+            stars={hotel.starRating} summary={hotel.description} facilities={facilities}
+            badges={tour.previewOnly ? <span className="rounded-xl bg-surface-muted px-3 py-2 text-xs font-bold">پیش‌نمایش</span> : null}
+            amenities={<HotelAmenities description={facilities} region={hotel.region ?? null} roomType="" serviceType={hotel.serviceLevel || ""} variant="tour-card" />}
+            rates={<HotelRates rates={tour.rates.filter(rate => rate.hotelId === hotel.id)} hotelName={hotel.name} />}
+            locationMap={<HotelLocationMap compact name={hotel.englishName || hotel.name} address={hotel.address} region={hotel.region}
+              destination={city} country={hotel.city?.country.name} latitude={hotel.latitude} longitude={hotel.longitude} />} />
+        </article>;
+      })}
+      {!visible.length && <p role="status" className="rounded-xl border p-5 text-muted">هتلی با این فیلترها پیدا نشد.</p>}
+    </div>
   </div>;
 }
