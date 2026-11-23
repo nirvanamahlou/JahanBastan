@@ -56,6 +56,7 @@
   line-height: 1.5;
 }
 .countryArrow { display: grid; place-items: center; flex-shrink: 0; width: 1.3rem; height: 1.3rem; border-radius: .38rem; background: #fcecf3; color: #a11652; }
+@media (min-width: 1151px) { .countryGrid:has(> :nth-child(4):last-child) { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 @media (max-width: 980px) { .countryGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 620px) { .countryGrid { grid-template-columns: minmax(0, 1fr); gap: .45rem; } .countryCard { min-height: 95px; } }
 @media (prefers-reduced-motion: reduce) { .countryCard { transition: none; } }

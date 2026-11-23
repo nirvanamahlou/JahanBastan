@@ -64,7 +64,7 @@
 .countryHeroTitle { display: flex; align-items: center; gap: .5rem; margin: .45rem 0 .2rem; }
 .countryHeroTitle h1 { font-size: clamp(1.15rem, 2vw, 1.65rem); font-weight: 800; overflow-wrap: anywhere; }
 .countryHeroCopy p { color: #e0e9f5; font-size: .7rem; }
-.countryLayout { grid-template-columns: 240px minmax(0, 1fr); gap: .9rem; }
+.countryLayout { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: .9rem; align-items: start; }
 .countryResults { display: grid; gap: .65rem; margin-top: .65rem; }
 .countryResult { min-width: 0; border: 1px solid #e1e7f1; border-radius: .8rem; background: #fff; color: #102747; }
 .countryResultMain { display: grid; grid-template-columns: minmax(0, 1fr) minmax(140px, 25%); gap: .8rem; align-items: center; padding: .75rem; }
@@ -90,7 +90,7 @@
 .dateRanges li > div span { color: #526581; }
 .dateRanges li > strong { margin-inline-start: auto; }
 .dateLink { display: inline-flex; align-items: center; min-height: 44px; color: #a11652; font-size: .7rem; font-weight: 700; }
-@media (max-width: 940px) { .countryLayout { grid-template-columns: 210px minmax(0, 1fr); } .countryResult .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 940px) { .countryLayout { grid-template-columns: 220px minmax(0, 1fr); } .countryResult .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 800px) { .countryLayout { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 600px) {
   .countryContainer.countryContainer { width: calc(100% - 28px); }
@@ -142,6 +142,13 @@
 .tourSearchAdvanced { margin-block-start: .65rem; }
 .tourSearchAdvanced > summary { width: fit-content; cursor: pointer; color: var(--brand); font-size: .8rem; }
 .tourSearchExtras { margin-block-start: .6rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)); }
+.countryLayout .tourSearch { min-width: 0; margin: 0; }
+.countryLayout .tourSearchFields, .countryLayout .tourSearchExtras { grid-template-columns: minmax(0, 1fr); }
+
+@media (max-width: 800px) {
+  .countryLayout .tourSearchFields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .countryLayout .tourSearchDates { grid-column: 1 / -1; }
+}
 
 @media (max-width: 70rem) {
   .tourSearchFields { grid-template-columns: repeat(3, minmax(0, 1fr)); }

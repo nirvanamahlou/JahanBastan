@@ -244,6 +244,7 @@ export default async function ToursPage({ searchParams }: { searchParams: Promis
       <header className={styles.heading}><div><h1>{heading}</h1><p>{payload.total.toLocaleString("fa-IR")} تور منتشرشده</p></div><Link className="ms-auto shrink-0 text-sm font-bold text-brand" href="/#tour-countries">← همه کشورها</Link></header>
       <Link href="/tours/departures/" className="mb-4 inline-flex rounded-xl bg-brand px-4 py-3 font-bold text-white">تورهای تاریخ‌دار</Link>
     </>}
+    <div className={country ? styles.countryLayout : undefined}>
     <form action="/tours/" className={styles.tourSearch} aria-label="جست‌وجوی تور">
         <div className={styles.tourSearchFields}>
           <div className={styles.field}><span>مبدأ</span><SiteSelect ariaLabel="مبدأ" defaultValue={departure} id="tour-origin" name="departure" options={[{ label: "همه مبدأها", value: "" }, ...options.origins]} searchable /></div>
@@ -289,5 +290,6 @@ export default async function ToursPage({ searchParams }: { searchParams: Promis
         </section>
         {pageCount > 1 ? <nav aria-label="صفحه‌بندی تورها" className="mt-8 flex flex-wrap justify-center gap-2">{Array.from({ length: pageCount }, (_, index) => index + 1).map((number) => <Link aria-current={number === page ? "page" : undefined} className={`grid size-11 place-items-center rounded-xl border text-sm font-black ${number === page ? "bg-brand text-white" : "text-brand"}`} href={hrefWith(current, { page: String(number) })} key={number}>{number.toLocaleString("fa-IR")}</Link>)}</nav> : null}
       </div>
+    </div>
   </Container></section>;
 }
