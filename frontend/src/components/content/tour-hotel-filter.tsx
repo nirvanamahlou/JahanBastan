@@ -3,6 +3,7 @@
 import { DeparturePicker } from "./departure-picker";
 
 import { TourHotelPresentation } from "./tour-hotel-presentation";
+import hotelStyles from "./tour-hotel-presentation.module.css";
 import { useEffect, useMemo, useState } from "react";
 
 import { HotelAmenities } from "@/components/content/hotel-amenities";
@@ -311,9 +312,8 @@ export function TourHotelFilter({
                         {offer.isBasePackage ? <span className="inline-flex min-h-9 items-center rounded-xl bg-brand px-3 text-xs font-black text-white">{"\u0647\u062a\u0644 \u067e\u0627\u06cc\u0647 \u067e\u06a9\u06cc\u062c"}</span> : null}
                         <span className={`inline-flex min-h-9 items-center rounded-xl px-3 text-xs font-black ${offer.isAvailable && (offer.capacityRemaining === null || offer.capacityRemaining > 0) ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"}`}>
                           {!offer.isAvailable || offer.capacityRemaining === 0 ? "تکمیل ظرفیت" : offer.capacityRemaining === null ? "ظرفیت موجود" : `${offer.capacityRemaining.toLocaleString("fa-IR")} اتاق باقی‌مانده`}
-                        </span></>} />
-                <div className="border-t border-border bg-surface-muted/40 p-3">
-                  <div className={`grid gap-2 sm:grid-cols-2 md:grid-cols-3 ${Number(offer.extraPrice) > 0 ? "xl:grid-cols-6" : "xl:grid-cols-5"}`}>
+                        </span></>}
+                  rates={<div className={hotelStyles.rateGrid} aria-label="نرخ‌های اتاق و مسافر">
                     {rooms.filter((room) => room.key !== "extra" || Number(offer.extraPrice) > 0).map((room) => {
                       const available = offer.isAvailable && offer.capacityRemaining !== 0 && Number(offer[room.price]) > 0;
                       const selectedQuantity = selection[room.key];
@@ -321,21 +321,22 @@ export function TourHotelFilter({
                       const decrementLabel = room.key === "double" ? "کم کردن ۲ نفر از اتاق دوتخته" : `کم کردن ${room.label}`;
                       const incrementLabel = room.key === "double" ? "افزودن ۲ نفر به اتاق دوتخته" : `افزودن ${room.label}`;
                       return (
-                        <div className={`flex h-full flex-col rounded-2xl border p-3 text-center transition ${!available ? "border-dashed border-border/70 bg-white" : selectedQuantity ? "border-[#f12b75] bg-[#fff4f8] shadow-[0_8px_18px_rgba(241,43,117,.12)]" : "border-[#ffd7e6] bg-white"}`} key={room.key}>
-                          <p className="flex min-h-10 items-center justify-center rounded-xl bg-surface-muted px-2 py-2 text-xs font-black leading-5 text-brand">{room.label}{room.key === "double" ? " (۲ نفر)" : ""}</p>
-                          <div className="mt-2 flex min-h-[5.25rem] items-center justify-center text-xs leading-6 text-muted">
+                        <div className={hotelStyles.rateTile} data-active={selectedQuantity > 0} data-unavailable={!available} key={room.key}>
+                          <p className={hotelStyles.rateLabel}>{room.label}{room.key === "double" ? " (۲ نفر)" : ""}</p>
+                          <div className={hotelStyles.ratePrice}>
                             {available ? <RoomPrice offer={offer} room={room} /> : <span className="font-bold text-muted">ناموجود</span>}
                           </div>
-                          <div className="mx-auto mt-auto flex w-full max-w-32 items-center overflow-hidden rounded-xl border border-border bg-white">
-                            <button aria-label={decrementLabel} className="grid h-9 min-w-0 flex-1 place-items-center text-lg font-black text-brand transition hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-35" disabled={!available || selectedQuantity === 0} onClick={() => updateQuantity(offer.id, room.key, -1)} type="button">−</button>
-                            <output aria-label={room.key === "double" ? "تعداد مسافر اتاق دوتخته" : `تعداد ${room.label}`} className="grid h-9 w-9 shrink-0 place-items-center border-x border-border font-black text-brand">{displayedQuantity.toLocaleString("fa-IR")}</output>
-                            <button aria-label={incrementLabel} className="grid h-9 min-w-0 flex-1 place-items-center text-lg font-black text-brand transition hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-35" disabled={!available || selectedQuantity >= 20} onClick={() => updateQuantity(offer.id, room.key, 1)} type="button">+</button>
+                          <div className={hotelStyles.rateControl}>
+                            <button aria-label={decrementLabel} className="hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-35" disabled={!available || selectedQuantity === 0} onClick={() => updateQuantity(offer.id, room.key, -1)} type="button">−</button>
+                            <output aria-label={room.key === "double" ? "تعداد مسافر اتاق دوتخته" : `تعداد ${room.label}`}>{displayedQuantity.toLocaleString("fa-IR")}</output>
+                            <button aria-label={incrementLabel} className="hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-35" disabled={!available || selectedQuantity >= 20} onClick={() => updateQuantity(offer.id, room.key, 1)} type="button">+</button>
                           </div>
                         </div>
                       );
                     })}
-                  </div>
-                  <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                  </div>} />
+                <div className="border-t border-border bg-surface-muted/40 p-3">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
                     {selectedCount ? (
                       <div className="rounded-2xl bg-gradient-to-l from-[#f12b75] to-[#ff6da3] px-4 py-3 text-sm text-white shadow-[0_10px_20px_rgba(241,43,117,.2)]">
                         <strong>{"\u062c\u0645\u0639 \u0642\u0627\u0628\u0644 \u067e\u0631\u062f\u0627\u062e\u062a: "}</strong>

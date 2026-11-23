@@ -1,0 +1,132 @@
+.presentation {
+  display: grid;
+  gap: .65rem 1rem;
+  padding: .8rem;
+}
+
+.media { min-width: 0; }
+.hotelInfo, .prices { min-width: 0; }
+.hotelHeading { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .65rem; }
+.hotelHeading h3 { margin: 0; font-size: 1.02rem; font-weight: 800; overflow-wrap: anywhere; }
+.rating { display: inline-flex; flex-wrap: wrap; align-items: center; gap: .3rem; color: var(--muted); font-size: .63rem; }
+.location { margin: .24rem 0 0; color: var(--muted); font-size: .72rem; }
+.badges { display: flex; flex-wrap: wrap; align-items: center; gap: .28rem; margin-top: .32rem; }
+.badges > * { min-height: 1.45rem; padding-inline: .38rem; font-size: .59rem; }
+.amenities { margin-top: .35rem; }
+.amenities ul { display: flex; flex-wrap: wrap; gap: .28rem; margin: 0; }
+.amenities li {
+  flex: 0 1 auto;
+  min-height: 1.5rem;
+  gap: .22rem;
+  padding: .14rem .34rem;
+  border: 1px solid var(--border);
+  border-radius: .4rem;
+  background: var(--surface-muted);
+  box-shadow: none;
+  font-size: .59rem;
+}
+.amenities li > span:first-child { width: .9rem; height: .9rem; background: transparent; }
+.amenities li svg { width: .72rem; height: .72rem; }
+.hotelActions { display: flex; flex-wrap: wrap; align-items: baseline; gap: .22rem .65rem; margin-top: .36rem; }
+.hotelActions details { min-width: 0; }
+.hotelActions details[open] { flex-basis: 100%; }
+.hotelActions summary { width: fit-content; cursor: pointer; }
+.hotelActions :is(a, summary) { min-height: 1.55rem; color: var(--accent-strong); font-size: .65rem; font-weight: 700; }
+.hotelActions a { display: inline-flex; align-items: center; gap: .24rem; }
+.hotelActions details p { margin-top: .25rem; color: var(--muted); font-size: .68rem; line-height: 1.8; }
+
+.gallery { display: grid; gap: .3rem; }
+.galleryStage {
+  position: relative;
+  aspect-ratio: 2 / 1;
+  overflow: hidden;
+  border-radius: .62rem;
+  background: var(--surface-muted);
+}
+.galleryStage > img { object-fit: cover; }
+.galleryFallback { display: grid; place-items: center; color: var(--muted); font-size: .66rem; }
+.galleryCount {
+  position: absolute;
+  inset: auto .28rem .28rem auto;
+  padding: .12rem .35rem;
+  border-radius: .32rem;
+  background: #102747e8;
+  color: white;
+  font-size: .58rem;
+}
+.galleryArrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  border: 1px solid #ffffff66;
+  border-radius: 50%;
+  background: #102747e8;
+  color: white;
+}
+.galleryArrow:first-of-type { inset-inline-start: .25rem; }
+.galleryArrow:last-of-type { inset-inline-end: .25rem; }
+.galleryThumbs { display: flex; gap: .24rem; overflow-x: auto; padding: 2px 0; }
+.galleryThumb {
+  position: relative;
+  flex: 0 0 2rem;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: .28rem;
+}
+.galleryThumb img { object-fit: cover; }
+.galleryThumb[aria-pressed="true"] { border-color: var(--accent-strong); box-shadow: inset 0 0 0 1px var(--accent-strong); }
+.gallery :is(button):focus-visible,
+.hotelActions :is(a, summary):focus-visible { outline: 2px solid var(--accent-strong); outline-offset: 2px; }
+
+.rateGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 6rem), 1fr)); gap: .34rem; }
+.rateTile {
+  display: flex;
+  flex-direction: column;
+  gap: .28rem;
+  min-width: 0;
+  padding: .36rem;
+  border: 1px solid var(--border);
+  border-radius: .48rem;
+  background: var(--surface-muted);
+  color: var(--brand);
+  text-align: center;
+}
+.rateTile[data-active="true"] { border-color: var(--accent-strong); background: color-mix(in srgb, var(--accent-strong) 9%, var(--surface)); }
+.rateTile[data-unavailable="true"] { border-style: dashed; }
+.rateLabel { color: var(--muted); font-size: .62rem; font-weight: 700; line-height: 1.55; overflow-wrap: anywhere; }
+.ratePrice { display: grid; align-content: center; min-height: 2.2rem; font-size: .68rem; line-height: 1.5; overflow-wrap: anywhere; }
+.ratePrice :is(strong, b) { font-size: .7rem; }
+.rateMeta { margin-top: .2rem; color: var(--muted); font-size: .56rem; }
+.rateControl {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .2rem;
+  margin-top: auto;
+  border: 1px solid var(--border);
+  border-radius: .35rem;
+  background: var(--surface);
+  font-size: .68rem;
+}
+.rateControl button { display: grid; flex: 1; min-width: 1.45rem; min-height: 1.75rem; place-items: center; font-weight: 750; }
+.rateControl output { min-width: 1.15rem; text-align: center; font-weight: 700; }
+
+@media (min-width: 680px) {
+  .presentation {
+    grid-template-columns: minmax(126px, 25%) minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    align-items: start;
+  }
+  .media { grid-row: 1 / 3; }
+  .galleryStage { aspect-ratio: 1.16; }
+}
+@media (max-width: 679px) {
+  .presentation { padding: .6rem; gap: .55rem; }
+  .rateGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .rateControl button { min-height: 44px; }
+}

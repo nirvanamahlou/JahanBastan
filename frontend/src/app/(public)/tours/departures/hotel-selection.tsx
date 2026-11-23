@@ -7,6 +7,7 @@ import { useState } from "react";
 import { HotelAmenities } from "@/components/content/hotel-amenities";
 import { HotelLocationMap } from "@/components/content/hotel-location-map";
 import { TourHotelPresentation } from "@/components/content/tour-hotel-presentation";
+import hotelStyles from "@/components/content/tour-hotel-presentation.module.css";
 import { hotelImages, labels, priceText, type Departure } from "./catalog";
 
 const normalize = (value: string) => value.trim().toLocaleLowerCase("fa-IR")
@@ -25,7 +26,7 @@ function HotelRates({ rates, hotelName }: { rates: Departure["rates"]; hotelName
   }
   if (!rates.length) return <p className="text-sm text-muted">نرخ این هتل اعلام نشده است.</p>;
   return <>
-    <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-[repeat(auto-fit,minmax(8rem,1fr))]">
+    <div className={hotelStyles.rateGrid} aria-label="نرخ‌های اتاق و مسافر">
       {rates.map((rate, index) => {
         const count = counts[index] || 0;
         const double = rate.kind === "double";
@@ -35,19 +36,19 @@ function HotelRates({ rates, hotelName }: { rates: Departure["rates"]; hotelName
         const adjust = (delta: number) => setCounts(current => ({
           ...current, [index]: Math.max(0, Math.min(20, (current[index] || 0) + delta)),
         }));
-        return <div key={index} className="flex flex-col rounded-2xl border border-[#ffd7e6] bg-white p-3 text-center">
-          <h3 className="rounded-xl bg-surface-muted px-2 py-3 text-xs font-black text-brand">{room}</h3>
-          {rate.roomTypeName && <p className="mt-2 text-xs text-muted">{rate.roomTypeName}</p>}
-          <div className="grid min-h-20 content-center gap-1 py-3 text-xs leading-6">
+        return <div key={index} className={hotelStyles.rateTile} data-active={count > 0} data-unavailable={!priced}>
+          <p className={hotelStyles.rateLabel}>{room}</p>
+          {rate.roomTypeName && <p className={hotelStyles.rateMeta}>{rate.roomTypeName}</p>}
+          <div className={hotelStyles.ratePrice}>
             <strong>{priced ? priceText(rate.total) : "استعلام قیمت"}</strong>
             {(rate.hotel.length > 0 || rate.flight.length > 0) && <span className="text-muted">
               {[rate.hotel.length ? "هتل " + priceText(rate.hotel) : "", rate.flight.length ? "پرواز " + priceText(rate.flight) : ""].filter(Boolean).join(" + ")}
             </span>}
           </div>
-          <div className="mx-auto mt-auto flex w-full max-w-32 overflow-hidden rounded-xl border border-border bg-white">
-            <button type="button" aria-label={"کم کردن " + label} onClick={() => adjust(-1)} disabled={!priced || !count} className="h-9 flex-1 font-black text-brand disabled:opacity-35">−</button>
-            <output aria-label={"تعداد مسافران " + label} className="grid h-9 w-9 place-items-center border-x border-border font-black text-brand">{(count * (double ? 2 : 1)).toLocaleString("fa-IR")}</output>
-            <button type="button" aria-label={"افزودن " + label} onClick={() => adjust(1)} disabled={!priced || count >= 20} className="h-9 flex-1 font-black text-brand disabled:opacity-35">+</button>
+          <div className={hotelStyles.rateControl}>
+            <button type="button" aria-label={"کم کردن " + label} onClick={() => adjust(-1)} disabled={!priced || !count} className="disabled:opacity-35">−</button>
+            <output aria-label={"تعداد مسافران " + label}>{(count * (double ? 2 : 1)).toLocaleString("fa-IR")}</output>
+            <button type="button" aria-label={"افزودن " + label} onClick={() => adjust(1)} disabled={!priced || count >= 20} className="disabled:opacity-35">+</button>
           </div>
         </div>;
       })}
@@ -100,9 +101,9 @@ export function AvinaHotelSelection({ tour, exchangeRates }: { tour: Departure; 
             location={[city, hotel.city?.country.name].filter(Boolean).join("، ")}
             stars={hotel.starRating} summary={hotel.description} facilities={facilities}
             badges={tour.previewOnly ? <span className="rounded-xl bg-surface-muted px-3 py-2 text-xs font-bold">پیش‌نمایش</span> : null}
-            amenities={<HotelAmenities description={facilities} region={hotel.region ?? null} roomType="" serviceType={hotel.serviceLevel || ""} variant="tour-card" />} />
+            amenities={<HotelAmenities description={facilities} region={hotel.region ?? null} roomType="" serviceType={hotel.serviceLevel || ""} variant="tour-card" />}
+            rates={<HotelRates rates={tour.rates.filter(rate => rate.hotelId === hotel.id)} hotelName={hotel.name} />} />
           <div className="space-y-4 border-t border-border bg-surface-muted/40 p-3">
-            <HotelRates rates={tour.rates.filter(rate => rate.hotelId === hotel.id)} hotelName={hotel.name} />
             <HotelLocationMap compact name={hotel.englishName || hotel.name} address={hotel.address} region={hotel.region}
               destination={city} country={hotel.city?.country.name} latitude={hotel.latitude} longitude={hotel.longitude} />
           </div>
