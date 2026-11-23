@@ -1,3 +1,15 @@
+.profileFrame, .profileContent.profileContent {
+  width: min(1280px, calc(100% - 48px));
+  max-width: none;
+  margin-inline: auto;
+}
+
+.profileContent.profileContent { padding-inline: 0; }
+
+@media (max-width: 760px) {
+  .profileFrame, .profileContent.profileContent { width: calc(100% - 28px); }
+}
+
 .routeSection {
   overflow: hidden;
   padding: 1rem;

@@ -469,7 +469,7 @@ export default async function TourPage({ params }: Props) {
               ) : null}
         actions={<TourActions showBookingAction={hasHotels} slug={item.slug} title={item.title} tourId={item.id} />} />
 
-      <Container className="-mt-4 relative z-10 pb-14" data-scroll-reveal-skip>
+      <Container className={`-mt-4 relative z-10 pb-14 ${tourStyles.profileContent}`} data-scroll-reveal-skip>
         <TourProfileFacts facts={facts} />
 
         <TourDetailTabs sections={tourSections} />

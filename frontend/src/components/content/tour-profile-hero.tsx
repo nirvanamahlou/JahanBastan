@@ -6,7 +6,7 @@ import tourStyles from "./structured-tour-content.module.css";
 type Props = { title:string; summary?:ReactNode; image?:ReactNode; destination?:ReactNode; badges?:ReactNode; rating?:ReactNode; actions?:ReactNode };
 export function TourProfileHero({title,summary,image,destination,badges,rating,actions}:Props) {
   return (
-      <section className={`relative mx-auto min-h-[31rem] max-w-[96rem] overflow-hidden bg-brand sm:mt-3 sm:rounded-[2rem] ${tourStyles.heroShell}`} data-scroll-reveal-skip>
+      <section className={`relative min-h-[31rem] overflow-hidden bg-brand sm:mt-3 sm:rounded-[2rem] ${tourStyles.profileFrame} ${tourStyles.heroShell}`} data-scroll-reveal-skip>
         {image}
         <div className="absolute inset-0 bg-gradient-to-l from-brand/95 via-brand/65 to-brand/20" />
         <div aria-hidden="true" className={tourStyles.heroAura} />

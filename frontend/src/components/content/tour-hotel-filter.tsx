@@ -327,6 +327,10 @@ export function TourHotelFilter({
         <div className="min-w-0 space-y-4" id="tour-hotel-results">
           {visibleOffers.map((offer) => {
             const selection = selections[offer.id] ?? emptySelection;
+            const showRooms = rooms.filter(room => room.key !== "extra" || Number(offer.extraPrice) > 0);
+            const availableRooms = offer.isAvailable && offer.capacityRemaining !== 0
+              ? showRooms.filter(room => Number(offer[room.price]) > 0)
+              : [];
             const selectedCount = Object.values(selection).reduce((sum, value) => sum + value, 0);
             const selectionTotal = rooms.reduce<number | null>((total, room) => {
               if (total === null || !selection[room.key]) return total;
@@ -350,29 +354,37 @@ export function TourHotelFilter({
                           {!offer.isAvailable || offer.capacityRemaining === 0 ? "تکمیل ظرفیت" : offer.capacityRemaining === null ? "ظرفیت موجود" : `${offer.capacityRemaining.toLocaleString("fa-IR")} اتاق باقی‌مانده`}
                         </span></>}
                   rates={<div className={hotelStyles.rateGrid} aria-label="نرخ‌های اتاق و مسافر">
-                    {rooms.filter((room) => room.key !== "extra" || Number(offer.extraPrice) > 0).map((room) => {
-                      const available = offer.isAvailable && offer.capacityRemaining !== 0 && Number(offer[room.price]) > 0;
-                      const selectedQuantity = selection[room.key];
-                      const displayedQuantity = room.key === "double" ? selectedQuantity * 2 : selectedQuantity;
-                      const decrementLabel = room.key === "double" ? "کم کردن ۲ نفر از اتاق دوتخته" : `کم کردن ${room.label}`;
-                      const incrementLabel = room.key === "double" ? "افزودن ۲ نفر به اتاق دوتخته" : `افزودن ${room.label}`;
+                    {showRooms.map((room) => {
+                      const available = availableRooms.includes(room);
                       return (
-                        <div className={hotelStyles.rateTile} data-active={selectedQuantity > 0} data-unavailable={!available} key={room.key}>
+                        <div className={hotelStyles.rateTile} data-primary={room.key === "double" && available} data-active={selection[room.key] > 0} data-unavailable={!available} key={room.key}>
                           <p className={hotelStyles.rateLabel}>{room.label}{room.key === "double" ? " (۲ نفر)" : ""}</p>
                           <div className={hotelStyles.ratePrice}>
                             {available ? <RoomPrice offer={offer} room={room} /> : <span className="font-bold text-muted">ناموجود</span>}
-                          </div>
-                          <div className={hotelStyles.rateControl}>
-                            <button aria-label={decrementLabel} className="hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-35" disabled={!available || selectedQuantity === 0} onClick={() => updateQuantity(offer.id, room.key, -1)} type="button">−</button>
-                            <output aria-label={room.key === "double" ? "تعداد مسافر اتاق دوتخته" : `تعداد ${room.label}`}>{displayedQuantity.toLocaleString("fa-IR")}</output>
-                            <button aria-label={incrementLabel} className="hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-35" disabled={!available || selectedQuantity >= 20} onClick={() => updateQuantity(offer.id, room.key, 1)} type="button">+</button>
                           </div>
                         </div>
                       );
                     })}
                   </div>} />
-                <div className="border-t border-border bg-surface-muted/40 p-3">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
+                {availableRooms.length ? (
+                  <details className={hotelStyles.booking} data-hotel-booking>
+                    <summary>انتخاب اتاق و رزرو</summary>
+                    <div className={hotelStyles.bookingBody}>
+                      <div className={hotelStyles.rateGrid} aria-label="تعداد مسافران">
+                        {availableRooms.map(room => {
+                          const quantity = selection[room.key];
+                          const double = room.key === "double";
+                          return <div className={hotelStyles.rateTile} data-active={quantity > 0} key={room.key}>
+                            <p className={hotelStyles.rateLabel}>{room.label}</p>
+                            <div className={hotelStyles.rateControl}>
+                              <button aria-label={double ? "کم کردن ۲ نفر از اتاق دوتخته" : `کم کردن ${room.label}`} className="hover:bg-surface-muted disabled:opacity-35" disabled={!quantity} onClick={() => updateQuantity(offer.id, room.key, -1)} type="button">−</button>
+                              <output aria-label={double ? "تعداد مسافر اتاق دوتخته" : `تعداد ${room.label}`}>{(double ? quantity * 2 : quantity).toLocaleString("fa-IR")}</output>
+                              <button aria-label={double ? "افزودن ۲ نفر به اتاق دوتخته" : `افزودن ${room.label}`} className="hover:bg-surface-muted disabled:opacity-35" disabled={quantity >= 20} onClick={() => updateQuantity(offer.id, room.key, 1)} type="button">+</button>
+                            </div>
+                          </div>;
+                        })}
+                      </div>
+                      <div className="flex flex-wrap items-center justify-between gap-3">
                     {selectedCount ? (
                       <div className="rounded-2xl bg-gradient-to-l from-[#f12b75] to-[#ff6da3] px-4 py-3 text-sm text-white shadow-[0_10px_20px_rgba(241,43,117,.2)]">
                         <strong>{"\u062c\u0645\u0639 \u0642\u0627\u0628\u0644 \u067e\u0631\u062f\u0627\u062e\u062a: "}</strong>
@@ -382,8 +394,10 @@ export function TourHotelFilter({
                     ) : null}
                     <p className="text-xs text-muted">شمارنده اتاق دوتخته بر اساس تعداد مسافر است و هر بار ۲ نفر تغییر می‌کند.</p>
                     <CartAddButton className="w-full sm:mr-auto sm:max-w-sm" buttonClassName="!rounded-2xl !bg-[#f12b75] !text-white hover:!bg-[#d91d62]" disabled={!selectedCount || !offer.isAvailable || offer.capacityRemaining === 0 || (offer.capacityRemaining !== null && selection.double + selection.single > offer.capacityRemaining)} idleLabel={!offer.isAvailable || offer.capacityRemaining === 0 ? "تکمیل ظرفیت" : "افزودن انتخاب‌ها به سبد خرید"} itemType="tour" roomSelection={selection} tourDepartureId={offer.departure.id} tourHotelPriceId={offer.id} tourId={tourId} />
-                  </div>
-                </div>
+                      </div>
+                    </div>
+                  </details>
+                ) : <p className={hotelStyles.bookingUnavailable}>{!offer.isAvailable || offer.capacityRemaining === 0 ? "تکمیل ظرفیت" : "استعلام قیمت و ظرفیت"}</p>}
               </article>
             );
           })}

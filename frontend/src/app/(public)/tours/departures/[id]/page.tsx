@@ -7,6 +7,7 @@ import { AvinaDeparturePicker } from "../departure-picker";
 import { TourProfileFacts } from "@/components/content/tour-profile-facts";
 import { ClockIcon, LocationIcon, PlaneIcon, SuitcaseIcon } from "@/components/layout/site-icons";
 import { TourProfileHero } from "@/components/content/tour-profile-hero";
+import tourStyles from "@/components/content/structured-tour-content.module.css";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Container } from "@/components/ui/container";
@@ -60,7 +61,7 @@ export default async function DepartureProfile({ params }: { params: Promise<{ i
       image={image && <img src={image} alt="" referrerPolicy="no-referrer" className="absolute inset-0 h-full w-full object-cover" />}
       badges={<p>{tour.outbound.originName} به {tour.outbound.destinationName}</p>}
       actions={<Link href="#tour-dates" className="rounded-xl bg-white px-4 py-3 font-bold text-brand">{formatPersianDate(tour.startsOn)} تا {formatPersianDate(tour.endsOn)}</Link>} />
-    <Container className="relative z-10 -mt-4 space-y-5 pb-14">
+    <Container className={`relative z-10 -mt-4 space-y-5 pb-14 ${tourStyles.profileContent}`}>
     <TourProfileFacts facts={[
       { label: "مقصد", value: tour.outbound.destinationName, icon: <LocationIcon className="size-5" /> },
       { label: "تاریخ حرکت", value: formatPersianDate(tour.startsOn), icon: <ClockIcon className="size-5" /> },

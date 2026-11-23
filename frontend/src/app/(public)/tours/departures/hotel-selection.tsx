@@ -25,18 +25,18 @@ function HotelRates({ rates, hotelName }: { rates: Departure["rates"]; hotelName
     }
   }
   if (!rates.length) return <p className="text-sm text-muted">نرخ این هتل اعلام نشده است.</p>;
+  const choices = rates.map((rate, index) => {
+    const count = counts[index] || 0;
+    const double = rate.kind === "double";
+    const room = double ? "اتاق دوتخته (۲ نفر)" : rate.kind === "single" ? "اتاق یک‌تخته" : labels[rate.kind] || rate.kind;
+    const priced = rate.total.length > 0 && rate.total.every(part => Number.isFinite(Number(part.amount)));
+    return { rate, index, count, double, room, priced };
+  });
+  const pricedChoices = choices.filter(choice => choice.priced);
   return <>
     <div className={hotelStyles.rateGrid} aria-label="نرخ‌های اتاق و مسافر">
-      {rates.map((rate, index) => {
-        const count = counts[index] || 0;
-        const double = rate.kind === "double";
-        const room = double ? "اتاق دوتخته (۲ نفر)" : rate.kind === "single" ? "اتاق یک‌تخته" : labels[rate.kind] || rate.kind;
-        const label = [room, rate.roomTypeName, hotelName].filter(Boolean).join("، ");
-        const priced = rate.total.length > 0 && rate.total.every(p => Number.isFinite(Number(p.amount)));
-        const adjust = (delta: number) => setCounts(current => ({
-          ...current, [index]: Math.max(0, Math.min(20, (current[index] || 0) + delta)),
-        }));
-        return <div key={index} className={hotelStyles.rateTile} data-active={count > 0} data-unavailable={!priced}>
+      {choices.map(({ rate, index, count, double, room, priced }) => (
+        <div key={index} className={hotelStyles.rateTile} data-primary={double && priced} data-active={count > 0} data-unavailable={!priced}>
           <p className={hotelStyles.rateLabel}>{room}</p>
           {rate.roomTypeName && <p className={hotelStyles.rateMeta}>{rate.roomTypeName}</p>}
           <div className={hotelStyles.ratePrice}>
@@ -45,17 +45,33 @@ function HotelRates({ rates, hotelName }: { rates: Departure["rates"]; hotelName
               {[rate.hotel.length ? "هتل " + priceText(rate.hotel) : "", rate.flight.length ? "پرواز " + priceText(rate.flight) : ""].filter(Boolean).join(" + ")}
             </span>}
           </div>
-          <div className={hotelStyles.rateControl}>
-            <button type="button" aria-label={"کم کردن " + label} onClick={() => adjust(-1)} disabled={!priced || !count} className="disabled:opacity-35">−</button>
-            <output aria-label={"تعداد مسافران " + label}>{(count * (double ? 2 : 1)).toLocaleString("fa-IR")}</output>
-            <button type="button" aria-label={"افزودن " + label} onClick={() => adjust(1)} disabled={!priced || count >= 20} className="disabled:opacity-35">+</button>
-          </div>
-        </div>;
-      })}
+        </div>
+      ))}
     </div>
-    {totals.size > 0 && <output aria-live="polite" className="block rounded-xl bg-[#fff0f6] p-3 font-bold text-brand">
-      جمع انتخاب‌ها {priceText([...totals].map(([currencyCode, amount]) => ({ currencyCode, amount: String(amount) })))}
-    </output>}
+    {pricedChoices.length > 0 && <details className={`${hotelStyles.booking} mt-2 !mx-0 !mb-0`}>
+      <summary>محاسبه مبلغ سفر</summary>
+      <div className={hotelStyles.bookingBody}>
+        <div className={hotelStyles.rateGrid}>
+          {pricedChoices.map(({ rate, index, count, double, room }) => {
+            const label = [room, rate.roomTypeName, hotelName].filter(Boolean).join("، ");
+            const adjust = (delta: number) => setCounts(current => ({
+              ...current, [index]: Math.max(0, Math.min(20, (current[index] || 0) + delta)),
+            }));
+            return <div key={index} className={hotelStyles.rateTile} data-active={count > 0}>
+              <p className={hotelStyles.rateLabel}>{[room, rate.roomTypeName].filter(Boolean).join("، ")}</p>
+              <div className={hotelStyles.rateControl}>
+                <button type="button" aria-label={"کم کردن " + label} onClick={() => adjust(-1)} disabled={!count} className="disabled:opacity-35">−</button>
+                <output aria-label={"تعداد مسافران " + label}>{(count * (double ? 2 : 1)).toLocaleString("fa-IR")}</output>
+                <button type="button" aria-label={"افزودن " + label} onClick={() => adjust(1)} disabled={count >= 20} className="disabled:opacity-35">+</button>
+              </div>
+            </div>;
+          })}
+        </div>
+        {totals.size > 0 && <output aria-live="polite" className="block rounded-xl bg-[#fff0f6] p-3 font-bold text-brand">
+          جمع انتخاب‌ها {priceText([...totals].map(([currencyCode, amount]) => ({ currencyCode, amount: String(amount) })))}
+        </output>}
+      </div>
+    </details>}
   </>;
 }
 
