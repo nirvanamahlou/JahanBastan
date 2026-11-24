@@ -20,7 +20,7 @@
   height: 38px;
   overflow: hidden;
 }
-.bar > .logoMark.logoMark > :global(img.brand-logo) {
+.bar.bar > .logoMark.logoMark > :global(img.brand-logo) {
   position: absolute;
   top: -6px;
   left: -25px;
