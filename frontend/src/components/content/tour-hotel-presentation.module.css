@@ -96,8 +96,8 @@
   color: var(--brand);
   text-align: center;
 }
-.rateTile[data-active="true"] { border-color: var(--accent-strong); background: color-mix(in srgb, var(--accent-strong) 9%, var(--surface)); }
-.rateTile[data-primary="true"]:not([data-active="true"]) { border-color: #eab4cd; background: color-mix(in srgb, #db3c7d 8%, var(--surface)); }
+.rateTile[data-active="true"] { border-color: #7ba0c9; background: color-mix(in srgb, #4278b5 12%, var(--surface)); }
+.rateTile[data-primary="true"]:not([data-active="true"]) { border-color: #b8cee7; background: color-mix(in srgb, #4278b5 6%, var(--surface)); }
 .rateTile[data-unavailable="true"] { border-style: dashed; }
 .rateLabel { color: var(--muted); font-size: .62rem; font-weight: 700; line-height: 1.55; overflow-wrap: anywhere; }
 .ratePrice { display: grid; align-content: center; min-height: 2.2rem; font-size: .68rem; line-height: 1.5; overflow-wrap: anywhere; }
@@ -115,6 +115,11 @@
   font-size: .68rem;
 }
 .rateControl button { display: grid; flex: 1; min-width: 1.45rem; min-height: 1.75rem; place-items: center; font-weight: 750; }
+.rateControl button:not(:disabled):hover {
+  background-color: #e0ebf8 !important;
+  color: #102747 !important;
+  box-shadow: none !important;
+}
 .rateControl output { min-width: 1.15rem; text-align: center; font-weight: 700; }
 
 .booking { margin: 0 .8rem .75rem; }
@@ -151,7 +156,7 @@
   align-items: center;
   justify-content: space-between;
   gap: .65rem;
-  padding: .7rem .8rem;
+  padding: .45rem .8rem;
   border-block-start: 1px solid var(--border);
 }
 .bookingUnavailable { margin: 0 .8rem .75rem; padding: .45rem; border-radius: .5rem; background: var(--surface-muted); color: var(--muted); font-size: .69rem; text-align: center; }

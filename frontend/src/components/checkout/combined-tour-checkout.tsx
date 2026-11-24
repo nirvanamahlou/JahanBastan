@@ -10,14 +10,15 @@ import { PUBLIC_API_BASE_URL } from "@/lib/api/client";
 import { getTourPassengerCounts } from "@/lib/tour-passenger-counts";
 
 type Props = {
-  combinedDeparturePriceId: number;
+  combinedDeparturePriceId?: number;
+  tourHotelPriceId?: number;
   departureId: number;
   onClose: () => void;
   roomSelection: Record<string, number>;
   tourId: number;
 };
 
-export function CombinedTourCheckout({ combinedDeparturePriceId, departureId, onClose, roomSelection, tourId }: Props) {
+export function CombinedTourCheckout({ combinedDeparturePriceId, departureId, onClose, roomSelection, tourHotelPriceId, tourId }: Props) {
   const [passengers, setPassengers] = useState<PassengerCheckoutData[]>([]);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [signIn, setSignIn] = useState(false);
@@ -36,7 +37,7 @@ export function CombinedTourCheckout({ combinedDeparturePriceId, departureId, on
         credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          combinedSelection: { itemType: "tour", tourId, tourDepartureId: departureId, combinedDeparturePriceId, roomSelection },
+          tourSelection: { itemType: "tour", tourId, tourDepartureId: departureId, combinedDeparturePriceId, tourHotelPriceId, roomSelection },
           termsAccepted,
           passengers: passengers.map((passenger) => ({
             ...passenger,

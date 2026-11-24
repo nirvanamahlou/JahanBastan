@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { DeparturePicker } from "./departure-picker";
 
 import { TourHotelPresentation } from "./tour-hotel-presentation";
@@ -9,7 +11,8 @@ import { useEffect, useMemo, useState } from "react";
 import { HotelAmenities } from "@/components/content/hotel-amenities";
 import { HotelLocationMap } from "@/components/content/hotel-location-map";
 import { SiteSelect } from "@/components/ui/site-select";
-import { CartAddButton } from "@/components/customer-commerce-actions";
+import { CombinedTourCheckout } from "@/components/checkout/combined-tour-checkout";
+import { useOnlineSalesEnabled } from "@/components/online-sales-provider";
 import { CloseIcon, SearchIcon } from "@/components/layout/site-icons";
 import { PUBLIC_API_BASE_URL } from "@/lib/api/client";
 import { formatCurrency } from "@/lib/currency";
@@ -178,6 +181,8 @@ export function TourHotelFilter({
   const maximumRangeValue = Math.max(minimumRangeValue, Math.min(Number(maximumTotal) || priceRangeLimit, priceRangeLimit));
   const minimumRangePercent = (minimumRangeValue / priceRangeLimit) * 100;
   const maximumRangePercent = (maximumRangeValue / priceRangeLimit) * 100;
+  const onlineSalesEnabled = useOnlineSalesEnabled();
+  const [checkoutOfferId, setCheckoutOfferId] = useState<number | null>(null);
   const [selections, setSelections] = useState<Record<number, RoomSelection>>({});
   const faqItems = faqs ?? [];
 
@@ -365,7 +370,7 @@ export function TourHotelFilter({
               return total + (roomAmount * passengerFactor + flightAmount * passengerFactor) * selection[room.key];
             }, 0);
             return (
-              <article className="min-w-0 overflow-hidden rounded-[1.75rem] border border-[#ffd1e3] bg-white shadow-[0_16px_40px_rgba(241,43,117,.10)]" key={offer.id}>
+              <article className="min-w-0 overflow-hidden rounded-2xl border border-border bg-surface shadow-[0_8px_24px_rgba(16,39,71,.08)]" key={offer.id}>
                 <TourHotelPresentation name={offer.hotel.name} href={`/hotels/${offer.hotel.slug}/?tour=${encodeURIComponent(tourSlug)}`}
                   images={[...new Set([offer.hotel.imageId,...(offer.hotel.galleryImageIds ?? [])])].filter(Boolean).map(id => `${PUBLIC_API_BASE_URL}/media/${id}`)}
                   location={[offer.hotel.region,destination,country].filter(Boolean).join("، ")}
@@ -398,18 +403,22 @@ export function TourHotelFilter({
                       );
                     })}
                   </div>} />
-                {canSelectRoom ? (
+                {canSelectRoom && roomCount > 0 ? (
                   <div className={hotelStyles.inlineBooking} data-inline-hotel-booking>
-                    {roomCount ? (
-                      <div className="rounded-2xl bg-gradient-to-l from-[#f12b75] to-[#ff6da3] px-4 py-3 text-sm text-white shadow-[0_10px_20px_rgba(241,43,117,.2)]">
-                        <strong>{"\u062c\u0645\u0639 \u0642\u0627\u0628\u0644 \u067e\u0631\u062f\u0627\u062e\u062a: "}</strong>
-                        {selectionTotal === null ? "\u0646\u0631\u062e \u0627\u0631\u0632 \u0628\u0631\u0627\u06cc \u0645\u062d\u0627\u0633\u0628\u0647 \u0646\u0647\u0627\u06cc\u06cc \u0646\u06cc\u0627\u0632 \u0627\u0633\u062a." : formatCurrency(selectionTotal, "IRT")}
-                        {selection.childWithoutBed ? <span className="mr-2 text-xs text-white/75">{isForeignTourPrice(offer.childWithoutBedCurrency) ? "به نرخ ارزی کودک بدون تخت، هزینه پرواز کودک افزوده شده است." : "نرخ تومانی کودک بدون تخت نهایی است و هزینه پرواز جداگانه ندارد."}</span> : null}
-                      </div>
-                    ) : <p className="text-xs text-muted">ابتدا یک اتاق یک‌تخته یا دوتخته انتخاب کنید.</p>}
-                    <CartAddButton className="w-full sm:mr-auto sm:max-w-sm" buttonClassName="!rounded-2xl !bg-[#f12b75] !text-white hover:!bg-[#d91d62]" disabled={!roomCount || (offer.capacityRemaining !== null && roomCount > offer.capacityRemaining)} idleLabel="افزودن انتخاب‌ها به سبد خرید" itemType="tour" roomSelection={selection} tourDepartureId={offer.departure.id} tourHotelPriceId={offer.id} tourId={tourId} />
+                    <p className="text-xs font-bold text-brand">جمع قابل پرداخت: {selectionTotal === null ? "نیازمند محاسبهٔ نرخ ارز" : formatCurrency(selectionTotal, "IRT")}</p>
+                    {onlineSalesEnabled ? (
+                      <button className="account-primary min-h-10 w-full rounded-lg bg-brand px-3 text-xs font-bold text-white disabled:opacity-50 sm:w-auto"
+                        disabled={Object.values(selection).reduce((total, value) => total + value, selection.double) > 20}
+                        onClick={() => setCheckoutOfferId(offer.id)} type="button">
+                        خرید و ادامه ورود اطلاعات مسافران
+                      </button>
+                    ) : <Link className="account-primary rounded-lg bg-brand px-3 py-2 text-xs font-bold text-white" href="/contact/">تماس با کارشناسان</Link>}
                   </div>
-                ) : <p className={hotelStyles.bookingUnavailable}>{!offer.isAvailable || offer.capacityRemaining === 0 ? "تکمیل ظرفیت" : "استعلام قیمت و ظرفیت"}</p>}
+                ) : !canSelectRoom ? <p className={hotelStyles.bookingUnavailable}>{!offer.isAvailable || offer.capacityRemaining === 0 ? "تکمیل ظرفیت" : "استعلام قیمت و ظرفیت"}</p> : null}
+                {checkoutOfferId === offer.id && roomCount > 0 && canSelectRoom ? (
+                  <CombinedTourCheckout departureId={offer.departure.id} onClose={() => setCheckoutOfferId(null)}
+                    roomSelection={selection} tourHotelPriceId={offer.id} tourId={tourId} />
+                ) : null}
               </article>
             );
           })}

@@ -4,7 +4,7 @@ from datetime import date, datetime, time
 from decimal import Decimal
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import AliasChoices, BaseModel, ConfigDict, Field, model_validator
 from pydantic.alias_generators import to_camel
 
 from app.schemas.account import CartItemCreate, CustomerPassengerWrite
@@ -58,16 +58,21 @@ class BookingCreate(BookingSchema):
     terms_accepted: bool = False
     terms_version: str = Field(default="checkout-1405-01", max_length=40)
     discount_code: str | None = Field(default=None, min_length=3, max_length=40)
-    combined_selection: CartItemCreate | None = None
+    tour_selection: CartItemCreate | None = Field(
+        default=None,
+        validation_alias=AliasChoices("tourSelection", "combinedSelection"),
+    )
 
     @model_validator(mode="after")
-    def validate_combined_selection(self) -> "BookingCreate":
-        selection = self.combined_selection
+    def validate_tour_selection(self) -> "BookingCreate":
+        selection = self.tour_selection
         if selection is None:
             return self
-        if selection.item_type != "tour" or selection.combined_departure_price_id is None:
-            raise ValueError("a dated combined tour selection is required")
+        if selection.item_type != "tour":
+            raise ValueError("a dated tour selection is required")
         rooms = selection.room_selection
+        if selection.tour_hotel_price_id is not None and not (rooms.get('double') or rooms.get('single')):
+            raise ValueError('a single or double room is required')
         expected = {
             "adult": 2 * rooms.get("double", 0) + rooms.get("single", 0) + rooms.get("extra", 0),
             "child": rooms.get("childWithBed", 0) + rooms.get("childWithoutBed", 0),

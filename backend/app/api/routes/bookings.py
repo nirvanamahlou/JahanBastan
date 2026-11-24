@@ -72,8 +72,8 @@ async def create_booking(
     try:
         direct_cart_id = None
         terms_version = payload.terms_version
-        if payload.combined_selection is not None:
-            selection = payload.combined_selection
+        if payload.tour_selection is not None:
+            selection = payload.tour_selection
             settings = await session.get(SiteSetting, 1)
             links = settings.social_links if settings else {}
             terms_version = links.get("checkoutTermsVersion", "checkout-1405-01")
@@ -82,16 +82,19 @@ async def create_booking(
             snapshot = CustomerCart(customer_id=customer.id, status="abandoned")
             session.add(snapshot)
             await session.flush()
-            item = await CustomerCommerceRepository(session).add_combined_tour(
-                customer.id,
-                selection.tour_id or 0,
-                selection.tour_departure_id or 0,
-                selection.combined_departure_price_id or 0,
-                selection.room_selection,
-                cart_id=snapshot.id,
-            )
+            commerce = CustomerCommerceRepository(session)
+            if selection.combined_departure_price_id is not None:
+                item = await commerce.add_combined_tour(
+                    customer.id, selection.tour_id or 0, selection.tour_departure_id or 0,
+                    selection.combined_departure_price_id, selection.room_selection, cart_id=snapshot.id,
+                )
+            else:
+                item = await commerce.add_tour(
+                    customer.id, selection.tour_id or 0, selection.tour_departure_id or 0,
+                    selection.tour_hotel_price_id or 0, selection.room_selection, cart_id=snapshot.id,
+                )
             if item is None:
-                raise ValueError("ترکیب انتخابی دیگر با این نرخ در دسترس نیست.")
+                raise ValueError("هتل انتخابی دیگر با این نرخ در دسترس نیست.")
             direct_cart_id = snapshot.id
         booking = await BookingRepository(session).create_from_cart(
             customer.id,
