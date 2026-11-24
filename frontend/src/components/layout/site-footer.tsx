@@ -69,9 +69,9 @@ export async function SiteFooter() {
 
   const isCommerceLink = (href: string) => /^\/(?:cart|payment)\/?(?:[?#]|$)/.test(href);
   const isTravelServiceLink = (href: string) => {
-    const url = new URL(href, "https://jahanbastan.ir");
-    return /^\/(?:hotels|services\/(?:flights|hotels|buses|trains))\/?$/.test(url.pathname) ||
-      (/^\/services\/?$/.test(url.pathname) && ["flight", "hotel", "bus", "train", "visa"].includes(url.searchParams.get("type") ?? ""));
+    const [pathname, query] = href.split("#", 1)[0].split("?", 2);
+    return /^\/(?:hotels|services\/(?:flights|hotels|buses|trains))\/?$/.test(pathname) ||
+      (/^\/services\/?$/.test(pathname) && ["flight", "hotel", "bus", "train", "visa"].includes(new URLSearchParams(query).get("type") ?? ""));
   };
   const quickLinks = siteConfig.footerLinks
     .map((item, index) => ({
