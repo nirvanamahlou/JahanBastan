@@ -326,7 +326,7 @@ export function AccountForm({ onAuthenticated, refreshAfterAuthentication = true
           </div>
 
           </>}
-          {isLogin && accountType === "customer" ? (
+          {!compact && isLogin && accountType === "customer" ? (
             <div className="mt-4 grid grid-cols-2 gap-2 rounded-2xl border border-border bg-white p-1.5" role="group" aria-label="روش ورود">
               <button
                 aria-pressed={method === "sms"}
@@ -349,7 +349,7 @@ export function AccountForm({ onAuthenticated, refreshAfterAuthentication = true
                 onClick={() => { setMethod("email"); setError(""); setNotice(""); }}
                 type="button"
               >
-                ورود با ایمیل
+                ورود با رمز عبور
               </button>
             </div>
           ) : null}
@@ -465,6 +465,14 @@ export function AccountForm({ onAuthenticated, refreshAfterAuthentication = true
 
           {compact ? (
             <div className="mt-5 flex flex-wrap gap-x-4 gap-y-2 border-t border-border pt-4 text-sm font-bold text-brand">
+              {isLogin && accountType === "customer" && (
+                <button type="button" onClick={() => {
+                  switchMode("login");
+                  if (method === "email") setMethod("sms");
+                }}>
+                  {method === "sms" ? "ورود با رمز عبور" : "ورود با شماره موبایل"}
+                </button>
+              )}
               {accountType === "agency" && (
                 <button type="button" onClick={() => switchMode(isLogin ? "register" : "login")}>
                   {isLogin ? "ثبت‌نام آژانس" : "بازگشت به ورود آژانس"}
