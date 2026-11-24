@@ -256,7 +256,11 @@
 .hotelListCard .hotelListFooter a { min-height: 2.5rem; padding-inline: .65rem; font-size: .75rem; }
 @media (max-width: 640px) {
   .hotelListCard[data-hotel-list-card] { gap: .55rem; padding: .5rem; }
-  .hotelListCard > .hotelListBody > :first-child { flex-wrap: wrap; gap: .3rem; }
+  .hotelListCard > .hotelListBody { display: contents; }
+  .hotelListPhoto { grid-column: 1; grid-row: 1 / 3; }
+  .hotelListBody > :first-child { grid-column: 2; grid-row: 1; flex-wrap: wrap; gap: .3rem; }
+  .hotelListSummary { grid-column: 2; grid-row: 2; }
+  .hotelListFooter { grid-column: 1 / -1; grid-row: 3; }
   .hotelListCard > .hotelListBody > :first-child > :first-child { max-width: 100%; }
   .hotelListCard .hotelListFooter > :last-child { flex-wrap: wrap; min-width: 0; flex-shrink: 1; }
 }
