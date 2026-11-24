@@ -43,7 +43,7 @@
 .countryPhoto img { object-fit: cover; }
 .countryCopy { display: flex; flex-direction: column; min-width: 0; padding: .65rem; }
 .countryCopy h3 { display: flex; flex-wrap: wrap; gap: .35rem; align-items: center; font-size: .9rem; font-weight: 750; }
-.countryCopy p { margin: .15rem 0 .4rem; color: #58708c; font-size: .6rem; }
+.countryFoot p { margin: 0; color: #58708c; font-size: .6rem; }
 .countryFoot {
   display: flex;
   align-items: center;

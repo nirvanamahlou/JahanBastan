@@ -29,9 +29,8 @@ export function HomepageServiceShowcase({ panels }: { panels: Record<string, Sho
         <div className={styles.countryPhoto}><ShowcaseImage src={country.imageUrl} sizes="(max-width:760px) 36vw, 160px" /></div>
         <div className={styles.countryCopy}>
           <h3><CountryFlag country={country.title} imageId={country.flagId} />{country.title}</h3>
-          <p>{country.subtitle}</p>
           <div className={styles.countryFoot}>
-            <span>{country.price ? <>از <b>{country.price}</b></> : "استعلام قیمت"}</span>
+            <p>{country.subtitle}</p>
             <span className={styles.countryArrow} aria-hidden="true">←</span>
           </div>
         </div>
