@@ -1,7 +1,6 @@
 "use client";
 
 import { FlightRouteCard } from "./flight-route-card";
-import { useRef } from "react";
 
 import { CartAddButton } from "@/components/customer-commerce-actions";
 import { RefundPolicyButton } from "@/components/content/refund-policy-button";
@@ -18,7 +17,6 @@ import { PUBLIC_API_BASE_URL } from "@/lib/api/client";
 import { formatBaggageAllowance } from "@/lib/baggage";
 import { formatCurrency } from "@/lib/currency";
 import { formatTravelDuration } from "@/lib/travel-duration";
-import { FlightDetailsDialog } from "./flight-details-dialog";
 
 type FlightResultCardProps = {
   id: number;
@@ -58,7 +56,6 @@ const airportLabel = (name: string, code: string | null) => code ? `${name} (${c
 
 export function FlightResultCard(props: FlightResultCardProps) {
   const selection = useTicketSelection();
-  const details = useRef<HTMLDialogElement>(null);
   const usesReturnLeg = props.direction === "return" && props.useReturnLeg;
   const baseOrigin = props.originAirport || props.origin || "فرودگاه مبدأ";
   const baseDestination = (
@@ -138,10 +135,10 @@ export function FlightResultCard(props: FlightResultCardProps) {
           <button
             aria-pressed={selected}
             className={`inline-flex min-h-10 flex-1 items-center justify-center rounded-xl px-4 text-sm font-black text-white transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent ${selected ? "bg-emerald-600 hover:bg-emerald-700" : "bg-accent-strong hover:-translate-y-0.5 hover:bg-brand"}`}
-            onClick={() => details.current?.showModal()}
+            onClick={selectTicket}
             type="button"
           >
-            {selected ? `${directionLabel} انتخاب شد` : "جزئیات پرواز و خرید"}
+            {selected ? `${directionLabel} انتخاب شد` : "انتخاب بلیت"}
           </button>
           </div>
         </div>
@@ -166,14 +163,6 @@ export function FlightResultCard(props: FlightResultCardProps) {
 
         </div>
       </div>
-      <FlightDetailsDialog actionLabel={`انتخاب ${directionLabel}`} dialogRef={details} onContinue={selectTicket} price={price} priceLabel="قیمت هر مسافر" title={`پرواز ${origin} به ${destination}`}>
-        <FlightRouteCard label={directionLabel} carrier={props.provider || ""}
-          logo={props.providerIconImageId ? `${PUBLIC_API_BASE_URL}/media/${props.providerIconImageId}` : undefined}
-          flightNumber={flightNumber} duration={travelDuration || undefined}
-          origin={{ city: origin, time: shownTime(departureTime) }} destination={{ city: destination, time: shownTime(arrivalTime) }}
-          baggage={props.baggage ? formatBaggageAllowance(props.baggage) : null} />
-        {props.refundPolicy ? <details className="rounded-xl border border-brand/15 p-3 text-sm"><summary className="cursor-pointer font-bold text-brand">قوانین استرداد</summary><p className="mt-2 whitespace-pre-line">{props.refundPolicy}</p></details> : null}
-      </FlightDetailsDialog>
     </article>
   );
 }

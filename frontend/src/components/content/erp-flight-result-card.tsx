@@ -24,7 +24,6 @@ import {
   type PendingErpFlightCheckout as PendingCheckout,
 } from "@/lib/erp-flight-checkout-recovery";
 import type { PassengerCounts } from "@/lib/tour-passenger-counts";
-import { FlightDetailsDialog } from "./flight-details-dialog";
 
 type Airport = { name?: string | null; code?: string | null };
 
@@ -148,7 +147,6 @@ export function ErpFlightResultCard({
   passengerCounts: PassengerCounts;
 }) {
   const [modalOpen, setModalOpen] = useState(false);
-  const details = useRef<HTMLDialogElement>(null);
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("");
@@ -168,11 +166,13 @@ export function ErpFlightResultCard({
   const quoteVersion = useRef<string | undefined>(undefined);
   const customerId = useRef<number | null>(null);
 
+  const selectionAnchor = "flight-" + flight.product_ids.map(encodeURIComponent).join("_");
+
   async function choose() {
     const session = await readCustomerSession().catch(() => null);
     if (!session?.ok) {
       router.push(
-        `/account/?next=${encodeURIComponent(window.location.pathname + window.location.search)}`,
+        `/account/?next=${encodeURIComponent(window.location.pathname + window.location.search + "#" + selectionAnchor)}`,
       );
       return;
     }
@@ -359,7 +359,7 @@ export function ErpFlightResultCard({
   const capacities = legs.map((leg) => leg.remaining_capacity);
   const seats = capacities.every((capacity): capacity is number => typeof capacity === "number") ? Math.min(...capacities) : null;
   return (
-    <article className="flight-interactive-panel overflow-hidden rounded-2xl border border-brand/15 bg-white shadow-sm">
+    <article id={selectionAnchor} className="flight-interactive-panel scroll-mt-28 target:ring-2 target:ring-brand overflow-hidden rounded-2xl border border-brand/15 bg-white shadow-sm">
       <div className="grid lg:grid-cols-[minmax(0,1fr)_10rem]">
         <div className="min-w-0 p-4">
           <p className="inline-flex items-center gap-2 rounded-full bg-brand/5 px-2.5 py-1 text-xs font-bold text-brand">
@@ -380,7 +380,7 @@ export function ErpFlightResultCard({
           ) : null}
           {result?.state === "draft" ? (
             <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-950">
-              <strong>درخواست پرواز ثبت شد.</strong> <a className="mr-2 font-bold underline" href="/cart/">مشاهده در سبد خرید</a>
+              <strong>درخواست پرواز ثبت شد.</strong> <a className="mr-2 font-bold underline" href="/account/?tab=trips">پیگیری در سفرهای من</a>
               <p className="mt-1">
                 شماره قرارداد:{" "}
                 <bdi dir="ltr">
@@ -388,7 +388,6 @@ export function ErpFlightResultCard({
                 </bdi>
               </p>
               <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-emerald-200 pt-3">
-                <button type="button" disabled className="rounded-lg border border-emerald-200 px-3 py-2 font-bold opacity-60">پرداخت آنلاین</button>
                 <span>{result.paymentMessage}</span>
               </div>
             </div>
@@ -402,9 +401,9 @@ export function ErpFlightResultCard({
           {seats !== null ? <span className="mt-2 text-xs font-bold text-muted">{number.format(seats)} صندلی باقی‌مانده</span> : null}
           <button
             className="mt-4 min-h-11 w-full rounded-xl bg-accent-strong px-4 text-sm font-black text-white disabled:opacity-60"
-            disabled={busy || Boolean(review) || result?.state === "draft"}
+            disabled={busy || modalOpen || Boolean(review) || result?.state === "draft"}
             onClick={() =>
-              result?.retryable ? void checkout() : details.current?.showModal()
+              result?.retryable ? void checkout() : void choose()
             }
             type="button"
           >
@@ -412,23 +411,10 @@ export function ErpFlightResultCard({
               ? "در حال ثبت پیش‌نویس…"
               : result?.state === "draft"
                 ? "پیش‌نویس ثبت شد"
-                : result?.retryable ? "تلاش دوباره" : "جزئیات پرواز و خرید"}
+                : result?.retryable ? "تلاش دوباره" : "انتخاب بلیت"}
           </button>
         </aside>
       </div>
-      <FlightDetailsDialog
-        actionLabel="انتخاب بلیت و ادامه"
-        dialogRef={details}
-        onContinue={() => void choose()}
-        price={formatCurrency(flight.amount, flight.currency)}
-        priceLabel={flight.return_leg ? "نرخ رفت‌وبرگشت یک بزرگسال" : "نرخ یک بزرگسال"}
-        title={`پرواز ${flight.origin} به ${flight.destination}`}
-      >
-        {legs.map((leg, index) => (
-          <FlightTimeline key={leg.product_id} detailed leg={leg} label={index === 0 ? "رفت" : "برگشت"} />
-        ))}
-        <p className="text-xs text-muted">ساعت‌ها به وقت تهران‌اند.</p>
-      </FlightDetailsDialog>
       {review && <dialog dir="rtl" ref={preview} aria-labelledby="flight-review-heading" onCancel={(event) => {
         event.preventDefault();
         if (!busy) { setReview(null); setReviewPassengers([]); }
@@ -441,7 +427,7 @@ export function ErpFlightResultCard({
           <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_18rem]">
             <div className="grid min-w-0 gap-4 rounded-2xl bg-white p-4">
               <h3 className="font-black text-brand">اطلاعات بلیت</h3>
-              {legs.map((leg, index) => <FlightTimeline key={leg.product_id} detailed leg={leg} label={index === 0 ? "رفت" : "برگشت"} />)}
+              <p className="text-sm text-muted">{flight.origin} ← {flight.destination} · {flightDate.format(new Date(flight.departure))}</p>
               <h3 className="font-black text-brand">مشخصات مسافران · {number.format(reviewPassengers.length)} نفر</h3>
               <div className="overflow-x-auto rounded-xl border border-border">
                 <table className="w-full min-w-[40rem] text-sm">
