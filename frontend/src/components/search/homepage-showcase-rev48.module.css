@@ -1,5 +1,6 @@
 .section { padding:1.25rem 0 0; color:#102747; background:#fff; }
 .panel { position:relative; width:calc(100% - 80px); max-width:var(--home-content-max, 90rem); margin:auto; padding:1.6rem 1.5rem; border:1px solid #edf0f5; border-radius:1.15rem; background:linear-gradient(135deg,#f8faff,#fff7fa); }
+#tour-countries, #tour-countries .panel { background:var(--background, #fff); }
 .heading { margin-bottom:1rem; padding-inline-end:8rem; }
 .heading > span { font-size:.65rem; color:#e23878; }
 .heading h2 { margin-top:.25rem; font-size:1.4rem; }
