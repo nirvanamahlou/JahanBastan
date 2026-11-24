@@ -25,14 +25,6 @@ const socialIcons = {
 } as const;
 
 const socialOrder = ["instagram", "telegram", "whatsapp"] as const;
-const defaultServiceLinks =
-  siteConfig.navigation.find((item) => item.href === "/services/")?.children ?? [
-    { label: "تور", href: "/tours/" }, { label: "هتل", href: "/hotels/" },
-    { label: "پرواز", href: "/services/flights/" }, { label: "اتوبوس", href: "/services/?type=bus" },
-    { label: "قطار", href: "/services/?type=train" }, { label: "ویزا", href: "/services/?type=visa" },
-  ];
-
-
 function safeInternalHref(value: string | undefined, fallback: string) {
   const candidate = value?.trim();
   return candidate?.startsWith("/") ? candidate : fallback;
@@ -68,7 +60,6 @@ export async function SiteFooter() {
       : normalizedSavedWorkingHours || siteConfig.businessHours,
   );
   const footerBrandTitle = values.footerBrandTitle?.trim() || siteName;
-  const footerServicesTitle = values.footerServicesTitle?.trim() || "خدمات سفر";
   const footerQuickTitle = values.footerQuickTitle?.trim() || "دسترسی سریع";
   const footerOfficeTitle =
     values.footerOfficeTitle?.trim() || `دفتر ${siteName}`;
@@ -77,22 +68,18 @@ export async function SiteFooter() {
     `© ${new Date().getFullYear().toLocaleString("fa-IR")} ${siteName}. تمامی حقوق محفوظ است.`;
 
   const isCommerceLink = (href: string) => /^\/(?:cart|payment)\/?(?:[?#]|$)/.test(href);
-  const serviceLinks = defaultServiceLinks.map((item, index) => ({
-    id: `footer-service-${index + 1}`,
-    label:
-      values[`footerService${index + 1}Label`]?.trim() || item.label,
-    href: safeInternalHref(
-      values[`footerService${index + 1}Url`],
-      item.href,
-    ),
-  })).filter((item) => !isCommerceLink(item.href));
+  const isTravelServiceLink = (href: string) => {
+    const url = new URL(href, "https://jahanbastan.ir");
+    return /^\/(?:hotels|services\/(?:flights|hotels|buses|trains))\/?$/.test(url.pathname) ||
+      (/^\/services\/?$/.test(url.pathname) && ["flight", "hotel", "bus", "train", "visa"].includes(url.searchParams.get("type") ?? ""));
+  };
   const quickLinks = siteConfig.footerLinks
     .map((item, index) => ({
       id: `footer-quick-${index + 1}`,
       label: values[`footerQuick${index + 1}Label`]?.trim() || item.label,
       href: safeInternalHref(values[`footerQuick${index + 1}Url`], item.href),
     }))
-    .filter((item) => item.href !== siteConfig.contactHref && !isCommerceLink(item.href))
+    .filter((item) => item.href !== siteConfig.contactHref && !isCommerceLink(item.href) && !isTravelServiceLink(item.href))
     .filter((item, index, items) =>
       items.findIndex(
         (candidate) => candidate.href === item.href || candidate.label === item.label,
@@ -120,7 +107,7 @@ export async function SiteFooter() {
     >
       <div className={styles.layout}>
 
-        <Container className={`${styles.main} grid grid-cols-1 gap-x-4 gap-y-2.5 md:grid-cols-2 lg:grid-cols-[1.15fr_1fr_1fr_1.15fr] xl:gap-x-5`}>
+        <Container className={styles.main}>
           <section aria-labelledby="footer-brand-title" className="min-w-0">
             <Link
               href="/"
@@ -182,24 +169,7 @@ export async function SiteFooter() {
             ) : null}
           </section>
 
-          <nav aria-label={footerServicesTitle} className="min-w-0 lg:border-l lg:pl-3 xl:pl-4">
-            <h2 className="font-black text-white">{footerServicesTitle}</h2>
-            <ul className={`${styles.links} mt-1.5 grid gap-x-2 gap-y-1 text-white/70`}>
-              {serviceLinks.map((item) => (
-                <li key={item.id}>
-                  <Link
-                    className="inline-flex items-center gap-1.5 transition hover:-translate-x-1 hover:text-white"
-                    href={item.href}
-                  >
-                    <span className="text-[#f079b0]" aria-hidden="true">←</span>
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
-
-          <nav aria-label={footerQuickTitle} className="min-w-0 lg:border-l lg:pl-3 xl:pl-4">
+          <nav aria-label={footerQuickTitle} className={styles.column}>
             <h2 className="font-black text-white">{footerQuickTitle}</h2>
             <ul className={`${styles.links} mt-1.5 grid gap-x-2 gap-y-1 text-white/70`}>
               {quickLinks.map((item) => (
@@ -221,7 +191,7 @@ export async function SiteFooter() {
             </ul>
           </nav>
 
-          <section aria-labelledby="footer-office-title" className="min-w-0">
+          <section aria-labelledby="footer-office-title" className={styles.column}>
             <h2 id="footer-office-title" className="font-black text-white">
               {footerOfficeTitle}
             </h2>
@@ -249,7 +219,7 @@ export async function SiteFooter() {
         </Container>
 
         <div className="footer-bottom border-t border-white/15 bg-[#031d55]/65">
-          <Container className="flex flex-col gap-1.5 py-1 text-xs text-white/60 sm:flex-row sm:items-center sm:justify-between">
+          <Container className="flex flex-col gap-2 py-2 text-xs text-white/60 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
               <p>{footerCopyright}</p>
               <nav aria-label="پیوندهای حقوقی" className="flex flex-wrap gap-x-1.5 gap-y-1 sm:gap-x-3">
