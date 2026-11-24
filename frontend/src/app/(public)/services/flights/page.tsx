@@ -416,11 +416,11 @@ export default async function FlightsPage({ searchParams }: { searchParams: Prom
 
   return (
     <>
-      <PageIntro compact bannerSrc={shouldShowResults ? undefined : "/images/service-banners/flight-panorama-hd.webp"}
+      {!shouldShowResults && <PageIntro compact bannerSrc="/images/service-banners/flight-panorama-hd.webp"
         eyebrow="خدمات سفر / پرواز"
         title={country ? `پروازهای ${country}` : "پرواز بر اساس کشور"}
-      />
-      <section className={shouldShowResults ? "py-4 sm:py-6" : "py-8 sm:py-12"}>
+      />}
+      <section className={shouldShowResults ? "pt-2 pb-5 sm:pt-3" : "py-8 sm:py-12"}>
         <Container className={shouldShowResults ? `${catalogStyles.catalogContainer} ${catalogStyles.flightResultsContainer}` : catalogStyles.catalogContainer}>
           <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: "خدمات سفر", href: "/services/" }, { label: "پرواز" }]} />
 
@@ -459,7 +459,7 @@ export default async function FlightsPage({ searchParams }: { searchParams: Prom
             <div>
               <div className="depth-box mb-4 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border bg-surface p-4">
                 <div>
-                  <h2 className="text-xl font-black text-brand">{origin && destination ? `پرواز ${origin} به ${destination}` : "پروازهای موجود"}</h2>
+                  <h1 className="text-xl font-black text-brand">{origin && destination ? `پرواز ${origin} به ${destination}` : country ? `پروازهای ${country}` : "پروازهای موجود"}</h1>
                   <p className="mt-1 text-sm text-muted">{(flightTickets.length + visibleErpFlights.length).toLocaleString("fa-IR")} مورد پیدا شد{departureFrom ? ` · ${formatPersianDate(departureFrom)}` : ""}</p>
                 </div>
                 <LiveFlightForm>
