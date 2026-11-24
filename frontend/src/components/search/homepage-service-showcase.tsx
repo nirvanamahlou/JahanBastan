@@ -21,7 +21,7 @@ function CountryCard({ country }: { country: ShowcaseCard }) {
         <h3><CountryFlag country={country.title} imageId={country.flagId} />{country.title}</h3>
         <div className={styles.countryFoot}>
           <p>{country.subtitle}</p>
-          <span className={styles.countryArrow} aria-hidden="true">←</span>
+          <span className={styles.countryArrow} aria-hidden="true">â†گ</span>
         </div>
       </div>
     </Link>
@@ -66,17 +66,17 @@ function HotelCountryStrip({ cards }: { cards: ShowcaseCard[] }) {
   }
 
   return (
-    <>
-      <div id={id} ref={strip} dir="rtl" className={styles.hotelStrip} role="region" aria-label="کشورهای هتل">
+    <div className={styles.stripLayout} dir="rtl">
+      <div id={id} ref={strip} dir="rtl" className={styles.hotelStrip} role="region" aria-label="ع©ط´ظˆط±ظ‡ط§غŒ ظ‡طھظ„">
         {cards.map(country => <CountryCard key={country.id} country={country} />)}
       </div>
       {edges.previous || edges.next ? (
         <div className={styles.stripControls}>
-          <button type="button" aria-label="کشور قبلی" aria-controls={id} disabled={!edges.previous} onClick={() => move(-1)}><span dir="ltr" aria-hidden="true">→</span></button>
-          <button type="button" aria-label="کشور بعدی" aria-controls={id} disabled={!edges.next} onClick={() => move(1)}><span dir="ltr" aria-hidden="true">←</span></button>
+          <button type="button" aria-label="ع©ط´ظˆط± ظ‚ط¨ظ„غŒ" aria-controls={id} disabled={!edges.previous} onClick={() => move(-1)}><span dir="ltr" aria-hidden="true">â†’</span></button>
+          <button type="button" aria-label="ع©ط´ظˆط± ط¨ط¹ط¯غŒ" aria-controls={id} disabled={!edges.next} onClick={() => move(1)}><span dir="ltr" aria-hidden="true">â†گ</span></button>
         </div>
       ) : null}
-    </>
+    </div>
   );
 }
 
@@ -90,16 +90,16 @@ export function HomepageServiceShowcase({ panels }: { panels: Record<string, Sho
   const isTour = serviceType === "tour";
   return <section id={isTour ? "tour-countries" : undefined} data-service-showcase={serviceType} className={styles.section}><div className={styles.panel}>
     <header className={styles.heading}><span>{panel.eyebrow}</span><h2>{panel.title}</h2>{panel.description ? <p>{panel.description}</p> : null}</header>
-    {!isTour ? <div className={styles.controls}><Link href={panel.href}>همه کشورها</Link></div> : null}
+    {!isTour ? <div className={styles.controls}><Link href={panel.href}>ظ‡ظ…ظ‡ ع©ط´ظˆط±ظ‡ط§</Link></div> : null}
     {isTour ? <div id="tour-country-grid" className={styles.countryGrid} data-expanded={expanded}>
       {cards.map(country => <CountryCard key={country.id} country={country} />)}
     </div> : serviceType === "hotel" ? <HotelCountryStrip cards={cards} /> : <div className={styles.tiles}>
       {cards.slice(0, expanded ? undefined : 6).map((card) => <Link href={card.href} key={card.id} className={styles.tile}>
         <ShowcaseImage src={card.imageUrl} sizes="(max-width:760px) 45vw, 30vw" />
-        <div className={styles.overlay}><h3>{card.title}</h3>{card.subtitle ? <p>{card.subtitle}</p> : null}<span className={styles.tileAction}>←</span></div>
+        <div className={styles.overlay}><h3>{card.title}</h3>{card.subtitle ? <p>{card.subtitle}</p> : null}<span className={styles.tileAction}>â†گ</span></div>
       </Link>)}
     </div>}
-    {!cards.length ? <p className={styles.empty}>در حال حاضر گزینه‌ای برای این بخش منتشر نشده است.</p> : null}
+    {!cards.length ? <p className={styles.empty}>ط¯ط± ط­ط§ظ„ ط­ط§ط¶ط± ع¯ط²غŒظ†ظ‡â€Œط§غŒ ط¨ط±ط§غŒ ط§غŒظ† ط¨ط®ط´ ظ…ظ†طھط´ط± ظ†ط´ط¯ظ‡ ط§ط³طھ.</p> : null}
     {(isTour ? cards.length > 2 : serviceType !== "hotel" && cards.length > 6) ? (
       <button
         type="button"
@@ -108,7 +108,7 @@ export function HomepageServiceShowcase({ panels }: { panels: Record<string, Sho
         aria-expanded={expanded}
         onClick={() => setExpandedService(expanded ? null : serviceType)}
       >
-        {expanded ? "نمایش کمتر" : isTour ? "نمایش بیشتر" : "نمایش کشورهای بیشتر"}
+        {expanded ? "ظ†ظ…ط§غŒط´ ع©ظ…طھط±" : isTour ? "ظ†ظ…ط§غŒط´ ط¨غŒط´طھط±" : "ظ†ظ…ط§غŒط´ ع©ط´ظˆط±ظ‡ط§غŒ ط¨غŒط´طھط±"}
       </button>
     ) : null}
   </div></section>;
@@ -118,13 +118,13 @@ export function HomepageServiceRecommendations({ panels }: { panels: Record<stri
   const { serviceType } = useHomepageSearchService();
   const panel = panels[serviceType];
   if (!panel) return null;
-  const titles: Record<string, string> = { tour: "تورهای پیشنهادی", hotel: "هتل‌های پیشنهادی", visa: "ویزاهای پیشنهادی", flight: "پروازهای پیشنهادی", train: "قطارهای پیشنهادی", bus: "سفرهای پیشنهادی اتوبوس" };
+  const titles: Record<string, string> = { tour: "طھظˆط±ظ‡ط§غŒ ظ¾غŒط´ظ†ظ‡ط§ط¯غŒ", hotel: "ظ‡طھظ„â€Œظ‡ط§غŒ ظ¾غŒط´ظ†ظ‡ط§ط¯غŒ", visa: "ظˆغŒط²ط§ظ‡ط§غŒ ظ¾غŒط´ظ†ظ‡ط§ط¯غŒ", flight: "ظ¾ط±ظˆط§ط²ظ‡ط§غŒ ظ¾غŒط´ظ†ظ‡ط§ط¯غŒ", train: "ظ‚ط·ط§ط±ظ‡ط§غŒ ظ¾غŒط´ظ†ظ‡ط§ط¯غŒ", bus: "ط³ظپط±ظ‡ط§غŒ ظ¾غŒط´ظ†ظ‡ط§ط¯غŒ ط§طھظˆط¨ظˆط³" };
   return <section data-service-recommendations={serviceType} aria-labelledby="home-recommendations-title" className={styles.topRecommendations}>
-    <div className={styles.recommendationHeading}><h2 id="home-recommendations-title">{titles[serviceType]}</h2><Link href={panel.href}>مشاهده همه ←</Link></div>
+    <div className={styles.recommendationHeading}><h2 id="home-recommendations-title">{titles[serviceType]}</h2><Link href={panel.href}>ظ…ط´ط§ظ‡ط¯ظ‡ ظ‡ظ…ظ‡ â†گ</Link></div>
     <div className={styles.recommendations} data-web-card-grid="recommendations">{panel.recommendations.slice(0, 3).map((card) => <article key={card.id} className={styles.recommendation}>
-      <div className={styles.copy}><h3><Link href={card.href}>{card.title}</Link></h3>{card.stars ? <span className={styles.stars} aria-label={`${card.stars} ستاره`}>{"★".repeat(Math.min(5, card.stars))}</span> : null}<p>{card.subtitle}</p>{card.price ? <strong>{card.price}</strong> : null}<Link className={styles.primary} href={card.href}>{panel.action} ←</Link></div>
+      <div className={styles.copy}><h3><Link href={card.href}>{card.title}</Link></h3>{card.stars ? <span className={styles.stars} aria-label={`${card.stars} ط³طھط§ط±ظ‡`}>{"âک…".repeat(Math.min(5, card.stars))}</span> : null}<p>{card.subtitle}</p>{card.price ? <strong>{card.price}</strong> : null}<Link className={styles.primary} href={card.href}>{panel.action} â†گ</Link></div>
       <Link href={card.href} className={styles.thumbnail} aria-label={card.title}><ShowcaseImage src={card.imageUrl} sizes="(max-width: 767px) 38vw, (max-width: 1199px) 45vw, 440px" /></Link>
     </article>)}</div>
-    {!panel.recommendations.length ? <p className={styles.empty}>در حال حاضر پیشنهادی برای این بخش موجود نیست.</p> : null}
+    {!panel.recommendations.length ? <p className={styles.empty}>ط¯ط± ط­ط§ظ„ ط­ط§ط¶ط± ظ¾غŒط´ظ†ظ‡ط§ط¯غŒ ط¨ط±ط§غŒ ط§غŒظ† ط¨ط®ط´ ظ…ظˆط¬ظˆط¯ ظ†غŒط³طھ.</p> : null}
   </section>;
 }

@@ -1,6 +1,6 @@
 .section { padding:1.25rem 0 0; color:#102747; background:#fff; }
 .panel { position:relative; width:calc(100% - 80px); max-width:var(--home-content-max, 90rem); margin:auto; padding:1.6rem 1.5rem; border:1px solid #edf0f5; border-radius:1.15rem; background:linear-gradient(135deg,#f8faff,#fff7fa); }
-.section[data-service-showcase="tour"], .section[data-service-showcase="tour"] .panel { background:var(--background, #fff); }
+.section:is([data-service-showcase="tour"], [data-service-showcase="hotel"]), .section:is([data-service-showcase="tour"], [data-service-showcase="hotel"]) .panel { background:var(--background, #fff); }
 .heading { margin-bottom:1rem; padding-inline-end:8rem; }
 .heading > span { font-size:.65rem; color:#e23878; }
 .heading h2 { margin-top:.25rem; font-size:1.4rem; }
@@ -25,7 +25,7 @@
 @media(prefers-reduced-motion:reduce) { .tile img { transition:none; } }
 
 
-.section:global(.section[data-service-showcase="tour"]) { scroll-margin-top: 5.5rem; }
+.section:global(#tour-countries) { scroll-margin-top: 5.5rem; }
 .countryGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; }
 .countryCard {
   display: grid;
@@ -75,6 +75,8 @@
   .countryGrid:has(> :nth-child(3)) ~ .countryMore { display: flex; }
 }
 
+.stripLayout { position:relative; }
+.stripLayout:has(.stripControls) { padding-inline:2.65rem; }
 .hotelStrip {
   display: grid;
   grid-auto-flow: column;
@@ -88,10 +90,11 @@
 }
 .hotelStrip > a { scroll-snap-align: start; }
 .hotelStrip > a:focus-visible { outline-offset: -3px; }
-.stripControls { display: flex; justify-content: center; gap: .4rem; margin-top: .6rem; }
+.stripControls { position:absolute; inset:0; display:flex; align-items:center; justify-content:space-between; pointer-events:none; }
 .stripControls button {
   display: grid;
   place-items: center;
+  pointer-events: auto;
   min-width: 2.2rem;
   min-height: 2.2rem;
   border: 1px solid #c6d6eb;
