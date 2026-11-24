@@ -6,8 +6,8 @@
     0px,
     calc(var(--footer-chat-clearance) - max(var(--footer-gutter), (100% - var(--footer-max-width)) / 2))
   );
-  background: #fff !important;
-  color: #102747 !important;
+  background: #102747 !important;
+  color: #fff !important;
 }
 
 .layout {
@@ -27,14 +27,13 @@
   line-height: 1.4;
 }
 
-.footer [class*="text-white"] { color: #6d7b90 !important; }
-.footer h2, .footer strong { color: #102747 !important; }
 .footer p, .footer address { font-size: .75rem; line-height: 2.2; }
 .footer .main p,
 .footer .main address,
 .footer :global(.footer-bottom) p { line-height: 1.45; }
 .footer nav ul, .footer a { font-size: .75rem; }
-.footer nav { border-color: #edf0f4; }
+.footer nav { border-color: #ffffff2b; }
+.footer [aria-labelledby="footer-brand-title"] > a > span:first-child { background: #fff; padding: .16rem; }
 
 .links a {
   line-height: 1.4;
@@ -44,8 +43,8 @@
 .installItem { grid-column: 1 / -1; }
 
 .footer :global(.footer-bottom) {
-  border-color: #edf0f4;
-  background: #fff !important;
+  border-color: #ffffff2b;
+  background: #0c203b !important;
 }
 
 :global(body:has(.support-chat-widget)) .footer :global(.footer-bottom) > div {
