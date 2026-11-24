@@ -77,8 +77,8 @@
 }
 .tourCard:has(.dateDisclosure[open]) { border-color: #d997b7; }
 .tourCard .facts > div { border-radius: .55rem; background: #ffffffb3; padding: .28rem .35rem; }
-.countryResultMain { display: grid; grid-template-columns: minmax(0, 1fr) minmax(140px, 25%); gap: .8rem; align-items: center; padding: .75rem; }
-.countryResultMain .photo { min-height: 124px; aspect-ratio: 1.5; }
+.countryResultMain { display: grid; grid-template-columns: minmax(0, 1fr) minmax(140px, min(25%, 250px)); gap: .8rem; align-items: center; padding: .75rem; }
+.countryResultMain .photo { min-height: 124px; aspect-ratio: 1.6; }
 .tourInformation { min-width: 0; }
 .countryResult h2 { font-size: .92rem; font-weight: 750; line-height: 1.65; overflow-wrap: anywhere; }
 .countryResult p { color: #526581; font-size: .7rem; line-height: 1.75; }
@@ -232,3 +232,9 @@
 .dateRange:hover, .dateRange:focus-visible { border-color: #6586af; }
 .dateArrow, .dateLink { color: #25466e; }
 .dateNights { background: #e6eef9; }
+@media (max-width: 600px) {
+  .countryResult .facts { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .28rem; }
+  .countryResult .facts > div { padding: .28rem .15rem; gap: .16rem; line-height: 1.45; }
+  .countryResult .facts > div > svg { width: 1.45rem; height: 1.45rem; padding: .28rem; }
+  .countryResult .facts :is(strong, span) { font-size: .55rem; }
+}
