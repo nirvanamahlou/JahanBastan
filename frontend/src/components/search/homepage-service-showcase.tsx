@@ -91,7 +91,7 @@ export function HomepageServiceShowcase({ panels }: { panels: Record<string, Sho
   return <section id={isTour ? "tour-countries" : undefined} data-service-showcase={serviceType} className={styles.section}><div className={styles.panel}>
     <header className={styles.heading}><span>{panel.eyebrow}</span><h2>{panel.title}</h2>{panel.description ? <p>{panel.description}</p> : null}</header>
     {!isTour ? <div className={styles.controls}><Link href={panel.href}>همه کشورها</Link></div> : null}
-    {isTour ? <div id="tour-country-grid" className={styles.countryGrid} data-expanded={expanded}>
+    {isTour ? <div id="tour-country-grid" className={styles.countryGrid}>
       {cards.map(country => <CountryCard key={country.id} country={country} />)}
     </div> : serviceType === "hotel" ? <HotelCountryStrip cards={cards} /> : <div className={styles.tiles}>
       {cards.slice(0, expanded ? undefined : 6).map((card) => <Link href={card.href} key={card.id} className={styles.tile}>
@@ -100,15 +100,14 @@ export function HomepageServiceShowcase({ panels }: { panels: Record<string, Sho
       </Link>)}
     </div>}
     {!cards.length ? <p className={styles.empty}>در حال حاضر گزینه‌ای برای این بخش منتشر نشده است.</p> : null}
-    {(isTour ? cards.length > 2 : serviceType !== "hotel" && cards.length > 6) ? (
+    {(!isTour && serviceType !== "hotel" && cards.length > 6) ? (
       <button
         type="button"
-        className={isTour ? styles.countryMore : styles.more}
-        aria-controls={isTour ? "tour-country-grid" : undefined}
+        className={styles.more}
         aria-expanded={expanded}
         onClick={() => setExpandedService(expanded ? null : serviceType)}
       >
-        {expanded ? "نمایش کمتر" : isTour ? "نمایش بیشتر" : "نمایش کشورهای بیشتر"}
+        {expanded ? "نمایش کمتر" : "نمایش کشورهای بیشتر"}
       </button>
     ) : null}
   </div></section>;

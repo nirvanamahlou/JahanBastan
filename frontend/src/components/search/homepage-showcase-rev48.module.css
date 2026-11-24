@@ -61,20 +61,6 @@
 @media (max-width: 620px) { .countryGrid { grid-template-columns: minmax(0, 1fr); gap: .45rem; } .countryCard { min-height: 95px; } }
 @media (prefers-reduced-motion: reduce) { .countryCard { transition: none; } }
 
-.countryMore { composes: more; display: none; }
-@media (width > 980px) {
-  .countryGrid[data-expanded="false"] > :nth-child(n+7) { display: none; }
-  .countryGrid:has(> :nth-child(7)) ~ .countryMore { display: flex; }
-}
-@media (620px < width <= 980px) {
-  .countryGrid[data-expanded="false"] > :nth-child(n+5) { display: none; }
-  .countryGrid:has(> :nth-child(5)) ~ .countryMore { display: flex; }
-}
-@media (width <= 620px) {
-  .countryGrid[data-expanded="false"] > :nth-child(n+3) { display: none; }
-  .countryGrid:has(> :nth-child(3)) ~ .countryMore { display: flex; }
-}
-
 .stripLayout { position:relative; }
 .stripLayout:has(.stripControls) { padding-inline:2.65rem; }
 .hotelStrip {
