@@ -741,3 +741,16 @@
 .compactDetails :is(.routeCard, .place) { border-radius: .7rem; box-shadow: none; }
 .compactDetails .infoBody { padding-top: .4rem; }
 .compactDetails :is(.infoRichText, .itineraryDescription, .serviceList li, .documentList li) { font-size: .73rem; line-height: 1.75; }
+
+.overviewCopy > :is(h2, h3),
+.compactDetails :is(.infoRichText, .itineraryDescription) :is(h2, h3) {
+  margin-block: .65rem .25rem;
+  font-size: .88rem;
+  line-height: 1.5;
+  color: var(--brand);
+}
+.overviewCopy > :is(p, ul, ol, blockquote),
+.compactDetails :is(.infoRichText, .itineraryDescription) :is(p, ul, ol, blockquote) {
+  margin-block: .35rem;
+  line-height: 1.75;
+}
