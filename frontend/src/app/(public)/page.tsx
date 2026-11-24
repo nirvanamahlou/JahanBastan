@@ -102,6 +102,7 @@ export default async function HomePage() {
       .catch(() => []),
   ]);
   // Only explicitly ordered countries participate in homepage merchandising.
+  const publicTours = tourPayload.items;
   const homepageCountries = selectHomepageCountries(countryPayload.items);
   const visibleCountryNames = new Set(homepageCountries.map(country => normalizeCountryName(country.name)));
   const isHomepageCountry = (name: string) => visibleCountryNames.has(normalizeCountryName(name));
@@ -305,7 +306,19 @@ export default async function HomePage() {
     const destination = searchDestinationPayload.items.find((item) => normalizeCountryName(item.country) === group.country && item.imageId);
     return { id: group.country, title: group.country, country: group.country, flagId: flag?.imageId, href: `${href}${href.includes("?") ? "&" : "?"}country=${encodeURIComponent(group.country)}`, imageUrl: destinationPhoto ? mediaUrl(destination?.imageId ?? null) ?? group.imageUrl : group.imageUrl ?? mediaUrl(destination?.imageId ?? null), subtitle: `${group.count.toLocaleString("fa-IR")} ${label}`, price: group.cheapest?.amount ? formatCurrency(group.cheapest.amount, group.cheapest.currency) : null };
   });
-  const countryTiles = countryTilesFor(tourPayload.items.flatMap((tour) => (tour.routeDestinations?.length ? tour.routeDestinations : tour.destination ? [tour.destination] : []).map((destination) => ({ id: tour.id, country: destination.country, imageUrl: mediaUrl(tour.imageId), amount: tour.priceAmount, currency: tour.currency }))), "/tours/", "تور منتشرشده", true);
+  const countryTiles = countryTilesFor(
+    publicTours.flatMap((tour) => [
+      ...(tour.destination ? [tour.destination] : []),
+      ...(tour.routeDestinations ?? []),
+    ].map((destination) => ({
+      id: tour.id,
+      country: destination.country,
+      imageUrl: mediaUrl(tour.imageId),
+      amount: tour.priceAmount,
+      currency: tour.currency,
+    }))),
+    "/tours/", "تور منتشرشده", true, false,
+  );
   const hotelCountriesTiles = mergeCountryCounts(hotelDirectory).map((item) => ({
     id: item.country, title: item.country, country: item.country,
     flagId: countryCards.find(country => normalizeCountryName(country.name) === normalizeCountryName(item.country))?.imageId,
