@@ -7,7 +7,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 from pydantic.alias_generators import to_camel
 
-from app.schemas.account import CustomerPassengerWrite
+from app.schemas.account import CartItemCreate, CustomerPassengerWrite
 
 
 class BookingSchema(BaseModel):
@@ -58,6 +58,25 @@ class BookingCreate(BookingSchema):
     terms_accepted: bool = False
     terms_version: str = Field(default="checkout-1405-01", max_length=40)
     discount_code: str | None = Field(default=None, min_length=3, max_length=40)
+    combined_selection: CartItemCreate | None = None
+
+    @model_validator(mode="after")
+    def validate_combined_selection(self) -> "BookingCreate":
+        selection = self.combined_selection
+        if selection is None:
+            return self
+        if selection.item_type != "tour" or selection.combined_departure_price_id is None:
+            raise ValueError("a dated combined tour selection is required")
+        rooms = selection.room_selection
+        expected = {
+            "adult": 2 * rooms.get("double", 0) + rooms.get("single", 0) + rooms.get("extra", 0),
+            "child": rooms.get("childWithBed", 0) + rooms.get("childWithoutBed", 0),
+            "infant": rooms.get("infant", 0),
+        }
+        if any(sum(p.passenger_type == kind for p in self.passengers) != count for kind, count in expected.items()):
+            raise ValueError("passengers do not match the selected rates")
+        return self
+
 
 
 class BookingItemRead(BookingSchema):

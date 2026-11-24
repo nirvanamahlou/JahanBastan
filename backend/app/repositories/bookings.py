@@ -447,12 +447,17 @@ class BookingRepository:
         terms_accepted: bool = False,
         terms_version: str = "checkout-1405-01",
         discount_code: str | None = None,
+        direct_cart_id: int | None = None,
     ) -> BookingRequest:
         cart_record = await self.session.scalar(
             select(CustomerCart)
             .where(
                 CustomerCart.customer_id == customer_id,
-                CustomerCart.status == "active",
+                (
+                    CustomerCart.id == direct_cart_id
+                    if direct_cart_id is not None
+                    else CustomerCart.status == "active"
+                ),
             )
             .with_for_update()
         )

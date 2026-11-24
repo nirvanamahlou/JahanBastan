@@ -2,9 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 
-import { CartAddButton } from "@/components/customer-commerce-actions";
+import { CombinedTourCheckout } from "@/components/checkout/combined-tour-checkout";
+import { useOnlineSalesEnabled } from "@/components/online-sales-provider";
 import { isFinalLocalTourPrice } from "@/lib/tour-price-currency";
 import { formatCurrency } from "@/lib/currency";
 import { toToman, type ExchangeRates } from "@/lib/currency-conversion";
@@ -30,6 +31,7 @@ function CombinedPackagePrice({
   flightPrice,
   flightCurrency,
   supplement = false,
+  children,
 }: {
   label: string;
   price: string;
@@ -38,18 +40,20 @@ function CombinedPackagePrice({
   flightPrice: string | null;
   flightCurrency: string;
   supplement?: boolean;
+  children?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col justify-center rounded-lg border border-border bg-white p-2 text-center">
+    <div className="flex min-w-0 flex-col rounded-lg border border-border bg-white p-1.5 text-center">
       <p className="text-xs text-muted">{label}</p>
-      <strong className="mt-1 block text-sm text-brand">
+      <strong className="mb-1 mt-0.5 block text-sm text-brand">
         {formatCurrency(price, currency)}
       </strong>
       {addFlight && flightPrice !== null && Number(flightPrice) > 0 ? (
-        <span className="mt-1 block text-[11px] font-bold text-amber-700">
+        <span className="mb-1 block text-[11px] font-bold text-amber-700">
           + {supplement ? "" : "پرواز "}{formatCurrency(flightPrice, flightCurrency)}
         </span>
       ) : null}
+      {children}
     </div>
   );
 }
@@ -67,6 +71,8 @@ export function CombinedPackageCard({ item, index, tourId, departureId, capacity
   bookingDisabled?: boolean;
   exchangeRates?: ExchangeRates;
 }) {
+  const onlineSalesEnabled = useOnlineSalesEnabled();
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [selection, setSelection] = useState<Selection>(emptySelection);
   const childFlightPrice = item.childWithBedFlightPrice ?? item.childWithoutBedFlightPrice ?? null;
   const childFlightCurrency = item.childWithBedFlightCurrency ?? item.childWithoutBedFlightCurrency;
@@ -96,7 +102,7 @@ export function CombinedPackageCard({ item, index, tourId, departureId, capacity
   const capacityExceeded = capacityRemaining !== null && capacityRemaining !== undefined && passengerCount > capacityRemaining;
   const updateSelection = (key: SelectionKey, delta: number) => setSelection((current) => ({ ...current, [key]: Math.max(0, Math.min(20, current[key] + delta)) }));
   return (
-    <article className="overflow-hidden rounded-2xl border border-border bg-surface-muted shadow-sm">
+    <article className="mx-auto w-full max-w-[880px] overflow-hidden rounded-xl border border-border bg-surface-muted shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-white px-3 py-2">
         <div>
           <p className="text-xs font-black text-violet-600">ترکیب {(index + 1).toLocaleString("fa-IR")}</p>
@@ -106,7 +112,7 @@ export function CombinedPackageCard({ item, index, tourId, departureId, capacity
           {totalNights.toLocaleString("fa-IR")} شب
         </span> : null}
       </div>
-      <div className="grid grid-cols-2 gap-2 p-2.5">
+      <div className="grid grid-cols-2 gap-2 p-2">
         {item.hotels.map((assignment, hotelIndex) => {
           const images = [assignment.hotel.imageId, ...assignment.hotel.galleryImageIds].filter(
             (imageId, imageIndex, imageIds): imageId is number => Boolean(imageId) && imageIds.indexOf(imageId) === imageIndex,
@@ -116,7 +122,7 @@ export function CombinedPackageCard({ item, index, tourId, departureId, capacity
           return (
             <article className="overflow-hidden rounded-xl border border-border bg-white" key={`${assignment.hotel.slug}-${hotelIndex}`}>
               <Link aria-label={`مشاهده جزئیات ${assignment.hotel.name}`} className="group block" href={`/hotels/${assignment.hotel.slug}/`}>
-                <div className="relative h-20 sm:h-28 overflow-hidden bg-surface-muted">
+                <div className="relative h-[76px] sm:h-[108px] overflow-hidden bg-surface-muted">
                   {cover ? <Image alt={`نمای ساختمان هتل ${assignment.hotel.name}`} className="object-cover transition duration-500 group-hover:scale-105" fill sizes="(max-width: 768px) 48vw, 550px" src={`${PUBLIC_API_BASE_URL}/media/${cover}`} /> : <span className="grid h-full place-items-center text-sm text-muted">بدون تصویر</span>}
                   <span className="absolute right-2 top-2 grid size-6 place-items-center rounded-xl bg-brand/90 font-black text-white shadow-lg">{(hotelIndex + 1).toLocaleString("fa-IR")}</span>
                   {images.length > 1 ? <span className="absolute bottom-2 left-2 rounded-full bg-black/55 px-2.5 py-1 text-xs font-black text-white backdrop-blur">{images.length.toLocaleString("fa-IR")} تصویر</span> : null}
@@ -148,14 +154,14 @@ export function CombinedPackageCard({ item, index, tourId, departureId, capacity
       </div>
       {availablePrices.length ? <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,6rem),1fr))] gap-2 border-t border-border p-2.5">
         {availablePrices.map(([key, label, price, currency, addFlight, flightPrice, flightCurrency]) => (
-          <div className="grid h-full grid-rows-[1fr_auto] gap-2" key={key}>
-            <CombinedPackagePrice addFlight={addFlight} currency={currency} flightCurrency={flightCurrency} flightPrice={flightPrice} label={label} price={price ?? ""} supplement={key === "infant"} />
-            {canPurchase ? <div className="mx-auto flex w-full max-w-32 items-center overflow-hidden rounded-xl border border-emerald-200 bg-white">
-              <button aria-label={`کم کردن ${label}`} className="grid h-9 flex-1 place-items-center font-black text-brand disabled:opacity-35" disabled={selection[key] === 0} onClick={() => updateSelection(key, -1)} type="button">−</button>
-              <output className="grid h-9 w-10 place-items-center border-x border-emerald-100 font-black text-brand">{(key === "double" ? selection[key] * 2 : selection[key]).toLocaleString("fa-IR")}</output>
-              <button aria-label={`افزودن ${label}`} className="grid h-9 flex-1 place-items-center font-black text-brand disabled:opacity-35" disabled={selection[key] >= 20} onClick={() => updateSelection(key, 1)} type="button">+</button>
+          <CombinedPackagePrice key={key} addFlight={addFlight} currency={currency} flightCurrency={flightCurrency}
+            flightPrice={flightPrice} label={label} price={price ?? ""} supplement={key === "infant"}>
+            {canPurchase ? <div className="mx-auto mt-auto flex w-full max-w-28 items-center overflow-hidden rounded-md border border-border bg-surface-muted">
+              <button aria-label={`کم کردن ${label}`} className="grid h-8 min-w-0 flex-1 place-items-center font-bold text-brand disabled:opacity-35" disabled={selection[key] === 0} onClick={() => updateSelection(key, -1)} type="button">−</button>
+              <output className="grid h-8 w-8 place-items-center border-x border-border text-xs font-bold text-brand">{(key === "double" ? selection[key] * 2 : selection[key]).toLocaleString("fa-IR")}</output>
+              <button aria-label={`افزودن ${label}`} className="grid h-8 min-w-0 flex-1 place-items-center font-bold text-brand disabled:opacity-35" disabled={passengerCount + (key === "double" ? 2 : 1) > 20} onClick={() => updateSelection(key, 1)} type="button">+</button>
             </div> : null}
-          </div>
+          </CombinedPackagePrice>
         ))}
       </div> : null}
       {requiresFlightQuote ? <div className="border-t border-amber-200 bg-amber-50 p-4 text-sm leading-7 text-amber-950" role="status">
@@ -163,10 +169,16 @@ export function CombinedPackageCard({ item, index, tourId, departureId, capacity
         <p>برای دریافت قیمت نهایی و ثبت درخواست با کارشناسان ما تماس بگیرید.</p>
         <Link className="mt-3 inline-flex rounded-xl bg-brand px-4 py-2 font-black text-white" href="/contact/">تماس با کارشناسان</Link>
       </div> : null}
-      {canPurchase && availablePrices.length ? <div className="flex flex-wrap items-center gap-2 border-t border-border bg-white p-3">
-        {requiresFlightQuote ? <p className="text-sm font-bold text-amber-900">این گزینه پس از اعلام نرخ پرواز قابل رزرو می‌شود.</p> : selectedCount ? <p className="rounded-xl bg-violet-50 px-4 py-3 text-sm font-black text-brand">جمع قابل پرداخت: {total === null ? "نرخ ارز برای محاسبه نهایی نیاز است" : formatCurrency(total, "IRT")}</p> : <p className="text-sm text-muted">تعداد مسافران را برای این ترکیب انتخاب کنید.</p>}
-        <CartAddButton buttonClassName="!bg-[#f12b75] hover:!bg-[#d91d62]" className="w-full sm:mr-auto sm:max-w-sm" combinedDeparturePriceId={item.combinedDeparturePriceId} disabled={requiresFlightQuote || !selectedCount || bookingDisabled || capacityExceeded} idleLabel={requiresFlightQuote ? "نیازمند استعلام نرخ پرواز" : bookingDisabled ? "این تاریخ قابل رزرو نیست" : capacityExceeded ? "ظرفیت کافی نیست" : "افزودن ترکیب به سبد خرید"} itemType="tour" roomSelection={selection} tourDepartureId={departureId ?? undefined} tourId={tourId} />
+      {canPurchase && selectedCount > 0 && !requiresFlightQuote ? <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border bg-white p-2.5">
+        <p className="text-xs font-bold text-brand">جمع قابل پرداخت: {total === null ? "نیازمند محاسبهٔ نرخ ارز" : formatCurrency(total, "IRT")}</p>
+        <button className="account-primary min-h-10 rounded-lg bg-brand px-3 text-xs font-bold text-white disabled:opacity-50" disabled={!onlineSalesEnabled || bookingDisabled || capacityExceeded} onClick={() => setCheckoutOpen(true)} type="button">
+          {!onlineSalesEnabled ? "تماس حاصل فرمایید" : bookingDisabled ? "این تاریخ قابل رزرو نیست" : capacityExceeded ? "ظرفیت کافی نیست" : "خرید و ادامه ورود اطلاعات مسافران"}
+        </button>
       </div> : null}
+      {checkoutOpen && tourId && departureId && item.combinedDeparturePriceId ? (
+        <CombinedTourCheckout combinedDeparturePriceId={item.combinedDeparturePriceId} departureId={departureId}
+          onClose={() => setCheckoutOpen(false)} roomSelection={selection} tourId={tourId} />
+      ) : null}
     </article>
   );
 }

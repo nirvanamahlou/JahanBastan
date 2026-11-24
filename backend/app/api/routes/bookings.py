@@ -14,10 +14,11 @@ from app.api.dependencies.auth import (
     DatabaseSession,
     TrustedOrigin,
 )
-from app.models import PaymentIntent, PaymentStatus, SiteSetting
+from app.models import CustomerCart, PaymentIntent, PaymentStatus, SiteSetting
 from app.models.checkout import BookingStatusEvent
 from app.repositories.agencies import AgencyRepository
 from app.repositories.bookings import BookingRepository, HotelUnavailableError
+from app.repositories.customer_commerce import CustomerCommerceRepository
 from app.repositories.operations import OperationsRepository
 from app.schemas.booking import (
     AdminBookingRead,
@@ -69,6 +70,29 @@ async def create_booking(
 ) -> BookingRead:
     await require_online_sales_enabled(session)
     try:
+        direct_cart_id = None
+        terms_version = payload.terms_version
+        if payload.combined_selection is not None:
+            selection = payload.combined_selection
+            settings = await session.get(SiteSetting, 1)
+            links = settings.social_links if settings else {}
+            terms_version = links.get("checkoutTermsVersion", "checkout-1405-01")
+            # This snapshot is created and converted in one transaction, separately
+            # from any active cart the customer already has.
+            snapshot = CustomerCart(customer_id=customer.id, status="abandoned")
+            session.add(snapshot)
+            await session.flush()
+            item = await CustomerCommerceRepository(session).add_combined_tour(
+                customer.id,
+                selection.tour_id or 0,
+                selection.tour_departure_id or 0,
+                selection.combined_departure_price_id or 0,
+                selection.room_selection,
+                cart_id=snapshot.id,
+            )
+            if item is None:
+                raise ValueError("ترکیب انتخابی دیگر با این نرخ در دسترس نیست.")
+            direct_cart_id = snapshot.id
         booking = await BookingRepository(session).create_from_cart(
             customer.id,
             payload.customer_note,
@@ -81,8 +105,9 @@ async def create_booking(
             ],
             payment_method=payload.payment_method,
             terms_accepted=payload.terms_accepted,
-            terms_version=payload.terms_version,
+            terms_version=terms_version,
             discount_code=payload.discount_code,
+            direct_cart_id=direct_cart_id,
         )
         await OperationsRepository(session).create_notification(
             customer.id,
