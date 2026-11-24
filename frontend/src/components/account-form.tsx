@@ -263,6 +263,7 @@ export function AccountForm({ onAuthenticated, refreshAfterAuthentication = true
   }
 
   const isLogin = mode === "login";
+  const isAgencyLogin = isLogin && accountType === "agency";
   const title = isLogin ? "خوش آمدید" : "حساب کاربری بسازید";
   const subtitle = isLogin
     ? `برای ورود به حساب ${accountType === "agency" ? "آژانسی" : "مشتری"} اطلاعات خود را وارد کنید.`
@@ -428,9 +429,13 @@ export function AccountForm({ onAuthenticated, refreshAfterAuthentication = true
           ) : (
             <form className="mt-5 space-y-4" onSubmit={submitEmail}>
               {!isLogin ? <Input id="customer-full-name" name="fullName" label={accountType === "agency" ? "نام کانتر درخواست‌کننده / کانتر فروش" : "نام و نام خانوادگی"} hint={accountType === "agency" ? "برای هر کانتر یک ایمیل و رمز عبور جداگانه ثبت کنید." : undefined} minLength={2} autoComplete="name" required /> : null}
-              <Input id="customer-email" name="email" label="ایمیل" placeholder="name@example.com" type="email" autoComplete="email" required />
+              {isAgencyLogin ? (
+                <Input key="agency-username" id="agency-username" name="email" label="نام کاربری آژانس" hint="ایمیل ثبت‌شدهٔ حساب آژانس" type="email" autoComplete="username" required />
+              ) : (
+              <Input key="customer-email" id="customer-email" name="email" label="ایمیل" placeholder="name@example.com" type="email" autoComplete="email" required />
+              )}
               <Input id="customer-password" name="password" label="رمز عبور" type="password" minLength={8} maxLength={128} autoComplete={isLogin ? "current-password" : "new-password"} hint={!isLogin ? "حداقل ۸ کاراکتر" : undefined} required />
-              {isLogin ? <Link className="-mt-1 inline-flex text-xs font-bold text-pink-600 underline-offset-4 hover:underline" href="/account/forgot-password/">رمز عبور را فراموش کرده‌اید؟</Link> : null}
+              {isLogin && !(compact && isAgencyLogin) ? <Link className="-mt-1 inline-flex text-xs font-bold text-pink-600 underline-offset-4 hover:underline" href="/account/forgot-password/">رمز عبور را فراموش کرده‌اید؟</Link> : null}
               {!isLogin ? <Input id="customer-password-confirmation" name="passwordConfirmation" label="تکرار رمز عبور" type="password" minLength={8} maxLength={128} autoComplete="new-password" required /> : null}
               {!isLogin && accountType === "agency" ? (
                 <fieldset className="grid gap-4 rounded-2xl border border-brand/15 bg-brand-soft/35 p-4 sm:grid-cols-2">
@@ -449,17 +454,22 @@ export function AccountForm({ onAuthenticated, refreshAfterAuthentication = true
                   <p className="sm:col-span-2 text-xs leading-6 text-muted">این حساب مخصوص همان کانتر است. برای هر کانتر، یک ایمیل و رمز عبور مستقل بسازید. پس از ثبت، درخواست در پنل مدیریت برای پشتیبان نمایش داده می‌شود و خرید اعتباری بعد از تأیید و تعیین سقف اعتبار فعال خواهد شد.</p>
                 </fieldset>
               ) : null}
-              <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-surface-muted px-4 py-3 text-sm text-brand">
+              {!(compact && isAgencyLogin) && <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-surface-muted px-4 py-3 text-sm text-brand">
                 <input className="mt-1 size-4 accent-pink-500" name="rememberMe" type="checkbox" />
                 <span><strong className="block">مرا به خاطر بسپار</strong><span className="mt-1 block text-xs font-normal leading-5 text-muted">فقط در این دستگاه؛ نشست ورود تا ۳۰ روز فعال می‌ماند.</span></span>
-              </label>
+              </label>}
               {error ? <Alert variant="error">{error}</Alert> : null}
-              <Button className="w-full bg-pink-500 text-white hover:bg-pink-600 focus-visible:ring-pink-500" loading={submitting} size="lg" type="submit">{isLogin ? "ورود به حساب" : "ایجاد حساب کاربری"}</Button>
+              <Button className="w-full bg-pink-500 text-white hover:bg-pink-600 focus-visible:ring-pink-500" loading={submitting} size="lg" type="submit">{isAgencyLogin ? "ورود آژانس" : isLogin ? "ورود به حساب" : "ایجاد حساب کاربری"}</Button>
             </form>
           )}
 
           {compact ? (
             <div className="mt-5 flex flex-wrap gap-x-4 gap-y-2 border-t border-border pt-4 text-sm font-bold text-brand">
+              {accountType === "agency" && (
+                <button type="button" onClick={() => switchMode(isLogin ? "register" : "login")}>
+                  {isLogin ? "ثبت‌نام آژانس" : "بازگشت به ورود آژانس"}
+                </button>
+              )}
               {accountType === "agency" ? (
                 <button type="button" onClick={() => { switchMode("login"); setAccountType("customer"); setMethod("sms"); }}>ورود مسافر</button>
               ) : (
