@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { PlaneIcon, SuitcaseIcon } from "@/components/layout/site-icons";
+import { PlaneTakeoffIcon, SuitcaseIcon } from "@/components/layout/site-icons";
 import styles from "./flight-route-card.module.css";
 
 type Endpoint = { city: string; code?: string | null; airport?: string | null; time: string; dateTime?: string; date?: string };
@@ -15,7 +15,7 @@ export function FlightRouteCard({ label, date, carrier, logo, flightNumber, cabi
       <header className={styles.header}>
         <div className={styles.airline}>
           <span className={styles.logo}>
-            {logo && failedLogo !== logo ? <Image src={logo} alt="" width={44} height={44} unoptimized onError={() => setFailedLogo(logo)} /> : <PlaneIcon className="size-6" aria-hidden />}
+            {logo && failedLogo !== logo ? <Image src={logo} alt="" width={44} height={44} unoptimized onError={() => setFailedLogo(logo)} /> : <PlaneTakeoffIcon className="size-6" aria-hidden />}
           </span>
           <div className={styles.airlineText}><strong>{carrier || "شرکت هواپیمایی"}</strong><span>{flightNumber ? <>پرواز <bdi>{flightNumber}</bdi></> : null}{flightNumber && cabin ? " · " : null}{cabin}</span></div>
         </div>
@@ -30,7 +30,7 @@ export function FlightRouteCard({ label, date, carrier, logo, flightNumber, cabi
         </div>
         <div className={styles.connection}>
           <span>{duration}</span>
-          <div className={styles.track} aria-hidden><i /><span /><PlaneIcon className="size-5 -scale-x-100" /><span /><i /></div>
+          <div className={styles.track} aria-hidden><i /><span /><PlaneTakeoffIcon className="size-5 shrink-0 -scale-x-100" /><span /><i /></div>
         </div>
         <div className={`${styles.endpoint} ${styles.arrival}`}>
           <span className={styles.caption}>رسیدن</span>

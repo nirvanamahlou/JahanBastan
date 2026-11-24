@@ -11,7 +11,7 @@ import {
 } from "@/components/content/ticket-selection-provider";
 import {
   ClockIcon,
-  PlaneIcon,
+  PlaneTakeoffIcon,
   SuitcaseIcon,
 } from "@/components/layout/site-icons";
 import { PUBLIC_API_BASE_URL } from "@/lib/api/client";
@@ -111,10 +111,10 @@ export function FlightResultCard(props: FlightResultCardProps) {
           پرفروش
         </span>
       ) : null}
-      <div className="grid lg:grid-cols-[minmax(0,1fr)_13rem]">
+      <div className="grid lg:grid-cols-[minmax(0,1fr)_10rem]">
         <div className="px-4 py-3 sm:px-6 sm:py-4">
           <p className="mb-3 inline-flex items-center gap-2 text-xs font-black text-brand">
-            <PlaneIcon className="size-4" /> {directionLabel}
+            <PlaneTakeoffIcon className="size-4" /> {directionLabel}
           </p>
           <FlightRouteCard
             label={directionLabel} carrier={props.provider || ""}

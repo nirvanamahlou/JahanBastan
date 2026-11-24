@@ -6,10 +6,10 @@
 .sidebar form{display:grid;gap:18px;margin-top:20px}
 .sidebar label,.field{display:grid;gap:8px;font-size:13px;font-weight:700}
 .sidebar button[type=submit]{width:100%;min-height:44px;border-radius:10px;background:var(--brand);color:#fff;font-weight:800}
-.flightSidebar{padding:16px;background:var(--surface)}
+.sidebar.flightSidebar{padding:10px;background:var(--surface)}
 .flightSidebar summary{padding:4px 2px 8px}
-.flightSidebar .flightFilters{grid-template-columns:minmax(0,1fr);gap:14px;margin-top:8px}
-.flightFilterGroup{display:grid;grid-template-columns:minmax(0,1fr);gap:11px;min-width:0;border:1px solid var(--border);border-radius:14px;padding:10px 12px 13px;background:color-mix(in srgb,var(--surface-muted) 64%,var(--surface))}
+.flightSidebar .flightFilters{grid-template-columns:minmax(0,1fr);gap:8px;margin-top:4px}
+.flightFilterGroup{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;min-width:0;border:1px solid var(--border);border-radius:12px;padding:6px 8px 8px;background:color-mix(in srgb,var(--surface-muted) 64%,var(--surface))}
 .flightFilterGroup legend{padding-inline:6px;font-size:13px;font-weight:800}
 .flightFilterGroup > [data-date-range]{height:auto;grid-column:1/-1}
 .flightFilters .flightCheckbox{display:flex;align-items:center;gap:8px}
@@ -35,9 +35,11 @@
 @media(max-width:800px){.layout{grid-template-columns:minmax(0,1fr)}.sidebar{position:static;padding:16px}.row{grid-template-columns:minmax(0,1fr) 220px}.heading h1{font-size:24px}}
 @media(max-width:540px){.row{grid-template-columns:minmax(0,1fr)}.rowMedia{grid-row:1}.facts{margin-top:14px}.heading h1{font-size:22px}.sort form{width:100%;flex-wrap:wrap}}
 
-/* Give flight controls room without changing other service sidebars. */
-.flightLayout{grid-template-columns:320px minmax(0,1fr)}
-@media(max-width:1100px){.flightLayout{grid-template-columns:290px minmax(0,1fr)}}
+.catalogContainer.flightResultsContainer{max-width:1040px}
+.flightLayout{grid-template-columns:240px minmax(0,1fr);gap:18px}
+.flightSidebar .flightFilters :is(label,fieldset legend){font-size:12px}
+.flightSidebar .flightFilters :is(button[aria-expanded],select,input[type=search],[data-date-range] button){min-height:36px;font-size:12px}
+.flightSidebar .flightFilters > fieldset{padding:8px}
 @media(max-width:800px){.flightLayout{grid-template-columns:minmax(0,1fr)}}
 
 /* The country view keeps the same filters with a more compact card layout. */

@@ -16,7 +16,6 @@ import { AvailabilityNotice } from "@/components/content/availability-notice";
 import { PageIntro } from "@/components/layout/page-intro";
 import { JalaliDateRangeInput } from "@/components/search/jalali-date-range-input";
 import { LiveFlightForm } from "@/components/search/live-flight-form";
-import { FlightRangeFilter, type FlightRangeKind } from "@/components/search/flight-range-filter";
 import { FlightAirlineFilter } from "@/components/search/flight-airline-filter";
 import { SearchableRouteSelect } from "@/components/search/searchable-route-select";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
@@ -87,6 +86,7 @@ function erpAmountInToman(amount: string, currency: string): number | null {
 const tehranDate = new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Tehran" });
 const tehranTime = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Tehran", hourCycle: "h23" });
 const rangeKinds = ["price", "departure", "arrival", "duration"] as const;
+type FlightRangeKind = (typeof rangeKinds)[number];
 
 function clockMinutes(time: string | null) {
   const match = /^(\d{1,2}):(\d{2})/.exec(time ?? "");
@@ -379,7 +379,6 @@ export default async function FlightsPage({ searchParams }: { searchParams: Prom
   const flightTickets = allFlightTickets.filter(({ flight, useReturnLeg }) => matchesNativeFilters(flight, useReturnLeg));
   const visibleErpFlights = erpFlights.filter(matchesErpFilters);
   const erpScope = erpFlights.filter(erpInCountry);
-  const metricRows = [...erpScope.map(erpMetrics), ...allFlightTickets.map(({ flight, useReturnLeg }) => nativeMetrics(flight, useReturnLeg))];
   const airlineChoices = [...new Set([...erpScope.flatMap((flight) => [flight.carrier, flight.return_leg?.carrier]), ...allFlightTickets.map(({ flight }) => flight.providerCompany), ...chosenAirlines]
     .filter((name): name is string => Boolean(name && !name.includes("|"))))].sort((a, b) => a.localeCompare(b, "fa"));
   const minAirlinePrices = new Map<string, number>();
@@ -390,19 +389,6 @@ export default async function FlightsPage({ searchParams }: { searchParams: Prom
     if (price === null) continue;
     for (const name of names) if (name) minAirlinePrices.set(name, Math.min(price, minAirlinePrices.get(name) ?? price));
   }
-  const airportChoices = (side: "from" | "to") => {
-    const entries = [
-      ...erpScope.map((flight) => side === "from" ? flight.origin_airport : flight.destination_airport),
-      ...allFlightTickets.map(({ flight, useReturnLeg }) => (side === "from") !== useReturnLeg
-        ? { code: flight.originAirportCode, name: flight.originAirport }
-        : { code: flight.destinationAirportCode, name: flight.destinationAirport }),
-    ];
-    const options = new Map<string, string>();
-    for (const entry of entries) if (entry?.code) options.set(entry.code, entry.name ? `${entry.name} (${entry.code})` : entry.code);
-    const current = side === "from" ? fromAirport : toAirport;
-    if (current && !options.has(current)) options.set(current, current);
-    return [...options.entries()].sort((a, b) => a[1].localeCompare(b[1], "fa"));
-  };
   const showStops = Boolean(maxStops) || allFlightTickets.some(({ flight }) => flight.stopsCount !== null);
   const chooseErpRoundTrip = !browseCountry && tripType === "round_trip" && Boolean(origin && destination);
   const availableDates = new Set<string>();
@@ -430,12 +416,12 @@ export default async function FlightsPage({ searchParams }: { searchParams: Prom
 
   return (
     <>
-      <PageIntro compact bannerSrc="/images/service-banners/flight-panorama-hd.webp"
+      <PageIntro compact bannerSrc={shouldShowResults ? undefined : "/images/service-banners/flight-panorama-hd.webp"}
         eyebrow="خدمات سفر / پرواز"
         title={country ? `پروازهای ${country}` : "پرواز بر اساس کشور"}
       />
-      <section className="py-8 sm:py-12">
-        <Container className={catalogStyles.catalogContainer}>
+      <section className={shouldShowResults ? "py-4 sm:py-6" : "py-8 sm:py-12"}>
+        <Container className={shouldShowResults ? `${catalogStyles.catalogContainer} ${catalogStyles.flightResultsContainer}` : catalogStyles.catalogContainer}>
           <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: "خدمات سفر", href: "/services/" }, { label: "پرواز" }]} />
 
           {shouldShowResults ? (
@@ -456,27 +442,6 @@ export default async function FlightsPage({ searchParams }: { searchParams: Prom
                 </fieldset>
                 {flightScope ? <input name="flightScope" type="hidden" value={flightScope} /> : null}
                 <FlightAirlineFilter key={`${airlines}/${sameAirline}`} options={airlineChoices.map((name) => ({ name, minPrice: minAirlinePrices.get(name) ?? null }))} selected={[...chosenAirlines]} provider={provider} sameAirline={sameAirline} showSameAirline={sameAirline || erpScope.some((flight) => flight.return_leg && flight.return_leg.carrier !== flight.carrier)} />
-                {rangeKinds.map((kind) => {
-                  const suffix = kind[0].toUpperCase() + kind.slice(1);
-                  const values = metricRows.flatMap((row) => row[kind] === null ? [] : [row[kind]]);
-                  const initialMin = rangeParams[`min${suffix}`];
-                  const initialMax = rangeParams[`max${suffix}`];
-                  return <FlightRangeFilter key={JSON.stringify([kind, values, initialMin, initialMax])} kind={kind} values={values} initialMin={initialMin} initialMax={initialMax} />;
-                })}
-                {(["from", "to"] as const).map((side) => {
-                  const options = airportChoices(side);
-                  if (!options.length) return null;
-                  return <label className="grid gap-2 text-sm font-bold" key={side}>
-                    {side === "from" ? "فرودگاه مبدأ" : "فرودگاه مقصد"}
-                    <select className={control} defaultValue={side === "from" ? fromAirport : toAirport} key={side === "from" ? fromAirport : toAirport} name={`${side}Airport`}>
-                      <option value="">همه فرودگاه‌ها</option>
-                      {options.map(([code, label]) => <option key={code} value={code}>{label}</option>)}
-                    </select>
-                  </label>;
-                })}
-                <fieldset className={catalogStyles.flightFilterGroup}>
-                <legend>مشخصات پرواز</legend>
-                <label className="grid gap-2 text-sm font-black">شماره پرواز<input aria-label="شماره پرواز" className={control} defaultValue={flightNumber} name="flightNumber" placeholder="شماره رفت یا برگشت" /></label>
                 {showStops ? <label>تعداد توقف
                   <select className={control} name="maxStops" defaultValue={maxStops}>
                     <option value="">همه پروازها</option>
@@ -485,7 +450,6 @@ export default async function FlightsPage({ searchParams }: { searchParams: Prom
                   </select>
                 </label> : null}
                 <label className={catalogStyles.flightCheckbox}><input defaultChecked={featured} name="featured" type="checkbox" value="true" /> فقط پرفروش</label>
-                </fieldset>
                 {hasFilters ? <Link className="text-center text-sm font-bold text-brand underline underline-offset-4" href="/services/flights/">پاک کردن فیلترها</Link> : null}
               </LiveFlightForm>
               </ResponsiveFilterPanel>

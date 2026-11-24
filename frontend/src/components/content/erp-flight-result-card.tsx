@@ -9,7 +9,7 @@ import {
   type FlightBuyerContact,
   type PassengerCheckoutData,
 } from "@/components/passenger-checkout-modal";
-import { PlaneIcon } from "@/components/layout/site-icons";
+import { PlaneTakeoffIcon } from "@/components/layout/site-icons";
 import { PUBLIC_API_BASE_URL } from "@/lib/api/client";
 import { invalidateCustomerSession, readCustomerSession } from "@/lib/customer-session";
 import { formatCurrency } from "@/lib/currency";
@@ -360,10 +360,10 @@ export function ErpFlightResultCard({
   const seats = capacities.every((capacity): capacity is number => typeof capacity === "number") ? Math.min(...capacities) : null;
   return (
     <article className="flight-interactive-panel overflow-hidden rounded-2xl border border-brand/15 bg-white shadow-sm">
-      <div className="grid lg:grid-cols-[minmax(0,1fr)_13rem]">
+      <div className="grid lg:grid-cols-[minmax(0,1fr)_10rem]">
         <div className="min-w-0 p-4">
           <p className="inline-flex items-center gap-2 rounded-full bg-brand/5 px-2.5 py-1 text-xs font-bold text-brand">
-            <PlaneIcon className="size-4" /> {flight.return_leg ? "رفت‌وبرگشت" : "یک‌طرفه"}
+            <PlaneTakeoffIcon className="size-4" /> {flight.return_leg ? "رفت‌وبرگشت" : "یک‌طرفه"}
           </p>
           <div className="mt-3 space-y-2">
             {legs.map((leg, index) => (
