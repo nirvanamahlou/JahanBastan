@@ -87,6 +87,7 @@ export async function SiteFooter() {
     values.footerCopyright?.trim() ||
     `© ${new Date().getFullYear().toLocaleString("fa-IR")} ${siteName}. تمامی حقوق محفوظ است.`;
 
+  const isCommerceLink = (href: string) => /^\/(?:cart|payment)\/?(?:[?#]|$)/.test(href);
   const serviceLinks = defaultServiceLinks.map((item, index) => ({
     id: `footer-service-${index + 1}`,
     label:
@@ -95,14 +96,14 @@ export async function SiteFooter() {
       values[`footerService${index + 1}Url`],
       item.href,
     ),
-  }));
+  })).filter((item) => !isCommerceLink(item.href));
   const quickLinks = siteConfig.footerLinks
     .map((item, index) => ({
       id: `footer-quick-${index + 1}`,
       label: values[`footerQuick${index + 1}Label`]?.trim() || item.label,
       href: safeInternalHref(values[`footerQuick${index + 1}Url`], item.href),
     }))
-    .filter((item) => item.href !== siteConfig.contactHref)
+    .filter((item) => item.href !== siteConfig.contactHref && !isCommerceLink(item.href))
     .filter((item, index, items) =>
       items.findIndex(
         (candidate) => candidate.href === item.href || candidate.label === item.label,
