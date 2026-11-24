@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 
 import { AccountForm } from "@/components/account-form";
-import { PlaneIcon } from "@/components/layout/site-icons";
+import { FlightTicketIcon, PlaneIcon } from "@/components/layout/site-icons";
 import { Button } from "@/components/ui/button";
 import { PUBLIC_API_BASE_URL } from "@/lib/api/client";
 
@@ -18,6 +18,7 @@ type Props = {
 };
 
 export function AvailabilityNotice({ departureDate, destination, iconImageId, label, origin, serviceType }: Props) {
+  const FallbackIcon = serviceType === "flight" ? FlightTicketIcon : PlaneIcon;
   const [open, setOpen] = useState(false);
   const [registered, setRegistered] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -50,7 +51,7 @@ export function AvailabilityNotice({ departureDate, destination, iconImageId, la
   return <>
     <section className="rounded-3xl border border-dashed border-brand/25 bg-white px-5 py-10 text-center shadow-sm">
       <div className="relative mx-auto grid size-20 place-items-center overflow-hidden rounded-full bg-brand-soft text-brand">
-        {iconImageId ? <Image alt="" fill className="object-contain p-2" src={`${PUBLIC_API_BASE_URL}/media/${iconImageId}`} /> : <PlaneIcon className="size-9" />}
+        {iconImageId ? <Image alt="" fill className="object-contain p-2" src={`${PUBLIC_API_BASE_URL}/media/${iconImageId}`} /> : <FallbackIcon className="size-9" aria-hidden="true" />}
       </div>
       <h3 className="mt-5 text-xl font-black text-brand">در این تاریخ بلیتی موجود نیست</h3>
       <p className="mx-auto mt-2 max-w-xl text-sm leading-7 text-muted">تاریخ یا فیلترها را تغییر دهید؛ همچنین می‌توانید درخواست اطلاع‌رسانی برای {label} را ثبت کنید.</p>
