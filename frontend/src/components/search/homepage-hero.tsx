@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 import {
   type TransportSearchOptions,
   TravelSearch,
@@ -32,6 +34,11 @@ export function HomepageHero({
   return (
     <section data-homepage-hero className={styles.hero} aria-label="جستجوی خدمات سفر">
       <Container className={styles.layout}>
+        {serviceType === "tour" && (
+          <div className={styles.tourBanner}>
+            <Image src="/images/hero/tour-mediterranean-panorama.webp" alt="" fill unoptimized loading="eager" />
+          </div>
+        )}
         <div className={styles.content}>
           <div id="trip-search" tabIndex={-1} data-home-search="true" className={styles.search}>
             <TravelSearch key={serviceType} hotelCountries={hotelCountries} visaCountries={visaCountries}
