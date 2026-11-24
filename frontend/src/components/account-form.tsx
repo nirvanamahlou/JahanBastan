@@ -325,20 +325,13 @@ export function AccountForm({ onAuthenticated, refreshAfterAuthentication = true
           </div>
 
           </>}
-          {!compact && isLogin && accountType === "customer" ? (
-            <div className="mt-4 grid grid-cols-2 gap-2 rounded-2xl border border-border bg-white p-1.5" aria-label="روش ورود">
-              <button
-                aria-pressed={method === "email"}
-                className={`min-h-10 rounded-xl px-3 text-sm font-bold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${method === "email" ? "bg-brand text-white shadow-sm" : "text-brand hover:bg-brand-soft"}`}
-                onClick={() => { setMethod("email"); setError(""); setNotice(""); }}
-                type="button"
-              >
-                ایمیل و رمز عبور
-              </button>
+          {isLogin && accountType === "customer" ? (
+            <div className="mt-4 grid grid-cols-2 gap-2 rounded-2xl border border-border bg-white p-1.5" role="group" aria-label="روش ورود">
               <button
                 aria-pressed={method === "sms"}
                 className={`min-h-10 rounded-xl px-3 text-sm font-bold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${method === "sms" ? "bg-brand text-white shadow-sm" : "text-brand hover:bg-brand-soft"}`}
                 onClick={() => {
+                  if (method === "sms") return;
                   setMethod("sms");
                   setSmsStep("request");
                   setSmsPhone("");
@@ -347,7 +340,15 @@ export function AccountForm({ onAuthenticated, refreshAfterAuthentication = true
                 }}
                 type="button"
               >
-                ورود با پیامک
+                ورود با شماره موبایل
+              </button>
+              <button
+                aria-pressed={method === "email"}
+                className={`min-h-10 rounded-xl px-3 text-sm font-bold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${method === "email" ? "bg-brand text-white shadow-sm" : "text-brand hover:bg-brand-soft"}`}
+                onClick={() => { setMethod("email"); setError(""); setNotice(""); }}
+                type="button"
+              >
+                ورود با ایمیل
               </button>
             </div>
           ) : null}
@@ -459,12 +460,11 @@ export function AccountForm({ onAuthenticated, refreshAfterAuthentication = true
 
           {compact ? (
             <div className="mt-5 flex flex-wrap gap-x-4 gap-y-2 border-t border-border pt-4 text-sm font-bold text-brand">
-              {isLogin && accountType === "customer" && method === "sms" ? (
-                <button type="button" onClick={() => switchMode("login")}>ورود با رمز عبور</button>
+              {accountType === "agency" ? (
+                <button type="button" onClick={() => { switchMode("login"); setAccountType("customer"); setMethod("sms"); }}>ورود مسافر</button>
               ) : (
-                <button type="button" onClick={() => { switchMode("login"); setAccountType("customer"); setMethod("sms"); }}>ورود با پیامک</button>
+                <button type="button" onClick={() => { switchMode("login"); setAccountType("agency"); }}>ورود آژانس</button>
               )}
-              {isLogin && accountType === "customer" && <button type="button" onClick={() => { switchMode("login"); setAccountType("agency"); }}>ورود آژانس</button>}
             </div>
           ) : (
             <Link className="mt-3 flex min-h-11 w-full items-center justify-center rounded-xl border border-brand bg-white px-4 py-3 text-sm font-black text-brand transition hover:bg-brand-soft" href="/account/operations/">پیگیری درخواست‌ها و لغو رزرو</Link>
