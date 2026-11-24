@@ -109,7 +109,7 @@ export function CombinedPackageCard({ item, tourId, departureId, capacityRemaini
           const cover = images[0] ?? null;
           const board = assignment.boardType?.trim();
           return (
-            <article className="overflow-hidden rounded-xl border border-border bg-white" key={`${assignment.hotel.slug}-${hotelIndex}`}>
+            <article className={`overflow-hidden rounded-xl border border-border bg-white ${item.hotels.length === 3 && hotelIndex === 2 ? "col-span-2" : ""}`} key={`${assignment.hotel.slug}-${hotelIndex}`}>
               <Link aria-label={`مشاهده جزئیات ${assignment.hotel.name}`} className="group block" href={`/hotels/${assignment.hotel.slug}/`}>
                 <div className="relative h-[76px] sm:h-[108px] overflow-hidden bg-surface-muted">
                   {cover ? <Image alt={`نمای ساختمان هتل ${assignment.hotel.name}`} className="object-cover transition duration-500 group-hover:scale-105" fill sizes="(max-width: 768px) 48vw, 550px" src={`${PUBLIC_API_BASE_URL}/media/${cover}`} /> : <span className="grid h-full place-items-center text-sm text-muted">بدون تصویر</span>}
