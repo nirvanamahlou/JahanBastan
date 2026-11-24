@@ -5,7 +5,6 @@ import Link from "next/link";
 
 import { groupCountryOffers, mergeCountryCounts, type CountryOffer } from "@/lib/country-catalog";
 import { HomepageServiceShowcase, type ShowcasePanel } from "@/components/search/homepage-service-showcase";
-import { HomepageTourPromos } from "@/components/search/homepage-tour-promos";
 import { BookIcon, ClockIcon, HotelIcon, LocationIcon, PhoneIcon } from "@/components/layout/site-icons";
 import { HomepageSearchGuide, HomepageSearchProvider } from "@/components/search/homepage-search-guide";
 import { HomepageHero } from "@/components/search/homepage-hero";
@@ -127,13 +126,6 @@ export default async function HomePage() {
       ];
     }),
   ) as Record<ServiceType, string>;
-  const homePromoImageId = Number(settings?.socialLinks.homePromoImageId);
-  const hasHomePromoImage = Number.isInteger(homePromoImageId) && homePromoImageId > 0;
-  const homePromoImageUrl = hasHomePromoImage
-    ? PUBLIC_API_BASE_URL + "/media/" + homePromoImageId
-    : null;
-  const homePromoTitle = settings?.socialLinks.homePromoTitle?.trim() || "پیشنهاد ویژه سفر";
-  const homePromoHref = settings?.socialLinks.homePromoHref?.trim() || "/tours/";
   const countryCards = [...homepageCountries];
   const knownCountries = new Set(
     countryCards.map((country) => normalizeCountryName(country.name)),
@@ -371,7 +363,6 @@ export default async function HomePage() {
         tourTransportOptions={tourTransportOptions}
       />
 
-      <HomepageTourPromos imageUrl={homePromoImageUrl} title={homePromoTitle} href={homePromoHref} />
       <HomepageServiceShowcase panels={showcasePanels} />
       <HomepageSearchGuide content={Object.fromEntries(Object.entries(settings?.socialLinks ?? {}).filter(([key]) => key.startsWith("searchGuide")))} />
       <section className={styles.aboutSection} aria-labelledby="home-about-title">
