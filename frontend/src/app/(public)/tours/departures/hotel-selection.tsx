@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { SiteSelect } from "@/components/ui/site-select";
 import { SearchIcon } from "@/components/layout/site-icons";
 import { toToman, type ExchangeRates } from "@/lib/currency-conversion";
@@ -12,7 +13,7 @@ import { hotelImages, labels, priceText, type Departure } from "./catalog";
 
 const normalize = (value: string) => value.trim().toLocaleLowerCase("fa-IR")
   .replace(/ي/g, "ی").replace(/ك/g, "ک");
-const field = "w-full rounded-xl border border-border bg-white p-3 text-sm";
+const field = "w-full rounded-xl border border-border bg-white p-2 text-xs";
 
 function HotelRates({ rates, hotelName }: { rates: Departure["rates"]; hotelName: string }) {
   const [counts, setCounts] = useState<Record<number, number>>({});
@@ -75,7 +76,7 @@ function HotelRates({ rates, hotelName }: { rates: Departure["rates"]; hotelName
   </>;
 }
 
-export function AvinaHotelSelection({ tour, exchangeRates }: { tour: Departure; exchangeRates: ExchangeRates }) {
+export function AvinaHotelSelection({ tour, exchangeRates }: { tour: Departure & { bookingPublicationId?: string | null }; exchangeRates: ExchangeRates }) {
   const [query, setQuery] = useState("");
   const [hotelId, setHotelId] = useState("");
   const [region, setRegion] = useState("");
@@ -106,13 +107,13 @@ export function AvinaHotelSelection({ tour, exchangeRates }: { tour: Departure; 
       ((!minimum && !maximum) || (price !== undefined &&
         (!minimum || price >= Number(minimum)) && (!maximum || price <= Number(maximum))));
   });
-  return <div className="grid gap-5 lg:grid-cols-[16rem_minmax(0,1fr)]">
-    <aside className="h-fit rounded-[1.75rem] border border-[#ffd1e3] bg-gradient-to-b from-white to-[#fff6fa] p-4 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:overscroll-contain">
-      <header className="flex items-center justify-between border-b border-[#ffd7e6] pb-4">
+  return <div dir="rtl" className="grid gap-4 lg:grid-cols-[14rem_minmax(0,1fr)]">
+    <aside className="h-fit rounded-[1.75rem] border border-[#ffd1e3] bg-gradient-to-b from-white to-[#fff6fa] p-3 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:overscroll-contain">
+      <header className="flex items-center justify-between border-b border-[#ffd7e6] pb-2">
         <h2 className="flex items-center gap-2 font-black text-brand"><span aria-hidden="true" className="grid size-8 place-items-center rounded-xl bg-[#ffe3ee] text-[#f12b75]">☷</span>فیلترها</h2>
         <button type="button" className="rounded-lg bg-[#fff0f6] px-2 py-1 text-xs font-bold text-[#e6236c]" onClick={() => { setQuery(""); setHotelId(""); setRegion(""); setStars(""); setAvailableOnly(false); setInstallmentOnly(false); setMinimum(""); setMaximum(""); }}>پاک کردن</button>
       </header>
-      <div className="mt-4 grid gap-3 text-sm font-bold text-brand">
+      <div className="mt-2 grid gap-2 text-xs font-bold text-brand">
         <label className="grid gap-2">جستجوی نام هتل
           <span className="relative">
             <SearchIcon className="pointer-events-none absolute end-3 top-1/2 size-4 -translate-y-1/2 text-[#e6236c]" />
@@ -160,7 +161,14 @@ export function AvinaHotelSelection({ tour, exchangeRates }: { tour: Departure; 
             stars={hotel.starRating} summary={hotel.description} facilities={facilities}
             badges={tour.previewOnly ? <span className="rounded-xl bg-surface-muted px-3 py-2 text-xs font-bold">پیش‌نمایش</span> : null}
             amenities={<HotelAmenities description={facilities} region={hotel.region ?? null} roomType="" serviceType={hotel.serviceLevel || ""} variant="tour-card" />}
-            rates={<HotelRates rates={tour.rates.filter(rate => rate.hotelId === hotel.id)} hotelName={hotel.name} />}
+            rates={<>
+              <HotelRates rates={tour.rates.filter(rate => rate.hotelId === hotel.id)} hotelName={hotel.name} />
+              {canSell && tour.bookingPublicationId && tour.kind === "tour" && (
+                <Link className="mt-2 inline-flex min-h-9 items-center rounded-lg bg-brand px-3 py-1.5 text-xs font-bold text-white" href={`/cart/avina-tour/?${new URLSearchParams({ offer: tour.bookingPublicationId, hotel: hotel.name })}`}>
+                  انتخاب اتاق و ادامه خرید
+                </Link>
+              )}
+            </>}
             locationMap={<HotelLocationMap compact name={hotel.englishName || hotel.name} address={hotel.address} region={hotel.region}
               destination={city} country={hotel.city?.country.name} latitude={hotel.latitude} longitude={hotel.longitude} />} />
         </article>;
