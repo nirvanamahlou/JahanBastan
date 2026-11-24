@@ -53,13 +53,13 @@ async function readErrorBody(response: Response): Promise<ApiErrorBody | null> {
   }
 }
 
-export function AccountForm({ onAuthenticated, refreshAfterAuthentication = true }: { onAuthenticated?: () => void; refreshAfterAuthentication?: boolean } = {}) {
+export function AccountForm({ onAuthenticated, refreshAfterAuthentication = true, compact = false }: { onAuthenticated?: () => void; refreshAfterAuthentication?: boolean; compact?: boolean } = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [mode, setMode] = useState<Mode>(() =>
-    searchParams.get("mode") === "register" ? "register" : "login",
+    !compact && searchParams.get("mode") === "register" ? "register" : "login",
   );
-  const [method, setMethod] = useState<Method>("email");
+  const [method, setMethod] = useState<Method>(compact ? "sms" : "email");
   const [accountType, setAccountType] = useState<AccountType>("customer");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -272,8 +272,8 @@ export function AccountForm({ onAuthenticated, refreshAfterAuthentication = true
 
   return (
     <section className="mx-auto w-full max-w-xl" dir="rtl">
-      <div className="overflow-hidden rounded-[1.5rem] border sm:rounded-[2rem] border-brand/10 bg-white shadow-[0_24px_70px_rgba(1,37,105,0.13)]">
-        <header className="relative overflow-hidden bg-[linear-gradient(135deg,#012569,#0c4c9c)] px-5 py-6 text-center text-white sm:px-10 sm:py-9">
+      <div className={compact ? "" : "overflow-hidden rounded-[1.5rem] border sm:rounded-[2rem] border-brand/10 bg-white shadow-[0_24px_70px_rgba(1,37,105,0.13)]"}>
+        {!compact && <header className="relative overflow-hidden bg-[linear-gradient(135deg,#012569,#0c4c9c)] px-5 py-6 text-center text-white sm:px-10 sm:py-9">
           <div aria-hidden="true" className="absolute -right-12 -top-16 size-40 rounded-full bg-white/10" />
           <div aria-hidden="true" className="absolute -bottom-20 -left-12 size-44 rounded-full bg-accent/35" />
           <div className="relative">
@@ -281,9 +281,10 @@ export function AccountForm({ onAuthenticated, refreshAfterAuthentication = true
             <h1 className="mt-4 text-2xl font-black sm:text-3xl">{title}</h1>
             <p className="mx-auto mt-2 max-w-sm text-sm leading-7 text-white/80">{subtitle}</p>
           </div>
-        </header>
+        </header>}
 
-        <div className="p-4 sm:p-6">
+        <div className={compact ? "" : "p-4 sm:p-6"}>
+          {!compact && <>
           <div className="mb-4 grid grid-cols-2 gap-1 rounded-2xl border border-brand/10 bg-brand-soft p-1.5" aria-label="نوع حساب">
             <button
               aria-pressed={accountType === "customer"}
@@ -323,7 +324,8 @@ export function AccountForm({ onAuthenticated, refreshAfterAuthentication = true
             </button>
           </div>
 
-          {isLogin && accountType === "customer" ? (
+          </>}
+          {!compact && isLogin && accountType === "customer" ? (
             <div className="mt-4 grid grid-cols-2 gap-2 rounded-2xl border border-border bg-white p-1.5" aria-label="روش ورود">
               <button
                 aria-pressed={method === "email"}
@@ -457,7 +459,21 @@ export function AccountForm({ onAuthenticated, refreshAfterAuthentication = true
               <Button className="w-full bg-pink-500 text-white hover:bg-pink-600 focus-visible:ring-pink-500" loading={submitting} size="lg" type="submit">{isLogin ? "ورود به حساب" : "ایجاد حساب کاربری"}</Button>
             </form>
           )}
-          <Link className="mt-3 flex min-h-11 w-full items-center justify-center rounded-xl border border-brand bg-white px-4 py-3 text-sm font-black text-brand transition hover:bg-brand-soft" href="/account/operations/">پیگیری درخواست‌ها و لغو رزرو</Link>
+
+          {compact ? (
+            <div className="mt-5 flex flex-wrap gap-x-4 gap-y-2 border-t border-border pt-4 text-sm font-bold text-brand">
+              {isLogin && accountType === "customer" && method === "sms" ? (
+                <button type="button" onClick={() => switchMode("login")}>ورود با ایمیل و رمز عبور</button>
+              ) : (
+                <button type="button" onClick={() => { switchMode("login"); setAccountType("customer"); setMethod("sms"); }}>ورود با پیامک</button>
+              )}
+              {isLogin && accountType === "customer" && <button type="button" onClick={() => { switchMode("login"); setAccountType("agency"); }}>ورود آژانس</button>}
+              {isLogin && <button type="button" onClick={() => switchMode("register")}>ایجاد حساب</button>}
+              {!isLogin && <button type="button" onClick={() => { switchMode("register"); setAccountType(accountType === "customer" ? "agency" : "customer"); }}>{accountType === "customer" ? "ثبت‌نام آژانس" : "ثبت‌نام مشتری"}</button>}
+            </div>
+          ) : (
+            <Link className="mt-3 flex min-h-11 w-full items-center justify-center rounded-xl border border-brand bg-white px-4 py-3 text-sm font-black text-brand transition hover:bg-brand-soft" href="/account/operations/">پیگیری درخواست‌ها و لغو رزرو</Link>
+          )}
         </div>
       </div>
       <p className="mt-4 px-4 text-center text-xs leading-6 text-muted">با ورود یا ساخت حساب، <Link className="font-bold text-brand underline" href="/terms/">شرایط استفاده</Link> و <Link className="font-bold text-brand underline" href="/privacy/">حریم خصوصی</Link> جهان باستان را می‌پذیرید.</p>

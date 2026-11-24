@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { type MouseEvent, Suspense, useCallback, useEffect, useState } from "react";
 
+import { AccountForm } from "@/components/account-form";
+import { Dialog } from "@/components/ui/dialog";
 import { Container } from "@/components/ui/container";
 import { siteConfig } from "@/config/site";
 import { readCustomerSession } from "@/lib/customer-session";
@@ -23,9 +25,17 @@ function isCurrentRoute(pathname: string, href: string) {
 export function SiteHeader() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isNight, setIsNight] = useState(false);
   const [customerName, setCustomerName] = useState<string | null>(null);
+
+  function openAccount(event: MouseEvent<HTMLAnchorElement>) {
+    setMenuOpen(false);
+    if (customerName || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    setAccountOpen(true);
+  }
 
   const loadCustomer = useCallback(async () => {
     const response = await readCustomerSession().catch(() => null);
@@ -186,6 +196,8 @@ export function SiteHeader() {
 
           <Link
             href="/account/"
+            onClick={openAccount}
+            aria-haspopup={customerName ? undefined : "dialog"}
             className="hidden min-h-10 items-center whitespace-nowrap rounded-xl border border-[var(--interaction-hover-strong)] bg-[var(--interaction-hover)] px-5 text-sm font-bold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_9px_20px_rgba(199,33,105,0.3)] transition hover:-translate-y-0.5 hover:bg-[var(--interaction-hover-strong)] focus-visible:ring-4 focus-visible:ring-[var(--interaction-hover)] lg:inline-flex"
           >
             {customerName ? "پنل کاربری" : "ورود / ثبت‌نام"}
@@ -284,7 +296,8 @@ export function SiteHeader() {
 
                 <Link
                   href="/account/"
-                  onClick={() => setMenuOpen(false)}
+                  onClick={openAccount}
+                  aria-haspopup={customerName ? undefined : "dialog"}
                   className="flex min-h-11 items-center justify-center rounded-xl border border-[var(--interaction-hover-strong)] bg-[var(--interaction-hover)] px-4 font-bold text-white shadow-sm transition hover:bg-[var(--interaction-hover-strong)] focus-visible:ring-4 focus-visible:ring-[var(--interaction-hover)]"
                 >
                   {customerName ? "پنل کاربری" : "ورود / ثبت‌نام"}
@@ -294,6 +307,9 @@ export function SiteHeader() {
           </nav>
         </>
       ) : null}
+      <Dialog open={accountOpen} title="ورود و ثبت‌نام" compact onClose={() => setAccountOpen(false)}>
+        {accountOpen && <Suspense fallback={null}><AccountForm compact onAuthenticated={() => setAccountOpen(false)} /></Suspense>}
+      </Dialog>
     </header>
   );
 }
