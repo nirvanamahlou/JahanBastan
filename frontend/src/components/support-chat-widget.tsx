@@ -104,7 +104,7 @@ export function SupportChatWidget() {
     const { left, top } = event.currentTarget.getBoundingClientRect();
     suppressLauncherClick.current = false;
     launcherDrag.current = { pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, origin: { left, top }, moved: false };
-    event.currentTarget.setPointerCapture(event.pointerId);
+    if (event.pointerType === "mouse") event.currentTarget.setPointerCapture(event.pointerId);
   }
 
   function moveLauncher(event: PointerEvent<HTMLButtonElement>) {
@@ -426,7 +426,7 @@ export function SupportChatWidget() {
       <button
         aria-expanded={open}
         aria-label={open ? "بستن پشتیبانی آنلاین" : "باز کردن پشتیبانی آنلاین"}
-        className="support-chat-launcher relative flex size-11 touch-none select-none items-center justify-center rounded-xl border-2 border-white bg-[#102747] p-0 leading-none text-white shadow-[0_8px_22px_rgba(16,39,71,0.3)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-200 sm:size-16 sm:rounded-2xl"
+        className="support-chat-launcher relative flex size-[44px] touch-none select-none items-center justify-center rounded-xl border-2 border-white bg-[#102747] p-0 leading-none text-white shadow-[0_8px_22px_rgba(16,39,71,0.3)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-200 sm:size-16 sm:rounded-2xl"
         ref={launcherRef}
         onPointerDown={startLauncherDrag}
         onPointerMove={moveLauncher}
