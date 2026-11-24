@@ -1,8 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import Link from "next/link";
+import { useRef, useState } from "react";
 import { ArrowLeftIcon } from "@/components/layout/site-icons";
+import catalogStyles from "./catalog-layout.module.css";
 import styles from "./tour-hotel-presentation.module.css";
 
 export function TourHotelGallery({ name, gallery }: { name: string; gallery: string[] }) {
@@ -43,5 +45,34 @@ export function TourHotelGallery({ name, gallery }: { name: string; gallery: str
         ))}
       </div>}
     </section>
+  );
+}
+
+export function HotelListGallery({ name, href, photos, rating }: { name: string; href: string; photos: string[]; rating?: string | null }) {
+  const track = useRef<HTMLDivElement>(null);
+  function move(direction: number) {
+    const viewport = track.current;
+    if (!viewport || !viewport.clientWidth) return;
+    const index = Math.round(viewport.scrollLeft / viewport.clientWidth);
+    const next = (index + direction + photos.length) % photos.length;
+    viewport.scrollTo({
+      left: next * viewport.clientWidth,
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+    });
+  }
+
+  return (
+    <div className={catalogStyles.hotelGallery} aria-label={`تصاویر ${name}`}>
+      <div className={catalogStyles.hotelGalleryTrack} dir="ltr" ref={track}>
+        {photos.map((src, index) => (
+          <Link href={href} prefetch={false} key={src} aria-label={`مشاهده هتل ${name}، عکس ${index + 1}`}>
+            <Image src={src} alt="" fill sizes="(max-width: 640px) 30vw, 260px" className="object-cover" />
+          </Link>
+        ))}
+      </div>
+      {rating && <span className={catalogStyles.hotelGalleryRating}>امتیاز مهمان: {rating}</span>}
+      <button type="button" dir="ltr" className={catalogStyles.hotelGalleryLeft} aria-label="عکس به سمت چپ" onClick={() => move(-1)}>‹</button>
+      <button type="button" dir="ltr" className={catalogStyles.hotelGalleryRight} aria-label="عکس به سمت راست" onClick={() => move(1)}>›</button>
+    </div>
   );
 }

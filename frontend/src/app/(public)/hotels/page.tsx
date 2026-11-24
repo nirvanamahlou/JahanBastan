@@ -49,12 +49,12 @@ export default async function HotelsPage({
 
   return (
     <>
-      <PageIntro compact
+      <PageIntro compact className={catalogStyles.hotelListIntro}
         description="کشور را انتخاب کنید و هتل‌ها را بر اساس ستاره و امتیاز مهمان مقایسه کنید."
         eyebrow="اقامت در مقصد"
         title="هتل‌ها بر اساس کشور"
       />
-      <section className="py-10 sm:py-16">
+      <section className="py-4 sm:py-6">
         <Container className={catalogStyles.catalogContainer}>
           {destinationPayload.items.length ? (
             <HotelCatalog

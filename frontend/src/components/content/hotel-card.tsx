@@ -8,7 +8,10 @@ import { CompareToggle, type ComparisonItem } from "@/components/content/compari
 import styles from "./catalog-layout.module.css";
 import { HotelIcon, LocationIcon } from "@/components/layout/site-icons";
 
+import { HotelListGallery } from "./tour-hotel-gallery";
+
 type HotelCardProps = {
+  galleryImages?: string[];
   listLayout?: boolean;
   slug: string;
   name: string;
@@ -56,6 +59,7 @@ function localizePlaceName(value: string) {
 
 export function HotelCard({
   listLayout = false,
+  galleryImages = [],
   slug,
   name,
   destination,
@@ -69,9 +73,8 @@ export function HotelCard({
   guestRating = null,
 }: HotelCardProps) {
   const href = `/hotels/${slug}/`;
-  // Catalogue cards intentionally use only the dedicated square cover image.
-  // Gallery assets belong to the hotel detail page and never leak into cards.
   const mainImage = imageUrl ?? null;
+  const photos = listLayout ? [...new Set([...(mainImage ? [mainImage] : []), ...galleryImages])] : [];
   const guestRatingLabel = guestRating ? guestRatingLabels[guestRating] : null;
   const mapUrl = hotelMapSearchUrl({ name, address, region, destination, country });
   const locationLabel = [
@@ -103,18 +106,23 @@ export function HotelCard({
       data-hotel-list-card={listLayout || undefined}
       data-scroll-reveal
     >
+      {photos.length > 1 ? (
+        <div className={styles.hotelListPhoto}>
+          <HotelListGallery name={name} href={href} photos={photos} rating={guestRatingLabel} />
+        </div>
+      ) : (
       <Link
         aria-label={`مشاهده هتل ${name}`}
         className={`${listLayout ? styles.hotelListPhoto : "catalog-card__media"} relative block overflow-hidden bg-surface-muted`}
         href={href}
       >
-        {mainImage ? (
+        {mainImage || photos[0] ? (
           <Image
             alt={name}
             className="object-cover transition duration-500 group-hover:scale-105"
             fill
             sizes={listLayout ? "(max-width: 640px) 30vw, 260px" : "(max-width: 640px) 100vw, (max-width: 1100px) 50vw, 33vw"}
-            src={mainImage}
+            src={mainImage || photos[0]}
           />
         ) : (
           <div className="absolute inset-0 grid place-items-center bg-[radial-gradient(circle_at_20%_18%,rgba(216,234,255,.9)_0,transparent_30%),linear-gradient(135deg,#001a4a_0%,#174891_62%,#4e83c4_100%)]">
@@ -128,6 +136,7 @@ export function HotelCard({
           </span>
         ) : null}
       </Link>
+      )}
 
       <div className={`${listLayout ? styles.hotelListBody : "catalog-card__body"} p-4`}>
         <div className="flex items-start justify-between gap-3">

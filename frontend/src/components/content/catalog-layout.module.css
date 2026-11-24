@@ -264,3 +264,25 @@
   .hotelListCard > .hotelListBody > :first-child > :first-child { max-width: 100%; }
   .hotelListCard .hotelListFooter > :last-child { flex-wrap: wrap; min-width: 0; flex-shrink: 1; }
 }
+
+.hotelListIntro { padding-block: .65rem; }
+.hotelListIntro h1 { font-size: clamp(1.15rem, 2.2vw, 1.65rem); }
+.hotelListIntro p { margin-block: .2rem; }
+.hotelListFilters { min-width: 0; padding: .75rem; border: 1px solid #d9e3f2; border-radius: .85rem; background: #fff; }
+.hotelListFilters summary { font-size: .8rem; line-height: 1.55; }
+.hotelListFilters details > :nth-child(2) { justify-content: flex-end; }
+.hotelListFilters :is(input[type="search"], button[aria-haspopup="listbox"]) { min-height: 2.05rem; font-size: .72rem; }
+.hotelListCard[data-hotel-list-card] { box-shadow: 0 3px 14px #1027470a; }
+.hotelListCard[data-hotel-list-card]:hover { transform: none; border-color: #a6bedb; }
+.hotelListBody > :first-child > :first-child > :nth-child(2) { gap: .25rem; margin-top: .2rem; }
+.hotelListBody a[target="_blank"] { min-height: 1.6rem; padding-block: .1rem; padding-inline: .4rem; background: transparent; }
+.hotelListPhoto { position: relative; overflow: hidden; background: #edf3fa; }
+.hotelGallery, .hotelGalleryTrack { position: absolute; inset: 0; }
+.hotelGalleryTrack { display: flex; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-inline: contain; }
+.hotelGalleryTrack > a { position: relative; flex: 0 0 100%; scroll-snap-align: start; }
+.hotelGalleryRating { position: absolute; inset: .35rem .35rem auto auto; background: #fff; color: #16584b; padding: .12rem .3rem; border-radius: .35rem; font-size: .55rem; pointer-events: none; }
+.hotelGalleryLeft, .hotelGalleryRight { position: absolute; bottom: .35rem; display: grid; place-items: center; width: 1.55rem; height: 1.55rem; border-radius: 50%; background: #102747e8; color: #fff; font-size: 1.1rem; line-height: 1; }
+.hotelGalleryLeft { left: .35rem; }
+.hotelGalleryRight { right: .35rem; }
+.hotelGalleryLeft:focus-visible, .hotelGalleryRight:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+@media (min-width: 1024px) { .hotelListFilters { position: sticky; top: 1rem; max-height: calc(100dvh - 2rem); overflow-y: auto; overscroll-behavior: contain; } }

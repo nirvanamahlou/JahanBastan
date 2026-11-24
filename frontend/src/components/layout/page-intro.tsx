@@ -8,12 +8,13 @@ type PageIntroProps = {
   title: string;
   description?: string;
   compact?: boolean;
+  className?: string;
   bannerSrc?: string;
 };
 
-export function PageIntro({ eyebrow, title, description, compact = false, bannerSrc }: PageIntroProps) {
+export function PageIntro({ eyebrow, title, description, compact = false, className = "", bannerSrc }: PageIntroProps) {
   return (
-    <section data-scroll-reveal className={`border-b border-border bg-surface-muted ${compact ? "py-7 sm:py-9" : "py-12 sm:py-16"}`}>
+    <section data-scroll-reveal className={`border-b border-border bg-surface-muted ${compact ? "py-7 sm:py-9" : "py-12 sm:py-16"} ${className}`}>
       <Container className={compact ? catalogStyles.catalogContainer : undefined}>
         {eyebrow ? (
           <p className="mb-3 text-sm font-bold text-brand">{eyebrow}</p>

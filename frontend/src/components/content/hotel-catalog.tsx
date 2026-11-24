@@ -1,6 +1,7 @@
 "use client";
 
 
+import styles from "./catalog-layout.module.css";
 import { ResponsiveFilterPanel } from "./responsive-filter-panel";
 import { CountryCityFields } from "./country-city-fields";
 import { useRouter } from "next/navigation";
@@ -72,11 +73,10 @@ export function HotelCatalog({ hotels, destinations, selectedDestinationSlug, co
   };
 
   return (
-    <div className="grid items-start gap-6 lg:grid-cols-[17rem_minmax(0,1fr)]">
-      <aside className="min-w-0 rounded-[1.75rem] border border-border bg-white p-5 shadow-[0_16px_40px_rgba(1,37,105,.08)] lg:sticky lg:top-5 lg:max-h-[calc(100vh-2.5rem)] lg:overflow-y-auto lg:overscroll-contain">
+    <div className="grid items-start gap-4 lg:grid-cols-[14rem_minmax(0,1fr)]">
+      <aside className={styles.hotelListFilters}>
         <ResponsiveFilterPanel title="فیلتر هتل‌ها">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="text-xl font-black text-brand">فیلترها</h2>
           <button
             className="text-xs font-bold text-brand transition hover:text-accent-strong"
             onClick={() => {
@@ -94,14 +94,14 @@ export function HotelCatalog({ hotels, destinations, selectedDestinationSlug, co
           </button>
         </div>
 
-        <label className="mt-6 grid min-w-0 gap-2 border-t border-border pt-5 text-sm font-black text-brand">
+        <label className="mt-3 grid min-w-0 gap-2 border-t border-border pt-2 text-sm font-black text-brand">
           جستجوی نام هتل
           <span className="relative block min-w-0">
             <SearchIcon className="pointer-events-none absolute end-3 top-1/2 size-4 -translate-y-1/2 text-brand" />
             <input
               aria-label="جستجوی نام هتل"
               autoComplete="off"
-              className="box-border min-h-12 w-full min-w-0 rounded-xl border border-border bg-white px-3 ps-10 text-sm font-bold text-brand outline-none transition placeholder:text-muted focus:border-brand focus:ring-4 focus:ring-brand/10"
+              className="box-border min-h-9 w-full min-w-0 rounded-xl border border-border bg-white px-3 ps-10 text-sm font-bold text-brand outline-none transition placeholder:text-muted focus:border-brand focus:ring-4 focus:ring-brand/10"
               dir="auto"
               onChange={(event) => setHotelQuery(event.target.value)}
               placeholder="نام هتل را وارد کنید"
@@ -121,23 +121,23 @@ export function HotelCatalog({ hotels, destinations, selectedDestinationSlug, co
           </span>
         </label>
 
-        <form action="/hotels/" className="mt-5 grid min-w-0 gap-4 border-t border-border pt-5">
+        <form action="/hotels/" className="mt-3 grid min-w-0 gap-2 border-t border-border pt-2">
           <CountryCityFields key={country + selectedDestinationSlug} id="hotel" countries={countries} cities={cities.map((city) => ({ title: city.title, value: city.slug, country: city.country }))} country={country} city={selectedDestinationSlug} cityName="destinationSlug" />
           {passengerCount ? <input name="passengerCount" type="hidden" value={passengerCount} /> : null}
-          <button className="min-h-11 rounded-xl bg-brand px-4 text-sm font-black text-white" type="submit">اعمال مقصد</button>
+          <button className="min-h-9 rounded-xl bg-brand px-4 text-sm font-black text-white" type="submit">اعمال مقصد</button>
         </form>
 
-        <fieldset className="mt-6 border-t border-border pt-5">
+        <fieldset className="mt-3 border-t border-border pt-2">
           <legend className="text-base font-black text-brand">ستاره هتل</legend>
-          <div className="mt-3 grid gap-2">
+          <div className="mt-2 grid gap-1">
             {[5, 4, 3, 2, 1].map((star) => (
               <label
-                className="flex cursor-pointer items-center justify-between rounded-xl px-2 py-2 transition hover:bg-sky-50"
+                className="flex cursor-pointer items-center justify-between rounded-xl px-2 py-1 transition hover:bg-sky-50"
                 key={star}
               >
                 <input
                   checked={selectedStars.includes(star)}
-                  className="size-5 accent-brand"
+                  className="size-4 accent-brand"
                   onChange={() => toggleStar(star)}
                   type="checkbox"
                 />
@@ -147,11 +147,11 @@ export function HotelCatalog({ hotels, destinations, selectedDestinationSlug, co
           </div>
         </fieldset>
 
-        <div className="mt-6 grid gap-2 border-t border-border pt-5 text-sm font-black text-brand">
+        <div className="mt-2 grid gap-1 border-t border-border pt-2 text-sm font-black text-brand">
           <span>مرتب‌سازی</span>
           <SiteSelect
             ariaLabel="مرتب‌سازی هتل‌ها"
-            className="min-h-12"
+            className="min-h-9"
             id="hotel-sort"
             onValueChange={setSort}
             options={[{ label: "پیشنهادی", value: "recommended" }, { label: "بیشترین ستاره", value: "stars-desc" }]}
@@ -159,10 +159,6 @@ export function HotelCatalog({ hotels, destinations, selectedDestinationSlug, co
           />
         </div>
 
-        <p className="mt-5 rounded-xl bg-surface-muted p-3 text-xs leading-6 text-muted">
-          {visibleHotels.length.toLocaleString("fa-IR")} هتل مطابق فیلترها پیدا
-          شد.
-        </p>
         </ResponsiveFilterPanel>
       </aside>
 
@@ -193,6 +189,7 @@ export function HotelCatalog({ hotels, destinations, selectedDestinationSlug, co
                 }
                 key={hotel.id}
                 listLayout
+                galleryImages={(hotel.galleryImageIds ?? []).map((id) => `${PUBLIC_API_BASE_URL}/media/${id}`)}
                 name={hotel.name}
                 slug={hotel.slug}
                 starRating={hotel.starRating}
