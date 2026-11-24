@@ -239,23 +239,24 @@
   display: grid;
   grid-template-columns: minmax(0, 31%) minmax(0, 1fr);
   min-height: 0;
+  overflow: hidden;
   padding: .65rem;
   gap: .75rem;
   border-radius: 1rem;
 }
-.hotelListCard > :global(.catalog-card__media) {
-  aspect-ratio: auto;
+.hotelListCard > .hotelListPhoto {
+  align-self: stretch;
   min-height: 8rem;
   border-radius: .65rem;
 }
-.hotelListCard > :global(.catalog-card__body) { padding: .2rem 0; min-width: 0; }
+.hotelListCard > .hotelListBody { display: flex; flex-direction: column; padding: .2rem 0; min-width: 0; }
 .hotelListCard h3 { min-height: 0; font-size: 1rem; line-height: 1.45; }
-.hotelListCard :global(.catalog-card__summary) { min-height: 0; margin-block: .45rem; font-size: .75rem; line-height: 1.6; }
-.hotelListCard :global(.catalog-card__footer) { gap: .45rem; padding-top: .45rem; }
-.hotelListCard :global(.catalog-card__footer) a { min-height: 2.5rem; padding-inline: .65rem; font-size: .75rem; }
+.hotelListCard .hotelListSummary { min-height: 0; margin-block: .45rem; font-size: .75rem; line-height: 1.6; }
+.hotelListCard .hotelListFooter { gap: .45rem; margin-top: auto; padding-top: .45rem; }
+.hotelListCard .hotelListFooter a { min-height: 2.5rem; padding-inline: .65rem; font-size: .75rem; }
 @media (max-width: 640px) {
   .hotelListCard[data-hotel-list-card] { gap: .55rem; padding: .5rem; }
-  .hotelListCard > :global(.catalog-card__body) > :first-child { flex-wrap: wrap; gap: .3rem; }
-  .hotelListCard > :global(.catalog-card__body) > :first-child > :first-child { max-width: 100%; }
-  .hotelListCard :global(.catalog-card__footer) > :last-child { flex-wrap: wrap; min-width: 0; flex-shrink: 1; }
+  .hotelListCard > .hotelListBody > :first-child { flex-wrap: wrap; gap: .3rem; }
+  .hotelListCard > .hotelListBody > :first-child > :first-child { max-width: 100%; }
+  .hotelListCard .hotelListFooter > :last-child { flex-wrap: wrap; min-width: 0; flex-shrink: 1; }
 }

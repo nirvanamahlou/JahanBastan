@@ -99,13 +99,13 @@ export function HotelCard({
   };
   return (
     <article
-      className={`catalog-card group border border-border bg-white shadow-[0_12px_32px_rgba(1,37,105,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_42px_rgba(1,37,105,0.14)] ${listLayout ? styles.hotelListCard : ""}`}
+      className={`${listLayout ? styles.hotelListCard : "catalog-card"} group border border-border bg-white shadow-[0_12px_32px_rgba(1,37,105,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_42px_rgba(1,37,105,0.14)]`}
       data-hotel-list-card={listLayout || undefined}
       data-scroll-reveal
     >
       <Link
         aria-label={`مشاهده هتل ${name}`}
-        className="catalog-card__media relative block overflow-hidden bg-surface-muted"
+        className={`${listLayout ? styles.hotelListPhoto : "catalog-card__media"} relative block overflow-hidden bg-surface-muted`}
         href={href}
       >
         {mainImage ? (
@@ -129,7 +129,7 @@ export function HotelCard({
         ) : null}
       </Link>
 
-      <div className="catalog-card__body p-4">
+      <div className={`${listLayout ? styles.hotelListBody : "catalog-card__body"} p-4`}>
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h3 className="min-h-10 break-words text-sm font-black leading-5 text-foreground" dir="auto">
@@ -157,11 +157,11 @@ export function HotelCard({
           <HotelStars className="shrink-0" rating={starRating} />
         </div>
 
-        <p className="catalog-card__summary mt-3 line-clamp-2 text-sm leading-6 text-muted">
+        <p className={`${listLayout ? styles.hotelListSummary : "catalog-card__summary"} mt-3 line-clamp-2 text-sm leading-6 text-muted`}>
           {summary}
         </p>
 
-        <div className="catalog-card__footer mt-4 flex flex-wrap items-end justify-between gap-3 border-t border-border pt-4">
+        <div className={`${listLayout ? styles.hotelListFooter : "catalog-card__footer"} mt-4 flex flex-wrap items-end justify-between gap-3 border-t border-border pt-4`}>
           <div className="min-w-0">
             <span className="text-[11px] text-muted">
               قیمت اقامت
