@@ -21,11 +21,13 @@ export type TourDepartureCalendarItem = TourDepartureAvailability & {
 export function TourDepartureCalendar({
   departures,
   fallbackDate,
+  initialDepartureId,
 }: {
   departures: TourDepartureCalendarItem[];
   fallbackDate?: string | null;
+  initialDepartureId?: number;
 }) {
-  const [selectedDepartureId, setSelectedDepartureId] = useState<number | null>(null);
+  const [selectedDepartureId, setSelectedDepartureId] = useState<number | null>(initialDepartureId ?? null);
   const available = [...departures]
     .filter((item) => item.departureDate || item.flightDetails)
     .sort((a, b) => (a.departureDate ?? "").localeCompare(b.departureDate ?? ""));
@@ -34,7 +36,7 @@ export function TourDepartureCalendar({
     : [];
   const dates = available.length ? available : fallback;
   const bookableDates = dates.filter(isTourDepartureBookable);
-  const selectedDeparture = bookableDates.find((departure) => departure.id === selectedDepartureId) ?? bookableDates[0];
+  const selectedDeparture = dates.find((departure) => departure.id === selectedDepartureId) ?? bookableDates[0];
 
   useEffect(() => {
     const sync = (event: Event) => setSelectedDepartureId((event as CustomEvent<{ departureId: number }>).detail.departureId);
@@ -105,7 +107,7 @@ export function TourDepartureCalendar({
       {selectedDeparture ? (
         <div className="mt-6 space-y-4 border-t border-border pt-6" id="selected-departure-flights" role="region" aria-label={`پروازهای ${selectedDeparture.departureDate ? formatPersianDate(selectedDeparture.departureDate) : selectedDeparture.label}`}>
           {selectedDeparture.flightDetails ?? <p className="rounded-2xl bg-surface-muted p-4 text-sm text-muted">اطلاعات پرواز برای این نوبت هنوز ثبت نشده است.</p>}
-          {selectedDeparture.canBook ? (
+          {selectedDeparture.canBook && isTourDepartureBookable(selectedDeparture) ? (
             <button className="w-full rounded-xl bg-brand px-5 py-3 text-sm font-black text-white transition hover:bg-brand-strong focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20 sm:w-auto" onClick={() => selectDeparture(selectedDeparture.id, true)} type="button">
               مشاهده هتل‌ها و قیمت‌های این تاریخ
             </button>

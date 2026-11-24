@@ -138,6 +138,7 @@ function formatPriceRangeLabel(value: number) {
 }
 
 export function TourHotelFilter({
+  initialDepartureId,
   departures,
   tourId,
   tourSlug,
@@ -147,6 +148,7 @@ export function TourHotelFilter({
   faqs,
   isInstallmentAvailable,
 }: {
+  initialDepartureId?: number;
   departures: TourBookingDeparture[];
   packages?: unknown[];
   tourId: number;
@@ -161,7 +163,7 @@ export function TourHotelFilter({
     () => departures.filter((item) => item.departureDate && item.hotelPrices.length && isTourDepartureBookable(item)),
     [departures],
   );
-  const [departureId, setDepartureId] = useState<number | null>(availableDates[0]?.id ?? null);
+  const [departureId, setDepartureId] = useState<number | null>(initialDepartureId ?? availableDates[0]?.id ?? null);
   const [hotelId, setHotelId] = useState<number | "all">("all");
   const [regionFilter, setRegionFilter] = useState("all");
   const [stars, setStars] = useState<number | "all">("all");
@@ -309,25 +311,25 @@ export function TourHotelFilter({
       </div>
 
       <div className="grid gap-5 lg:grid-cols-[16rem_minmax(0,1fr)]">
-        <aside className="h-fit min-w-0 rounded-[1.75rem] border border-[#ffd1e3] bg-gradient-to-b from-white to-[#fff6fa] p-4 shadow-[0_16px_40px_rgba(241,43,117,.09)] lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:overscroll-contain">
-          <div className="flex items-center justify-between border-b border-[#ffd7e6] pb-4"><h2 className="flex items-center gap-2 font-black text-brand"><span className="grid size-8 place-items-center rounded-xl bg-[#ffe3ee] text-[#f12b75]">☷</span>فیلترها</h2><button className="rounded-lg bg-[#fff0f6] px-2 py-1 text-xs font-bold text-[#e6236c]" onClick={() => { setHotelId("all"); setRegionFilter("all"); setStars("all"); setAvailableOnly(false); setInstallmentOnly(false); setQuery(""); setMinimumTotal(""); setMaximumTotal(""); }} type="button">پاک کردن</button></div>
-          <label className="mt-4 grid min-w-0 gap-2 text-sm font-bold text-brand">جستجوی نام هتل<span className="relative block min-w-0"><SearchIcon className="pointer-events-none absolute end-3 top-1/2 size-4 -translate-y-1/2 text-[#e6236c]" /><input aria-label="جستجوی نام هتل در تور" autoComplete="off" className="box-border min-h-11 w-full min-w-0 rounded-xl border border-[#ffc7dc] bg-white px-3 ps-10 text-sm font-bold text-brand outline-none transition placeholder:text-muted focus:border-[#f12b75] focus:ring-4 focus:ring-[#ffdbe9]" dir="auto" onChange={(event) => setQuery(event.target.value)} placeholder="نام هتل را وارد کنید" type="search" value={query} />{query ? <button aria-label="پاک کردن جستجوی هتل" className="absolute start-2 top-1/2 grid size-7 -translate-y-1/2 place-items-center rounded-lg text-muted transition hover:bg-[#fff0f6] hover:text-[#e6236c]" onClick={() => setQuery("")} type="button"><CloseIcon className="size-4" /></button> : null}</span></label>
-          <div className="mt-4 grid gap-2 text-sm font-bold text-brand"><span>هتل</span><SiteSelect ariaLabel="هتل" id="tour-hotel-filter" onValueChange={(nextValue) => setHotelId(nextValue === "all" ? "all" : Number(nextValue))} options={[{ label: "همه هتل‌ها", value: "all" }, ...hotels.map((hotel) => ({ label: hotel.name, value: String(hotel.id) }))]} searchable value={String(hotelId)} /></div>
-          <div className="mt-4 grid gap-2 text-sm font-bold text-brand"><span>منطقه هتل</span><SiteSelect ariaLabel="منطقه هتل" id="tour-region-filter" onValueChange={setRegionFilter} options={[{ label: "همه مناطق", value: "all" }, ...regions.map((region) => ({ label: region, value: region }))]} value={regionFilter} /></div>
-          <fieldset className="mt-5 border-t border-[#ffd7e6] pt-4"><legend className="px-1 text-sm font-black text-brand">درجه هتل</legend>{(["all", 5, 4, 3, 2, 1] as const).map((value) => (<button aria-pressed={stars === value} className={`mt-2 flex w-full items-center justify-between rounded-xl border px-3 py-2 text-sm transition ${stars === value ? "border-[#f12b75] bg-[#fff0f6] text-[#e6236c]" : "border-[#ffe0ec] bg-white text-muted hover:border-[#f69abd]"}`} key={value} onClick={() => setStars(value)} type="button"><span className={`grid size-5 place-items-center rounded-md border ${stars === value ? "border-[#f12b75] bg-[#f12b75] text-white" : "border-[#f2bfd3] bg-white"}`}>{stars === value ? "✓" : ""}</span><span>{value === "all" ? "همه هتل‌ها" : `${value.toLocaleString("fa-IR")} ستاره`}</span><span className="tracking-[.08em] text-[#f12b75]">{value === "all" ? "★★★★★" : "★".repeat(value)}</span></button>))}</fieldset>
-                    <fieldset className="mt-5 border-t border-[#ffd7e6] pt-4">
-            <legend className="px-1 text-sm font-black text-brand">فیلترهای تور</legend>
-            <label className="mt-3 flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-[#ffe0ec] bg-white px-3 py-3 text-sm font-black text-brand transition hover:border-[#f69abd]">
+        <aside aria-label="فیلترهای هتل" className="h-fit min-w-0 rounded-[1.75rem] border border-[#ffd1e3] bg-gradient-to-b from-white to-[#fff6fa] p-3 shadow-[0_16px_40px_rgba(241,43,117,.09)] lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:overscroll-contain">
+          <div className="flex items-center justify-between border-b border-[#ffd7e6] pb-2.5"><h2 className="flex items-center gap-1.5 text-[.78rem] font-black text-brand"><span className="grid size-6 place-items-center rounded-xl bg-[#ffe3ee] text-[#f12b75]">☷</span>فیلترها</h2><button className="rounded-lg bg-[#fff0f6] px-2 py-1 text-xs font-bold text-[#e6236c]" onClick={() => { setHotelId("all"); setRegionFilter("all"); setStars("all"); setAvailableOnly(false); setInstallmentOnly(false); setQuery(""); setMinimumTotal(""); setMaximumTotal(""); }} type="button">پاک کردن</button></div>
+          <label className="mt-3 grid min-w-0 gap-1.5 text-[.7rem] font-bold text-brand">جستجوی نام هتل<span className="relative block min-w-0"><SearchIcon className="pointer-events-none absolute end-3 top-1/2 size-4 -translate-y-1/2 text-[#e6236c]" /><input aria-label="جستجوی نام هتل در تور" autoComplete="off" className="box-border min-h-9 w-full min-w-0 rounded-xl border border-[#ffc7dc] bg-white px-3 ps-10 text-[.7rem] font-bold text-brand outline-none transition placeholder:text-muted focus:border-[#f12b75] focus:ring-4 focus:ring-[#ffdbe9]" dir="auto" onChange={(event) => setQuery(event.target.value)} placeholder="نام هتل را وارد کنید" type="search" value={query} />{query ? <button aria-label="پاک کردن جستجوی هتل" className="absolute start-2 top-1/2 grid size-7 -translate-y-1/2 place-items-center rounded-lg text-muted transition hover:bg-[#fff0f6] hover:text-[#e6236c]" onClick={() => setQuery("")} type="button"><CloseIcon className="size-4" /></button> : null}</span></label>
+          <div className="mt-3 grid gap-1.5 text-[.7rem] font-bold text-brand"><span>هتل</span><SiteSelect className="min-h-9! text-[.7rem]!" ariaLabel="هتل" id="tour-hotel-filter" onValueChange={(nextValue) => setHotelId(nextValue === "all" ? "all" : Number(nextValue))} options={[{ label: "همه هتل‌ها", value: "all" }, ...hotels.map((hotel) => ({ label: hotel.name, value: String(hotel.id) }))]} searchable value={String(hotelId)} /></div>
+          <div className="mt-3 grid gap-1.5 text-[.7rem] font-bold text-brand"><span>منطقه هتل</span><SiteSelect className="min-h-9! text-[.7rem]!" ariaLabel="منطقه هتل" id="tour-region-filter" onValueChange={setRegionFilter} options={[{ label: "همه مناطق", value: "all" }, ...regions.map((region) => ({ label: region, value: region }))]} value={regionFilter} /></div>
+          <fieldset className="mt-3.5 border-t border-[#ffd7e6] pt-2.5"><legend className="px-1 text-[.7rem] font-black text-brand">درجه هتل</legend>{(["all", 5, 4, 3, 2, 1] as const).map((value) => (<button aria-pressed={stars === value} className={`mt-2 flex w-full items-center justify-between rounded-xl border px-2.5 py-1.5 text-[.7rem] transition ${stars === value ? "border-[#f12b75] bg-[#fff0f6] text-[#e6236c]" : "border-[#ffe0ec] bg-white text-muted hover:border-[#f69abd]"}`} key={value} onClick={() => setStars(value)} type="button"><span className={`grid size-5 place-items-center rounded-md border ${stars === value ? "border-[#f12b75] bg-[#f12b75] text-white" : "border-[#f2bfd3] bg-white"}`}>{stars === value ? "✓" : ""}</span><span>{value === "all" ? "همه هتل‌ها" : `${value.toLocaleString("fa-IR")} ستاره`}</span><span className="tracking-[.08em] text-[#f12b75]">{value === "all" ? "★★★★★" : "★".repeat(value)}</span></button>))}</fieldset>
+                    <fieldset className="mt-3.5 border-t border-[#ffd7e6] pt-2.5">
+            <legend className="px-1 text-[.7rem] font-black text-brand">فیلترهای تور</legend>
+            <label className="mt-3 flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-[#ffe0ec] bg-white px-2.5 py-1.5 text-[.7rem] font-black text-brand transition hover:border-[#f69abd]">
               <span>فقط تورهای موجود</span>
               <input checked={availableOnly} className="size-5 accent-[#f12b75]" onChange={(event) => setAvailableOnly(event.target.checked)} type="checkbox" />
             </label>
-            <label className="mt-2 flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-[#ffe0ec] bg-white px-3 py-3 text-sm font-black text-brand transition hover:border-[#f69abd]">
+            <label className="mt-2 flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-[#ffe0ec] bg-white px-2.5 py-1.5 text-[.7rem] font-black text-brand transition hover:border-[#f69abd]">
               <span>فقط تورهای اقساطی</span>
               <input checked={installmentOnly} className="size-5 accent-[#f12b75]" onChange={(event) => setInstallmentOnly(event.target.checked)} type="checkbox" />
             </label>
           </fieldset>
-          <fieldset className="mt-5 border-t border-[#ffd7e6] pt-4">
-            <legend className="text-sm font-black text-brand">بازه قیمت نهایی (تومان)</legend>
+          <fieldset className="mt-3.5 border-t border-[#ffd7e6] pt-2.5">
+            <legend className="text-[.7rem] font-black text-brand">بازه قیمت نهایی (تومان)</legend>
             <div className="relative mt-4 h-6" dir="rtl">
               <span aria-hidden="true" className="absolute inset-x-0 top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-[#f7d7e4]" />
               <span aria-hidden="true" className="absolute top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-[#f12b75]" style={{ left: `${100 - maximumRangePercent}%`, width: `${maximumRangePercent - minimumRangePercent}%` }} />

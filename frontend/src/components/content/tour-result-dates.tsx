@@ -1,22 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { type ReactNode, useRef, useState } from "react";
 import { PUBLIC_API_BASE_URL } from "@/lib/api/client";
 import { formatCurrency } from "@/lib/currency";
 import { formatPersianDate } from "@/lib/persian-date";
-import { isTourDepartureBookable, type TourDepartureAvailability } from "@/lib/tour-departure-availability";
+import { CalendarIcon } from "@/components/layout/site-icons";
 import styles from "./catalog-layout.module.css";
 
 type Range = {
+  departureId?: number;
   departureDate: string;
   returnDate: string | null;
+  nights?: number | null;
   price: string | null;
-  comparablePrice?: { amount: number; currency: string };
 };
-type Departure = TourDepartureAvailability & {
+type Departure = {
+  id: number;
   departureDate: string | null;
   returnDate: string | null;
+  nights?: number | null;
   priceAmount: string | null;
   currency: string | null;
 };
@@ -25,10 +28,12 @@ export function TourResultDates({
   href,
   slug,
   fallback,
+  summaryContent,
 }: {
   href: string;
   slug: string | null;
   fallback: Range | null;
+  summaryContent: ReactNode;
 }) {
   const [ranges, setRanges] = useState<Range[] | null>(null);
   const [loading, setLoading] = useState(false);
@@ -48,14 +53,9 @@ export function TourResultDates({
       for (const item of data.departures ?? []) {
         if (!item.departureDate) continue;
         const price = item.priceAmount ? formatCurrency(item.priceAmount, item.currency) : null;
-        const amount = Number(item.priceAmount);
-        const currency = item.currency?.trim().toUpperCase();
-        const comparablePrice = currency && Number.isFinite(amount) && amount > 0 && isTourDepartureBookable(item)
-          ? { amount, currency }
-          : undefined;
-        const key = `${item.departureDate}|${item.returnDate ?? ""}|${price ?? ""}`;
-        if (!unique.has(key) || comparablePrice) {
-          unique.set(key, { departureDate: item.departureDate, returnDate: item.returnDate, price, comparablePrice });
+        const key = String(item.id);
+        if (!unique.has(key)) {
+          unique.set(key, { departureId: item.id, departureDate: item.departureDate, returnDate: item.returnDate, nights: item.nights, price });
         }
       }
       setRanges([...unique.values()].sort((a, b) => a.departureDate.localeCompare(b.departureDate)));
@@ -68,49 +68,56 @@ export function TourResultDates({
   }
 
   const visible = ranges?.length ? ranges : fallback ? [fallback] : [];
-  const cheapest = cheapestRange(visible);
   return (
     <details className={styles.dateDisclosure} onToggle={(event) => {
       if (event.currentTarget.open) void loadDates();
     }}>
-      <summary><span className={styles.showDates}>مشاهده تاریخ‌ها</span><span className={styles.hideDates}>بستن تاریخ‌ها</span></summary>
+      <summary>
+        {summaryContent}
+        <span className={styles.dateToggle}>
+          <span className={styles.showDates}>مشاهده تاریخ‌ها</span>
+          <span className={styles.hideDates}>بستن تاریخ‌ها</span>
+        </span>
+      </summary>
       <div className={styles.dateBody}>
         {loading && <p role="status">در حال دریافت تاریخ‌ها…</p>}
         {visible.length ? <>
           <p className={styles.dateHeading}>بازه‌های سفر</p>
           <ul className={styles.dateRanges}>
-            {visible.map((range) => (
-              <li className={`${styles.dateRange} ${range === cheapest ? styles.dateRangeBest : ""}`} key={`${range.departureDate}|${range.returnDate}|${range.price}`}>
-                {range === cheapest && <span className={styles.dateBestLabel}>کمترین قیمت ثبت‌شده</span>}
-                <div className={styles.datePoint}>
-                  <span>رفت</span>
-                  <time dateTime={range.departureDate}>{formatPersianDate(range.departureDate)}</time>
-                </div>
-                <div className={styles.datePrice}>
-                  <span>شروع قیمت</span>
-                  <strong>{range.price ?? "استعلام قیمت"}</strong>
-                </div>
-                <div className={styles.datePoint}>
-                  <span>برگشت</span>
-                  {range.returnDate ? <time dateTime={range.returnDate}>{formatPersianDate(range.returnDate)}</time> : <strong>—</strong>}
-                </div>
-              </li>
-            ))}
+            {visible.map((range) => {
+              const query = range.departureId ? `?departureId=${range.departureId}` : "";
+              const rangeHref = slug ? `${href}${query}#tour-dates` : href;
+              const nights = getNightCount(range);
+              return (
+                <li key={range.departureId ?? range.departureDate}>
+                  <Link className={styles.dateRange} href={rangeHref} prefetch={false}>
+                    <div className={styles.datePoint}>
+                      <span>رفت</span>
+                      <time dateTime={range.departureDate}>{formatPersianDate(range.departureDate)}</time>
+                    </div>
+                    <span className={styles.dateArrow} aria-hidden="true">←</span>
+                    <div className={styles.datePoint}>
+                      <span>برگشت</span>
+                      {range.returnDate ? <time dateTime={range.returnDate}>{formatPersianDate(range.returnDate)}</time> : <strong>—</strong>}
+                    </div>
+                    <div className={styles.dateCardFooter}>
+                      {nights !== null && <span className={styles.dateNights}><CalendarIcon aria-hidden="true" className="size-3.5" />{nights.toLocaleString("fa-IR")} شب</span>}
+                      <span>شروع قیمت <strong>{range.price ?? "استعلام قیمت"}</strong></span>
+                    </div>
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
-        </> : !loading && <p>تاریخ سفر را در جزئیات تور بررسی کنید.</p>}
-        <Link className={styles.dateLink} href={href}>مشاهده جزئیات تور ←</Link>
+        </> : !loading && <Link className={styles.dateLink} href={href}>مشاهده جزئیات تور ←</Link>}
       </div>
     </details>
   );
 }
 
-function cheapestRange(ranges: readonly Range[]) {
-  const comparable = ranges.flatMap((range) =>
-    range.comparablePrice ? [{ range, ...range.comparablePrice }] : [],
-  );
-  if (comparable.length < 2) return undefined;
-  if (ranges.some((range) => range.price && range.comparablePrice?.currency !== comparable[0].currency)) return undefined;
-  comparable.sort((a, b) => a.amount - b.amount);
-  const [lowest] = comparable;
-  return lowest.amount < comparable[comparable.length - 1].amount ? lowest.range : undefined;
+function getNightCount(range: Range) {
+  if (typeof range.nights === "number" && Number.isInteger(range.nights) && range.nights >= 0) return range.nights;
+  if (!range.returnDate) return null;
+  const nights = (Date.parse(range.returnDate) - Date.parse(range.departureDate)) / 86400000;
+  return Number.isInteger(nights) && nights >= 0 ? nights : null;
 }

@@ -8,17 +8,18 @@ import type { ExchangeRates } from "@/lib/currency-conversion";
 
 type Departure = { id: number; label: string; departureDate: string | null; bookingStatus: string; capacityRemaining: number | null };
 
-export function DatedCombinedPackages({ packages, departures, standaloneHotels = false, tourId, exchangeRates }: {
+export function DatedCombinedPackages({ packages, departures, standaloneHotels = false, tourId, exchangeRates, initialDepartureId }: {
   packages: PublicCombinedPackage[];
   departures: Departure[];
   standaloneHotels?: boolean;
   tourId: number;
   exchangeRates: ExchangeRates;
+  initialDepartureId?: number;
 }) {
   const dates = [...departures].filter((item) => item.departureDate).sort((a, b) => (a.departureDate ?? "").localeCompare(b.departureDate ?? ""));
   const hasDatedPrices = packages.some((item) => item.departurePrices?.length);
   const initial = dates.find((date) => packages.some((item) => item.departurePrices?.some((price) => price.departureId === date.id))) ?? dates[0];
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [selectedId, setSelectedId] = useState<number | null>(initialDepartureId ?? null);
   const selected = dates.find((item) => item.id === selectedId) ?? initial;
   useEffect(() => {
     const onDeparture = (event: Event) => {

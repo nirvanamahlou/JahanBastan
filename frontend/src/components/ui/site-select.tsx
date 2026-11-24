@@ -11,6 +11,7 @@ export type SiteSelectOption = {
 type SiteSelectProps = {
   ariaLabel: string;
   className?: string;
+  compactMenu?: boolean;
   defaultValue?: string;
   disabled?: boolean;
   id: string;
@@ -35,6 +36,7 @@ function normalize(value: string) {
 export function SiteSelect({
   ariaLabel,
   className = "",
+  compactMenu = false,
   defaultValue = "",
   disabled = false,
   id,
@@ -171,14 +173,14 @@ export function SiteSelect({
         role="combobox"
         type="button"
       >
-        <span className={`min-w-0 flex-1 truncate ${selected ? "" : "text-muted"}`}>
+        <span data-select-empty={!selectedValue || undefined} className={`min-w-0 flex-1 truncate ${selected ? "" : "text-muted"}`}>
           {selected?.label || placeholder}
         </span>
-        <span aria-hidden="true" className={`shrink-0 text-brand transition ${open ? "rotate-180" : ""}`}>⌄</span>
+        <span aria-hidden="true" className={`shrink-0 transition ${compactMenu ? "text-accent-strong" : "text-brand"} ${open ? "rotate-180" : ""}`}>{compactMenu ? "▾" : "⌄"}</span>
       </button>
 
       {open ? (
-        <div className="absolute inset-x-0 top-full z-[80] mt-2 min-w-[13rem] overflow-hidden rounded-2xl border border-border bg-white shadow-[0_18px_50px_rgba(1,37,105,0.18)]">
+        <div className={`absolute inset-x-0 top-full z-[80] mt-2 overflow-hidden border border-border shadow-[0_18px_50px_rgba(1,37,105,0.18)] ${compactMenu ? "min-w-0 rounded-xl bg-surface" : "min-w-[13rem] rounded-2xl bg-white"}`}>
           {searchable ? (
             <div className="border-b border-border bg-surface-muted p-2.5">
               <input
@@ -195,14 +197,14 @@ export function SiteSelect({
               />
             </div>
           ) : null}
-          <ul className="max-h-64 overflow-y-auto overscroll-contain p-1.5" id={`${id}-options`} role="listbox">
+          <ul className={`${compactMenu ? "max-h-40 p-1" : "max-h-64 p-1.5"} overflow-y-auto overscroll-contain`} id={`${id}-options`} role="listbox">
             {visibleOptions.map((option, index) => {
               const isSelected = option.value === selectedValue;
               return (
                 <li key={`${option.value}-${option.label}`} role="presentation">
                   <button
                     aria-selected={isSelected}
-                    className={`flex min-h-11 w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-right text-sm transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent ${isSelected ? "bg-brand text-white" : "text-foreground hover:bg-brand-soft hover:text-brand"}`}
+                    className={`flex w-full items-center justify-between rounded-xl text-right transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent ${compactMenu ? "min-h-8 gap-1 px-1.5 py-1 text-xs" : "min-h-11 gap-3 px-3 py-2.5 text-sm"} ${isSelected ? "bg-brand text-white" : "text-foreground hover:bg-brand-soft hover:text-brand"}`}
                     onClick={() => choose(option.value)}
                     ref={(element) => { optionRefs.current[index] = element; }}
                     role="option"

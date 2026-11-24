@@ -2,7 +2,6 @@ import { apiGet } from "@/lib/api/client";
 import { AvinaHotelSelection } from "../hotel-selection";
 import { StructuredTourContent } from "@/components/content/structured-tour-content";
 import { RichText } from "@/components/content/rich-text";
-import tourStyles from "@/components/content/structured-tour-content.module.css";
 import { AvinaDeparturePicker } from "../departure-picker";
 import { TourProfileFacts } from "@/components/content/tour-profile-facts";
 import { ClockIcon, LocationIcon, PlaneIcon, SuitcaseIcon } from "@/components/layout/site-icons";

@@ -1,3 +1,88 @@
-.footer { background:#fff!important; color:#102747!important; }.layout { width:100%; overflow:visible; }.footer > div > :global(.site-container) { width:calc(100% - 80px); max-width:90rem; padding-inline:0; padding-block:2.8rem; }.footer [class*="text-white"] { color:#6d7b90!important; }.footer h2, .footer strong { color:#102747!important; }.footer p, .footer address { font-size:.75rem; line-height:2.2; }.footer nav ul { font-size:.75rem; }.footer a { font-size:.75rem; }.footer :global(.footer-bottom) { border-color:#edf0f4; background:#fff!important; }.footer :global(.footer-bottom) > div { width:calc(100% - 80px); max-width:90rem; padding-inline:0; }.footer nav { border-color:#edf0f4; }
-@media(max-width:1150px) { .footer > div > :global(.site-container), .footer :global(.footer-bottom) > div { width:calc(100% - 48px); } }
-@media(max-width:760px) { .footer > div > :global(.site-container), .footer :global(.footer-bottom) > div { width:calc(100% - 28px); }.footer > div > :global(.site-container) { grid-template-columns:1fr 1fr; gap:1.5rem; }.footer > div > :global(.site-container) > section { grid-column:1/-1; } }
+.footer {
+  --footer-gutter: 40px;
+  --footer-max-width: 90rem;
+  --footer-chat-clearance: 4.5rem;
+  --footer-chat-padding: max(
+    0px,
+    calc(var(--footer-chat-clearance) - max(var(--footer-gutter), (100% - var(--footer-max-width)) / 2))
+  );
+  background: #fff !important;
+  color: #102747 !important;
+}
+
+.layout {
+  width: 100%;
+  overflow: visible;
+}
+
+.footer .layout > .main,
+.footer :global(.footer-bottom) > div {
+  width: calc(100% - 2 * var(--footer-gutter));
+  max-width: var(--footer-max-width);
+  padding-inline: 0;
+}
+
+.footer .layout > .main {
+  padding-block: .75rem;
+  line-height: 1.4;
+}
+
+.footer [class*="text-white"] { color: #6d7b90 !important; }
+.footer h2, .footer strong { color: #102747 !important; }
+.footer p, .footer address { font-size: .75rem; line-height: 2.2; }
+.footer .main p,
+.footer .main address,
+.footer :global(.footer-bottom) p { line-height: 1.45; }
+.footer nav ul, .footer a { font-size: .75rem; }
+.footer nav { border-color: #edf0f4; }
+
+.links a {
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.installItem { grid-column: 1 / -1; }
+
+.footer :global(.footer-bottom) {
+  border-color: #edf0f4;
+  background: #fff !important;
+}
+
+:global(body:has(.support-chat-widget)) .footer :global(.footer-bottom) > div {
+  padding-inline-start: var(--footer-chat-padding);
+}
+
+@media (min-width: 40rem) {
+  .footer { --footer-chat-clearance: 5.75rem; }
+}
+
+@media (min-width: 48rem) {
+  .links { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  :global(body:has(.support-chat-widget)) .footer .layout > .main {
+    padding-inline-start: var(--footer-chat-padding);
+  }
+}
+
+@media (max-width: 1150px) {
+  .footer { --footer-gutter: 24px; }
+}
+
+@media (width < 48rem) {
+  .footer { --footer-gutter: 14px; }
+
+  .footer .layout > .main {
+    gap: .55rem;
+    padding-block: .55rem;
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: .55rem;
+    row-gap: .2rem;
+  }
+
+  .links a { gap: .25rem; }
+  .installItem a { min-height: 1.25rem; }
+}

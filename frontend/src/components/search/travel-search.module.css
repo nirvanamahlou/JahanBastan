@@ -95,7 +95,7 @@
   .body { padding-top: 1rem; }
   .form, .form[data-service] { grid-template-columns: repeat(2,minmax(0,1fr)); gap: .75rem .5rem; }
   .form > .route, .form:not([data-service="tour"]) > .route, .form > [data-date-range] { grid-column: 1 / -1; }
-  .form > [data-vehicle-field], .form > [data-country-field] { grid-column: 1 / -1; }
+  .form > [data-country-field] { grid-column: 1 / -1; }
   .form > .submit { grid-column: 1 / -1; }
   .form > [data-guests-field] { grid-column: 1 / -1; }
   .route { grid-template-columns: minmax(0,1fr) 2rem minmax(0,1fr); gap: .25rem; }
@@ -152,10 +152,6 @@
 .field label, .field [data-passenger-selector] > span { top:.45rem; font-size:.625rem; }
 :global(#trip-search) .field [role="combobox"], :global(#trip-search) .field [data-passenger-selector] > div > button { min-height:3.5rem; padding-top:1.2rem; padding-bottom:.2rem; font-size:.75rem; font-weight:400; }
 :global(#trip-search) .field [role="combobox"] > span:first-child, :global(#trip-search) .field [data-passenger-selector] > div > button > span:first-child { font-weight:400!important; }
-:global(#trip-search) .form[data-service="tour"] :is(.route, [data-vehicle-field]) [role="combobox"] > span:first-child {
-  white-space: normal;
-  line-height: 1.2;
-}
 .fieldIcon { width:1.15rem; height:1.15rem; bottom:1rem; }
 .form [data-date-values], .form [data-date-values] > button { min-height:3.5rem; }
 .form [data-date-values] small { font-size:.625rem; }
@@ -168,10 +164,11 @@
 .form [data-trip-type] > button { min-height:1.5rem; }
 .form:has([data-trip-type]) { align-items:end; }
 @media(min-width:1150px) {
- .form[data-service="tour"] { grid-template-columns:1.1fr 2.8fr 2.1fr 1.1fr 1.2fr; }
+ .form[data-service="tour"] { grid-template-columns:minmax(0,2.6fr) minmax(0,2fr) minmax(0,1fr) minmax(0,.9fr); }
  .form[data-service="flight"], .form[data-service="bus"], .form[data-service="train"] { grid-template-columns:2.8fr 2.1fr 1.1fr 1.2fr; }
  .form[data-service] > .route, .form[data-service] > [data-date-range] { grid-column:auto; }
 }
+
 @media(max-width:760px) {
  .tabRow { gap:0; padding:.25rem .2rem 0; }
  .tab { min-height:3.5rem; gap:.1rem; }
@@ -179,7 +176,7 @@
  .tabIcon svg { width:1.3rem; height:1.3rem; }
  .body { margin-top:.5rem; padding:.65rem; }
  .form, .form[data-service] { gap:.5rem; }
- .form > [data-vehicle-field], .form > [data-guests-field] { grid-column:auto; }
+ .form > [data-guests-field] { grid-column:auto; }
  .form > .route { grid-column:1/-1; }
  .search .form :global(.search-action) { min-height:2.9rem; font-size:.8rem; }
  .field label, .field [data-passenger-selector] > span { font-size:.625rem; }

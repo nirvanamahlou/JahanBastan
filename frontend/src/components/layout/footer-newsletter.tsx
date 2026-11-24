@@ -48,7 +48,7 @@ export function FooterNewsletter({ backgroundImageUrl }: { backgroundImageUrl?: 
   }
   return <section className={styles.newsletter} aria-labelledby="footer-newsletter-title" data-custom-artwork={Boolean(backgroundImageUrl)}>
     <div className={styles.wrap}>
-      <header><span className={styles.icon}><PhoneIcon /></span><div><span>اعلان موجودی تور</span><h2 id="footer-newsletter-title">تور دلخواهتان که موجود شد، باخبر شوید.</h2><p>مسیر و زمان سفر را مشخص کنید؛ درخواستتان برای پیگیری کارشناسان ثبت می‌شود.</p></div></header>
+      <header><span className={styles.icon}><PhoneIcon /></span><div><h2 id="footer-newsletter-title">اعلان موجودی تور</h2><p>درخواستتان را ثبت کنید تا وقتی تور دلخواهتان موجود شد، باخبر شوید.</p></div></header>
       <form onSubmit={submit}>
         <div className={styles.fields}>
           <label>شماره موبایل<input name="phone" type="tel" inputMode="tel" dir="ltr" autoComplete="tel" placeholder="0912…" required maxLength={32} /></label>

@@ -13,7 +13,7 @@ export function JalaliCalendarModal({ ariaLabel, children, onClose }: { ariaLabe
     window.setTimeout(() => dialogRef.current?.focus(), 0);
 
     function handleKeyboard(event: KeyboardEvent) {
-      if (event.key === "Escape") {
+      if (event.key === "Escape" && !event.defaultPrevented) {
         event.preventDefault();
         onClose();
         return;

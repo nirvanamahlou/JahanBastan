@@ -66,7 +66,17 @@
 .countryHeroCopy p { color: #e0e9f5; font-size: .7rem; }
 .countryLayout { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: .9rem; align-items: start; }
 .countryResults { display: grid; gap: .65rem; margin-top: .65rem; }
-.countryResult { min-width: 0; border: 1px solid #e1e7f1; border-radius: .8rem; background: #fff; color: #102747; }
+.tourCard {
+  min-width: 0;
+  border: 1px solid #d9e3f2;
+  border-radius: .9rem;
+  background: linear-gradient(120deg, #f0f5ff, #fff 56%, #fff5f9);
+  color: #102747;
+  box-shadow: 0 6px 18px #1027470a;
+}
+.tourCard:has(.dateDisclosure[open]) { border-color: #d997b7; }
+.tourCard .row { padding-inline: .75rem; border-bottom: 0; }
+.tourCard .facts > div { border-radius: .55rem; background: #ffffffb3; padding: .28rem .35rem; }
 .countryResultMain { display: grid; grid-template-columns: minmax(0, 1fr) minmax(140px, 25%); gap: .8rem; align-items: center; padding: .75rem; }
 .countryResultMain .photo { min-height: 124px; aspect-ratio: 1.5; }
 .tourInformation { min-width: 0; }
@@ -75,20 +85,21 @@
 .countryResult .facts { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .42rem; margin-top: .55rem; }
 .countryResult .facts svg { width: .8rem; height: .8rem; color: #aa2057; }
 .countryResult .price { gap: .35rem; margin-top: .5rem; font-size: .8rem; }
-.dateDisclosure { border-top: 1px solid #e8edf4; }
-.dateDisclosure summary { display: flex; justify-content: space-between; align-items: center; min-height: 44px; padding: .35rem .75rem; color: #a11652; font-size: .72rem; font-weight: 700; cursor: pointer; list-style: none; }
+.dateDisclosure > summary { display: block; cursor: pointer; list-style: none; }
+.dateToggle { display: flex; justify-content: space-between; align-items: center; min-height: 44px; padding: .35rem .75rem; border-top: 1px solid #e3e8f4; border-radius: 0 0 .9rem .9rem; background: #eef3ff; color: #8a1b49; font-size: .72rem; font-weight: 700; }
+.dateDisclosure[open] .dateToggle { border-radius: 0; background: #fbe8f1; }
 .dateDisclosure summary::-webkit-details-marker { display: none; }
-.dateDisclosure summary::after { content: ""; width: .38rem; height: .38rem; border: solid currentColor; border-width: 0 1.5px 1.5px 0; transform: rotate(45deg); margin-inline-end: .18rem; }
-.dateDisclosure[open] summary::after { transform: rotate(225deg); }
+.dateToggle::after { content: ""; width: .38rem; height: .38rem; border: solid currentColor; border-width: 0 1.5px 1.5px 0; transform: rotate(45deg); margin-inline-end: .18rem; }
+.dateDisclosure[open] .dateToggle::after { transform: rotate(225deg); }
 .dateDisclosure .hideDates, .dateDisclosure[open] .showDates { display: none; }
 .dateDisclosure[open] .hideDates { display: inline; }
 .dateDisclosure summary:focus-visible, .countryHero a:focus-visible, .dateLink:focus-visible { outline: 2px solid #d33d7a; outline-offset: 2px; }
-.dateBody { padding: 0 .75rem .6rem; }
+.dateBody { padding: .55rem .75rem .7rem; }
 .dateBody .dateHeading { margin-bottom: .38rem; font-size: .74rem; font-weight: 750; color: #102747; }
 .dateRanges { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .48rem; }
 .dateRange {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: stretch;
   min-width: 0;
   overflow: hidden;
@@ -97,7 +108,9 @@
   background: #f6f8fc;
   color: #102747;
 }
-.datePoint, .datePrice {
+.dateRange:hover, .dateRange:focus-visible { border-color: #c42c69; }
+.dateRange:focus-visible { outline: 2px solid #c42c69; outline-offset: 2px; }
+.datePoint {
   display: grid;
   justify-items: center;
   align-content: center;
@@ -106,14 +119,12 @@
   padding: .5rem .22rem;
   text-align: center;
 }
-.datePrice { border-inline: 1px dashed #dce5f1; }
-.datePoint span, .datePrice span { color: #526581; font-size: .59rem; }
-.datePoint :is(time, strong), .datePrice strong { font-size: .71rem; line-height: 1.5; overflow-wrap: anywhere; }
+.datePoint span { color: #526581; font-size: .59rem; }
+.datePoint :is(time, strong) { font-size: .71rem; line-height: 1.5; overflow-wrap: anywhere; }
 .datePoint time { font-weight: 650; }
-.datePrice strong { font-size: .76rem; }
-.dateRangeBest { border-color: #edb7ce; background: #fff6fa; }
-.dateRangeBest .datePrice { border-color: #efcedc; }
-.dateBestLabel { grid-column: 1 / -1; padding: .2rem .45rem; background: #fbe3ee; color: #95174f; font-size: .59rem; font-weight: 750; }
+.dateArrow { align-self: center; color: #a11652; }
+.dateCardFooter { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: .25rem .65rem; padding: .42rem .65rem; background: #fff; border-top: 1px solid #e1e8f3; font-size: .68rem; }
+.dateNights { display: inline-flex; align-items: center; gap: .25rem; border-radius: .35rem; background: #f6edf3; padding-inline: .35rem; font-weight: 700; }
 .dateLink { display: inline-flex; align-items: center; min-height: 44px; margin-top: .15rem; color: #a11652; font-size: .7rem; font-weight: 700; }
 @media (max-width: 1100px) { .dateRanges { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 940px) { .countryLayout { grid-template-columns: 220px minmax(0, 1fr); } .countryResult .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
@@ -126,63 +137,72 @@
   .countryResultMain .photo { grid-row: 1; min-height: 0; aspect-ratio: 2.55; }
 }
 .tourSearch {
-  margin-block-end: 1rem;
+  margin-block-end: 1.15rem;
   padding: .85rem;
-  border: 1px solid var(--border);
+  border: 1px solid #e1e8f3;
+  border-block-start: 3px solid #d23b76;
   border-radius: 1rem;
-  background: var(--surface);
-}
-
-.tourSearchFields, .tourSearchExtras {
-  display: grid;
-  gap: .65rem;
-  align-items: end;
+  background: #f8faff;
+  box-shadow: 0 10px 24px #1027470b;
+  color: #102747;
 }
 
 .tourSearchFields {
-  grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(8rem, 1.6fr) auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr) minmax(10rem, 1.45fr) minmax(5.8rem, .65fr) auto;
+  gap: .6rem;
+  align-items: end;
 }
 
-.tourSearchExtras > label {
+.tourSearchFields > div, .tourSearchPassengers {
   display: grid;
   min-width: 0;
-  gap: .35rem;
-  font-size: .85rem;
+  gap: .3rem;
+  font-size: .75rem;
   font-weight: 700;
+}
+
+.tourSearchFields > .field > span { display: flex; align-items: center; gap: .28rem; }
+.tourSearchFields > .field > span svg { color: #a11652; }
+.tourSearchPassengers input {
+  width: 100%;
+  min-height: 2.45rem;
+  border: 1px solid #cad7e9;
+  border-radius: .65rem;
+  padding-inline: .55rem;
+  background: white;
+  color: #102747;
+  font-size: .75rem;
 }
 
 .tourSearchButton {
   display: flex;
-  min-height: 2.5rem;
+  min-height: 2.45rem;
   align-items: center;
   justify-content: center;
   gap: .4rem;
   border-radius: .65rem;
   padding-inline: .8rem;
-  background: var(--brand);
+  background: #102747;
   color: white;
   font-size: .8rem;
   font-weight: 700;
 }
 
-.tourSearchAdvanced { margin-block-start: .65rem; }
-.tourSearchAdvanced > summary { width: fit-content; cursor: pointer; color: var(--brand); font-size: .8rem; }
-.tourSearchExtras { margin-block-start: .6rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)); }
-.countryLayout .tourSearch { min-width: 0; margin: 0; }
-.countryLayout .tourSearchFields, .countryLayout .tourSearchExtras { grid-template-columns: minmax(0, 1fr); }
+.tourSearchButton:hover { background: #203f69; }
+.tourSearch :is(button, input, a):focus-visible { outline: 2px solid #b82862; outline-offset: 2px; }
+.tourSearchReset { display: inline-block; margin-block-start: .45rem; color: #a11652; font-size: .68rem; font-weight: 700; }
+.tourSearchDates [data-date-values] button { flex-direction: column; align-items: flex-start; gap: .12rem; padding: .3rem .4rem; }
+.tourSearchDates [data-date-values] strong { direction: ltr; unicode-bidi: isolate; overflow: visible; white-space: nowrap; font-size: .68rem; font-variant-numeric: tabular-nums; }
 
-@media (max-width: 800px) {
-  .countryLayout .tourSearchFields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .countryLayout :is(.tourSearchDates, .tourSearchButton) { grid-column: 1 / -1; }
-}
-
-@media (max-width: 70rem) {
-  .tourSearchFields { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-}
-
-@media (max-width: 40rem) {
+@media (max-width: 55rem) {
   .tourSearchFields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .tourSearchDates, .tourSearchButton { grid-column: 1 / -1; }
+  .tourSearchButton { grid-column: 1 / -1; }
+}
+
+@media (max-width: 30rem) {
+  .tourSearchDates { grid-column: 1 / -1; }
+  .tourSearchButton { grid-column: auto; }
 }
 
 .tourCard { background: linear-gradient(120deg, #eef4fc, #fff 68%); }

@@ -26,7 +26,7 @@ import { isTourDepartureBookable } from "@/lib/tour-departure-availability";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-type Props = { params: Promise<{ slug: string }> };
+type Props = { params: Promise<{ slug: string }>; searchParams: Promise<{ departureId?: string | string[] }> };
 type Tour = {
   id: number;
   slug: string;
@@ -276,7 +276,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function TourPage({ params }: Props) {
+export default async function TourPage({ params, searchParams }: Props) {
   const { slug } = await params;
   const item = await apiGet<Tour>(`/tours/${slug}`, { cache: "no-store" }).catch(() => null);
   if (!item && ["ayt", "ayt-copy", "ika-ayt-ika", "ika-ayt-ika-copy", "ayt-copy-2", "ayt-copy-3", "ika-ayt-ika-copy-copy", "ayt-copy-2-copy"].includes(slug)) {
@@ -289,6 +289,10 @@ export default async function TourPage({ params }: Props) {
   }
   if (!item) notFound();
 
+  const { departureId } = await searchParams;
+  const initialDepartureId = typeof departureId === "string"
+    ? item.departures.find((departure) => departure.departureDate && String(departure.id) === departureId)?.id
+    : undefined;
   const seo = tourSeoCopy(item);
   const images = [item.imageId, ...item.galleryImageIds].filter(
     (id): id is number => Boolean(id),
@@ -475,7 +479,7 @@ export default async function TourPage({ params }: Props) {
         <TourDetailTabs sections={tourSections} />
         {hasDates || flightDepartures.length ? (
           <div className="tour-tab-panel mt-8" data-tour-section="dates">
-            <TourDepartureCalendar departures={item.departures.map((departure) => ({
+            <TourDepartureCalendar key={initialDepartureId} initialDepartureId={initialDepartureId} departures={item.departures.map((departure) => ({
               id: departure.id,
               label: departure.label,
               departureDate: departure.departureDate,
@@ -524,8 +528,8 @@ export default async function TourPage({ params }: Props) {
             ) : null}
             {hasHotels ? (
               <div className="tour-tab-panel" data-tour-section="hotels">
-                <DatedCombinedPackages departures={item.departures} exchangeRates={{ usdToIrt: settings.socialLinks.exchangeRateUsdIrt, eurToIrt: settings.socialLinks.exchangeRateEurIrt }} packages={item.combinedPackages ?? []} standaloneHotels={hasStandaloneHotels} tourId={item.id} />
-                {hasStandaloneHotels ? <TourHotelFilter country={item.destination?.country} departures={item.departures as TourBookingDeparture[]} destination={item.destination?.title} exchangeRates={{ usdToIrt: settings.socialLinks.exchangeRateUsdIrt, eurToIrt: settings.socialLinks.exchangeRateEurIrt }} faqs={faqPayload.items} isInstallmentAvailable={item.isInstallmentAvailable} packages={[]} tourId={item.id} tourSlug={item.slug} /> : null}
+                <DatedCombinedPackages key={initialDepartureId} initialDepartureId={initialDepartureId} departures={item.departures} exchangeRates={{ usdToIrt: settings.socialLinks.exchangeRateUsdIrt, eurToIrt: settings.socialLinks.exchangeRateEurIrt }} packages={item.combinedPackages ?? []} standaloneHotels={hasStandaloneHotels} tourId={item.id} />
+                {hasStandaloneHotels ? <TourHotelFilter key={initialDepartureId} initialDepartureId={initialDepartureId} country={item.destination?.country} departures={item.departures as TourBookingDeparture[]} destination={item.destination?.title} exchangeRates={{ usdToIrt: settings.socialLinks.exchangeRateUsdIrt, eurToIrt: settings.socialLinks.exchangeRateEurIrt }} faqs={faqPayload.items} isInstallmentAvailable={item.isInstallmentAvailable} packages={[]} tourId={item.id} tourSlug={item.slug} /> : null}
               </div>
             ) : null}
             {(included.length || excluded.length) ? (

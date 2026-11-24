@@ -131,31 +131,31 @@ export async function SiteFooter() {
       <div className={styles.layout}>
         <FooterNewsletter backgroundImageUrl={footerAlertImageUrl} />
 
-        <Container className="grid grid-cols-1 gap-5 px-4 py-6 md:grid-cols-2 md:gap-6 md:px-8 lg:gap-7 lg:px-9 lg:py-7 xl:grid-cols-[1.2fr_0.85fr_0.85fr_1.2fr] xl:gap-8">
+        <Container className={`${styles.main} grid grid-cols-1 gap-x-4 gap-y-2.5 md:grid-cols-2 lg:grid-cols-[1.15fr_1fr_1fr_1.15fr] xl:gap-x-5`}>
           <section aria-labelledby="footer-brand-title" className="min-w-0">
             <Link
               href="/"
-              className="group inline-flex items-center gap-3 rounded-xl"
+              className="group flex w-fit items-center gap-2 rounded-xl"
             >
-              <span className="grid size-14 place-items-center rounded-xl bg-transparent transition-transform group-hover:-translate-y-1">
+              <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-transparent transition-transform group-hover:-translate-y-1">
                 <BrandLogo decorative className="h-full w-full object-contain drop-shadow-[0_5px_12px_rgba(0,0,0,.16)]" />
               </span>
               <span>
                 <strong
                   id="footer-brand-title"
-                  className="block text-lg font-black text-white"
+                  className="block text-base leading-tight font-black text-white"
                 >
                   {footerBrandTitle}
                 </strong>
-                <span className="mt-0.5 block text-xs text-white/75">
+                <span className="mt-0.5 block text-xs leading-tight text-white/75">
                   {siteConfig.description}
                 </span>
               </span>
             </Link>
-            <p className="mt-3 max-w-sm text-xs leading-5 text-white/70">
+            <p className="mt-1 max-w-sm text-xs text-white/70">
               {footerDescription}
             </p>
-            <div className="mt-5 grid max-w-[248px] grid-cols-2 gap-3" aria-label="پیوندهای سازمان‌های هواپیمایی و اینماد">
+            <div className="mt-2 grid max-w-64 grid-cols-4 gap-1.5" aria-label="پیوندهای سازمان‌های هواپیمایی و اینماد">
               <EnamadSeal compact />
               {[
                 { name: "انجمن بین‌المللی حمل‌ونقل هوایی (IATA)", href: "https://www.iata.org/", image: "/images/organizations/iata.svg" },
@@ -169,17 +169,17 @@ export async function SiteFooter() {
                   rel="noopener noreferrer"
                   aria-label={organization.name + " (باز شدن در تب جدید)"}
                   title={organization.name}
-                  className="flex h-24 items-center justify-center rounded-2xl border border-slate-200 bg-white p-3 shadow-sm transition hover:-translate-y-1 hover:shadow-md focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent"
+                  className="flex h-11 items-center justify-center rounded-lg border border-slate-200 bg-white p-1 shadow-sm transition hover:-translate-y-1 hover:shadow-md focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={organization.image} alt={organization.name} width={100} height={64} className={organization.image.endsWith("caa.png") ? "max-h-16 w-full object-contain brightness-0 opacity-80" : "max-h-16 w-full object-contain"} />
+                  <img src={organization.image} alt={organization.name} width={100} height={64} className={organization.image.endsWith("caa.png") ? "max-h-8 w-full object-contain brightness-0 opacity-80" : "max-h-8 w-full object-contain"} />
                 </a>
               ))}
             </div>
             {licenses.length ? (
-              <div className="mt-4">
+              <div className="mt-2">
                 <h2 className="text-xs font-black text-white">مجوزها و استعلام رسمی</h2>
-                <div className="mt-2 flex flex-wrap gap-2">
+                <div className="mt-1 flex flex-wrap gap-1.5">
                   {licenses.map((license) => (
                     <a
                       className="rounded-lg border border-white/20 bg-white/10 px-2.5 py-1.5 text-[10px] font-bold text-white/80 transition hover:border-accent hover:text-white"
@@ -196,13 +196,13 @@ export async function SiteFooter() {
             ) : null}
           </section>
 
-          <nav aria-label={footerServicesTitle} className="min-w-0 xl:border-l xl:border-white/15 xl:pl-8">
+          <nav aria-label={footerServicesTitle} className="min-w-0 lg:border-l lg:pl-3 xl:pl-4">
             <h2 className="font-black text-white">{footerServicesTitle}</h2>
-            <ul className="mt-3 grid gap-1.5 text-xs text-white/70 sm:text-sm">
+            <ul className={`${styles.links} mt-1.5 grid gap-x-2 gap-y-1 text-white/70`}>
               {serviceLinks.map((item) => (
                 <li key={item.id}>
                   <Link
-                    className="group inline-flex items-center gap-2 transition hover:-translate-x-1 hover:text-white"
+                    className="inline-flex items-center gap-1.5 transition hover:-translate-x-1 hover:text-white"
                     href={item.href}
                   >
                     <span className="text-[#f079b0]" aria-hidden="true">←</span>
@@ -213,13 +213,13 @@ export async function SiteFooter() {
             </ul>
           </nav>
 
-          <nav aria-label={footerQuickTitle} className="min-w-0 xl:border-l xl:border-white/15 xl:pl-8">
+          <nav aria-label={footerQuickTitle} className="min-w-0 lg:border-l lg:pl-3 xl:pl-4">
             <h2 className="font-black text-white">{footerQuickTitle}</h2>
-            <ul className="mt-3 grid gap-1.5 text-xs text-white/70 sm:text-sm">
+            <ul className={`${styles.links} mt-1.5 grid gap-x-2 gap-y-1 text-white/70`}>
               {quickLinks.map((item) => (
                 <li key={item.id}>
                   <Link
-                    className="group inline-flex items-center gap-2 transition hover:-translate-x-1 hover:text-white"
+                    className="inline-flex items-center gap-1.5 transition hover:-translate-x-1 hover:text-white"
                     href={item.href}
                   >
                     <span className="text-[#f079b0]" aria-hidden="true">←</span>
@@ -227,7 +227,11 @@ export async function SiteFooter() {
                   </Link>
                 </li>
               ))}
-              <li><Link href="/install/" className="inline-flex min-h-11 items-center gap-2 font-bold text-white"><span aria-hidden="true">↓</span>نصب وب‌اپ جهان باستان</Link></li>
+              <li className={styles.installItem}>
+                <Link href="/install/" className="inline-flex min-h-7 items-center gap-1.5 font-bold text-white">
+                  <span aria-hidden="true">↓</span>نصب وب‌اپ جهان باستان
+                </Link>
+              </li>
             </ul>
           </nav>
 
@@ -235,27 +239,23 @@ export async function SiteFooter() {
             <h2 id="footer-office-title" className="font-black text-white">
               {footerOfficeTitle}
             </h2>
-            <address className="mt-3 grid gap-1.5 not-italic text-sm leading-6 text-white/70">
-              <span className="flex items-start gap-2">
-                <LocationIcon className="mt-1 size-5 shrink-0 text-white" />
+            <address className="mt-1.5 grid gap-1 not-italic text-white/70">
+              <span className="flex items-start gap-1.5">
+                <LocationIcon className="size-4 shrink-0 text-white" />
                 <span>{address}</span>
               </span>
-              <a
-                href={`tel:${phone}`}
-                className="inline-flex w-fit items-center gap-2 transition-colors hover:text-white"
-              >
-                <PhoneIcon className="size-5 text-white" />
-                <span dir="ltr">{toPersianDigits(phone)}</span>
-              </a>
-              <a
-                href={`mailto:${email}`}
-                className="inline-flex w-fit items-center gap-2 transition-colors hover:text-white"
-              >
-                <MailIcon className="size-5 shrink-0 text-white" />
-                <span dir="ltr">{email}</span>
-              </a>
-              <span className="inline-flex items-center gap-2 text-white/70">
-                <ClockIcon className="size-5 text-white" />
+              <div className="flex flex-wrap gap-x-3 gap-y-1">
+                <a href={`tel:${phone}`} className="inline-flex items-center gap-1.5 transition-colors hover:text-white">
+                  <PhoneIcon className="size-4 shrink-0 text-white" />
+                  <span dir="ltr">{toPersianDigits(phone)}</span>
+                </a>
+                <a href={`mailto:${email}`} className="inline-flex min-w-0 items-center gap-1.5 transition-colors hover:text-white">
+                  <MailIcon className="size-4 shrink-0 text-white" />
+                  <span dir="ltr" className="[overflow-wrap:anywhere]">{email}</span>
+                </a>
+              </div>
+              <span className="inline-flex items-start gap-1.5 text-white/70">
+                <ClockIcon className="size-4 shrink-0 text-white" />
                 {workingHours}
               </span>
             </address>
@@ -263,9 +263,15 @@ export async function SiteFooter() {
         </Container>
 
         <div className="footer-bottom border-t border-white/15 bg-[#031d55]/65">
-          <Container className="flex flex-col gap-3 px-4 py-4 text-xs text-white/60 sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-10">
-            <div><p>{footerCopyright}</p><nav aria-label="پیوندهای حقوقی" className="mt-2 flex flex-wrap gap-3"><Link className="text-white/75 underline-offset-4 hover:text-white hover:underline" href="/terms/">شرایط استفاده و خرید</Link><Link className="text-white/75 underline-offset-4 hover:text-white hover:underline" href="/privacy/">حریم خصوصی</Link></nav></div>
-            <div className="flex flex-wrap gap-2" aria-label="شبکه‌های اجتماعی">
+          <Container className="flex flex-col gap-1.5 py-1 text-xs text-white/60 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+              <p>{footerCopyright}</p>
+              <nav aria-label="پیوندهای حقوقی" className="flex flex-wrap gap-x-1.5 gap-y-1 sm:gap-x-3">
+                <Link className="text-white/75 underline-offset-4 hover:text-white hover:underline" href="/terms/">شرایط استفاده و خرید</Link>
+                <Link className="text-white/75 underline-offset-4 hover:text-white hover:underline" href="/privacy/">حریم خصوصی</Link>
+              </nav>
+            </div>
+            <div className="flex shrink-0 flex-wrap gap-1" aria-label="شبکه‌های اجتماعی">
               {socialLinks.map((social) => {
                 const SocialIcon = socialIcons[social.icon];
                 return (

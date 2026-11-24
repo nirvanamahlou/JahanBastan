@@ -1,4 +1,3 @@
-import { CountryCityFields } from "@/components/content/country-city-fields";
 import { getDepartures, hotelImages } from "./departures/catalog";
 import type { Metadata } from "next";
 import Image from "next/image";
@@ -9,7 +8,7 @@ import { TourSortSelect } from "@/components/content/tour-sort-select";
 import { CountryFlag as Flag } from "@/components/content/country-flag";
 import styles from "@/components/content/catalog-layout.module.css";
 import { JalaliDateRangeInput } from "@/components/search/jalali-date-range-input";
-import { SearchIcon } from "@/components/layout/site-icons";
+import { LocationIcon, SearchIcon } from "@/components/layout/site-icons";
 import { Container } from "@/components/ui/container";
 import { EmptyState } from "@/components/ui/empty-state";
 import { SiteSelect } from "@/components/ui/site-select";
@@ -37,6 +36,7 @@ type ApiTour = {
   departureDate: string | null;
   returnDate?: string | null;
   priceAmount: string | null;
+  displayPrice?: string;
   currency: string | null;
   transportation: string | null;
   airlineName: string | null;
@@ -72,28 +72,8 @@ const sortOptions = [
   { label: "نزدیک‌ترین تاریخ", value: "departure" },
 ] as const;
 
-const transportationModes = [
-  { value: "flight", label: "همه پروازها", aliases: ["flight", "plane", "airplane", "پرواز", "هواپیما"] },
-  { value: "bus", label: "همه اتوبوس‌ها", aliases: ["bus", "اتوبوس"] },
-  { value: "train", label: "همه قطارها", aliases: ["train", "rail", "railway", "قطار"] },
-] as const;
-
 const valueOf = (value: string | string[] | undefined) =>
   Array.isArray(value) ? value[0] ?? "" : value ?? "";
-
-function normalizedTransportation(value: string) {
-  return value.trim().toLocaleLowerCase("fa-IR").replace(/[يى]/g, "ی").replace(/ك/g, "ک");
-}
-
-function transportationOptions(options: FilterOption[]) {
-  const modes = transportationModes
-    .filter((mode) => options.some((option) => {
-      const value = normalizedTransportation(option.value);
-      return mode.aliases.some((alias) => value === alias || value.includes(alias));
-    }))
-    .map(({ label, value }) => ({ label, value }));
-  return Array.from(new Map([...modes, ...options].map((option) => [option.value, option])).values());
-}
 
 function hrefWith(current: URLSearchParams, updates: Record<string, string | null>) {
   const next = new URLSearchParams(current);
@@ -109,22 +89,13 @@ function hrefWith(current: URLSearchParams, updates: Record<string, string | nul
 export default async function ToursPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const raw = await searchParams;
   const search = valueOf(raw.search).trim();
-  const country = normalizeCountryName(valueOf(raw.country));
-  const destination = valueOf(raw.destination);
+  const place = valueOf(raw.place);
+  const country = normalizeCountryName(place.startsWith("country:") ? place.slice(8) : place ? "" : valueOf(raw.country));
+  const destination = place.startsWith("city:") ? place.slice(5) : place ? "" : valueOf(raw.destination);
   const departure = valueOf(raw.departure);
-  const transportation = valueOf(raw.transportation);
-  const tourType = valueOf(raw.tourType);
-  const airline = valueOf(raw.airline);
-  const hotelStars = valueOf(raw.hotelStars);
   const departureFrom = valueOf(raw.departureFrom);
   const departureTo = valueOf(raw.departureTo);
   const passengerCount = valueOf(raw.passengerCount);
-  const minPrice = valueOf(raw.minPrice);
-  const maxPrice = valueOf(raw.maxPrice);
-  const featured = valueOf(raw.featured) === "true";
-  const installmentOnly = valueOf(raw.installmentOnly) === "true";
-  const directFlight = valueOf(raw.directFlight) === "true";
-  const lastMinute = valueOf(raw.lastMinute) === "true";
   const requestedSort = valueOf(raw.sort) || "featured";
   const sort = sortOptions.some((item) => item.value === requestedSort) ? requestedSort : "featured";
   const requestedPage = Math.max(1, Number(valueOf(raw.page)) || 1);
@@ -138,19 +109,9 @@ export default async function ToursPage({ searchParams }: { searchParams: Promis
   if (country) apiParams.set("country", country);
   if (destination) apiParams.set("destinationSlug", destination);
   if (departure) apiParams.set("origin", departure);
-  if (transportation) apiParams.set("transportation", transportation);
-  if (tourType) apiParams.set("tourType", tourType);
-  if (airline) apiParams.set("airline", airline);
-  if (hotelStars) apiParams.set("hotelStars", hotelStars);
   if (departureFrom) apiParams.set("departureFrom", departureFrom);
   if (departureTo) apiParams.set("departureTo", departureTo);
   if (passengerCount) apiParams.set("passengerCount", passengerCount);
-  if (minPrice) apiParams.set("minPrice", minPrice);
-  if (maxPrice) apiParams.set("maxPrice", maxPrice);
-  if (featured) apiParams.set("featured", "true");
-  if (installmentOnly) apiParams.set("installmentOnly", "true");
-  if (directFlight) apiParams.set("directFlight", "true");
-  if (lastMinute) apiParams.set("lastMinute", "true");
 
   const [nativePage, options, countries, destinations, departures] = await Promise.all([
     apiGet<{ items: ApiTour[]; total: number }>(`/tours?${apiParams}`, { cache: "no-store" })
@@ -173,22 +134,21 @@ export default async function ToursPage({ searchParams }: { searchParams: Promis
     if (country && !places.some(place => normalize(place.country.name) === normalize(country)) && !destinations.items.some(place => normalize(place.country) === normalize(country) && normalize(place.title) === normalize(city))) continue;
     if (search && ![tour.title,...names].some(name => normalize(name).includes(normalize(search)))) continue;
     if (departure && normalize(departure) !== normalize(tour.outbound.originName)) continue;
-    if (airline && ![tour.outbound.carrierName,tour.returning?.carrierName].some(name => normalize(name) === normalize(airline))) continue;
-    if (hotelStars && !tour.hotels.some(h => Number(h.starRating) === Number(hotelStars))) continue;
-    if (transportation && !(transportationModes[0].aliases as readonly string[]).includes(transportation)) continue;
-    if (tourType || featured || lastMinute || directFlight || installmentOnly) continue;
     const date = tour.startsOn.slice(0,10);
     if ((departureFrom && date < departureFrom) || (departureTo && date > departureTo)) continue;
     if (passengerCount && (tour.salesStopped || tour.previewOnly || (tour.remainingCapacity !== null && tour.remainingCapacity < Number(passengerCount)))) continue;
     const offers = tour.rates.filter(rate => rate.kind === "double").map(rate => rate.total);
     const comparable = offers.length > 0 && offers.every(parts => parts.length === 1 && parts[0].currencyCode === offers[0][0]?.currencyCode);
     const price = comparable ? Math.min(...offers.map(parts => Number(parts[0].amount))) : null;
-    if ((minPrice || maxPrice) && (price === null || (minPrice && price < Number(minPrice)) || (maxPrice && price > Number(maxPrice)))) continue;
+    const formattedOffers = new Set(offers.filter((parts) => parts.length).map((parts) =>
+      parts.map(({ amount, currencyCode }) => formatCurrency(String(amount), currencyCode)).join(" + "),
+    ));
+    const displayPrice = formattedOffers.size === 1 ? [...formattedOffers][0] : undefined;
     external.push({
       id:tour.id, slug:"departures/"+tour.id, title:tour.title, summary:tour.details?.summary || tour.description || null,
       imageId:null, imageUrl:tour.hotels.flatMap(hotelImages)[0], destination:{title:city,country:places[0]?.country.name || ""},
       durationDays:Math.round((Date.parse(tour.endsOn)-Date.parse(tour.startsOn))/86400000)+1,
-      departureDate:date, origin:tour.outbound.originName, priceAmount:price === null ? null : String(price),
+      departureDate:date, origin:tour.outbound.originName, priceAmount:price === null ? null : String(price), displayPrice,
       returnDate:tour.endsOn.slice(0,10),
       currency:comparable ? offers[0][0].currencyCode : null, airlineName:tour.outbound.carrierName,
       transportation:"پرواز", tourType:null, hotel:null, badgeLabel:null, isFeatured:false, isDirectFlight:false, isLastMinute:false, isInstallmentAvailable:false,
@@ -217,22 +177,17 @@ export default async function ToursPage({ searchParams }: { searchParams: Promis
     payload = {items:rows.slice(offset-from,offset-from+PAGE_SIZE),total};
   }
   const countryFlagIds = createCountryImageMap(countries.items);
-  const availableTransportations = transportationOptions(options.transportations);
   const current = new URLSearchParams();
-  ["country", "search", "destination", "departure", "transportation", "tourType", "airline", "hotelStars", "departureFrom", "departureTo", "passengerCount", "minPrice", "maxPrice", "featured", "installmentOnly", "directFlight", "lastMinute", "sort"]
-    .forEach((key) => {
-      const value = valueOf(raw[key]);
-      if (value) current.set(key, value);
-    });
+  for (const [key, value] of Object.entries({ country, search, destination, departure, departureFrom, departureTo, passengerCount, sort })) {
+    if (value) current.set(key, value);
+  }
   const pageCount = Math.max(1, Math.ceil(payload.total / PAGE_SIZE));
   const page = Math.min(requestedPage, pageCount);
-  const hasFilters = Boolean(country || search || destination || departure || transportation || tourType || airline || hotelStars || departureFrom || departureTo || passengerCount || minPrice || maxPrice || featured || installmentOnly || directFlight || lastMinute);
+  const hasFilters = Boolean(country || search || destination || departure || departureFrom || departureTo || passengerCount);
 
   const destinationLabel = options.destinations.find((option) => option.value === destination)?.label;
   const heading = destinationLabel ? `تورهای ${destinationLabel}` : country ? `تورهای ${country}` : "تورهای داخلی و خارجی";
-  const countryHref = country ? hrefWith(new URLSearchParams(), { country }) : "/tours/";
   const countryPhoto = country ? destinations.items.find(item => normalizeCountryName(item.country) === country && item.imageId)?.imageId : null;
-  const field = "min-h-12 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-brand outline-none transition focus:border-accent-strong focus:ring-4 focus:ring-accent/30";
   return <section className={country ? styles.countryPage : "bg-white pt-2 pb-8 sm:pt-3 sm:pb-12"}><Container className={country ? styles.countryContainer : styles.tourContainer}>
     {country ? <header className={styles.countryHero}>
       {countryPhoto && <div className={styles.countryHeroPhoto}><Image src={`${PUBLIC_API_BASE_URL}/media/${countryPhoto}`} alt="" fill sizes="(max-width:640px) 95vw, 520px" /></div>}
@@ -245,30 +200,33 @@ export default async function ToursPage({ searchParams }: { searchParams: Promis
       <header className={styles.heading}><div><h1>{heading}</h1><p>{payload.total.toLocaleString("fa-IR")} تور منتشرشده</p></div><Link className="ms-auto shrink-0 text-sm font-bold text-brand" href="/#tour-countries">← همه کشورها</Link></header>
       <Link href="/tours/departures/" className="mb-4 inline-flex rounded-xl bg-brand px-4 py-3 font-bold text-white">تورهای تاریخ‌دار</Link>
     </>}
-    <div className={country ? styles.countryLayout : undefined}>
-    <form action="/tours/" className={styles.tourSearch} aria-label="جست‌وجوی تور">
+    <div>
+      {!country && <form action="/tours/" className={styles.tourSearch} aria-label="جست‌وجوی تور">
         <div className={styles.tourSearchFields}>
-          <div className={styles.field}><span>مبدأ</span><SiteSelect ariaLabel="مبدأ" defaultValue={departure} id="tour-origin" name="departure" options={[{ label: "همه مبدأها", value: "" }, ...options.origins]} searchable /></div>
-          <CountryCityFields key={country + destination} id="tour" countries={countries.items} cities={destinations.items.map((item) => ({ title: item.title, value: item.slug, country: item.country }))} country={country} city={destination} />
-          <div className={`${styles.field} ${styles.tourSearchDates}`}><JalaliDateRangeInput key={`${departureFrom}:${departureTo}`} compact initialDeparture={departureFrom || null} initialReturn={departureTo || null} showTripType={false} dateLabels={{ field: "بازهٔ تاریخ حرکت", departure: "از تاریخ", return: "تا تاریخ" }} /></div>
+          <div className={styles.field}>
+            <span><LocationIcon className="size-4" />مبدأ</span>
+            <SiteSelect ariaLabel="مبدأ" defaultValue={departure} id="tour-origin" name="departure" options={[{ label: "همه مبدأها", value: "" }, ...options.origins]} searchable />
+          </div>
+          <div className={styles.field}>
+            <span><LocationIcon className="size-4" />مقصد</span>
+            <SiteSelect ariaLabel="مقصد" key={destination || country} defaultValue={destination ? `city:${destination}` : country ? `country:${country}` : ""} id="tour-destination" name="place" options={[
+              { label: "همه مقصدها", value: "" },
+              ...countries.items.map(({ name }) => ({ label: name, value: `country:${normalizeCountryName(name)}` })),
+              ...destinations.items.map(({ title, slug, country: cityCountry }) => ({ label: cityCountry ? `${title}، ${cityCountry}` : title, value: `city:${slug}` })),
+            ]} searchable />
+          </div>
+          <div className={styles.tourSearchDates}>
+            <JalaliDateRangeInput key={`${departureFrom}:${departureTo}`} compact initialDeparture={departureFrom || null} initialReturn={departureTo || null} showTripType={false} dateLabels={{ field: "بازهٔ تاریخ حرکت", departure: "از تاریخ", return: "تا تاریخ" }} />
+          </div>
+          <label className={styles.tourSearchPassengers}>
+            <span>تعداد مسافر</span>
+            <input defaultValue={passengerCount} min={1} max={20} name="passengerCount" placeholder="تعداد نفرات" type="number" />
+          </label>
           <button type="submit" className={styles.tourSearchButton}><SearchIcon className="size-4" />جست‌وجوی تور</button>
         </div>
-        <details className={styles.tourSearchAdvanced} open={Boolean(airline || hotelStars || tourType || transportation || minPrice || maxPrice || search || featured || installmentOnly || directFlight || lastMinute)}>
-          <summary>فیلترهای بیشتر</summary>
-          <div className={styles.tourSearchExtras}>
-          <div className={styles.field}><span>ایرلاین</span><SiteSelect ariaLabel="ایرلاین" defaultValue={airline} id="tour-airline" name="airline" options={[{ label: "همه ایرلاین‌ها", value: "" }, ...options.airlines]} searchable /></div>
-          <div className={styles.field}><span>درجه هتل</span><SiteSelect ariaLabel="درجه هتل" defaultValue={hotelStars} id="tour-hotel-stars" name="hotelStars" options={[{ label: "همه", value: "" }, ...options.hotelStars]} /></div>
-          <div className={styles.field}><span>نوع خدمات</span><SiteSelect ariaLabel="نوع خدمات" defaultValue={tourType} id="tour-service-type" name="tourType" options={[{ label: "همه خدمات", value: "" }, ...options.tourTypes]} /></div>
-          <div className={styles.field}><span>وسیله سفر</span><SiteSelect ariaLabel="وسیله سفر" defaultValue={transportation} id="tour-transportation" name="transportation" options={[{ label: "همه", value: "" }, ...availableTransportations]} /></div>
-          <fieldset className="grid min-w-0 grid-cols-2 gap-2"><legend className="mb-2 text-sm font-bold">محدوده قیمت</legend><label>از<input aria-label="حداقل قیمت" className={field} defaultValue={minPrice} min={0} name="minPrice" type="number" /></label><label>تا<input aria-label="حداکثر قیمت" className={field} defaultValue={maxPrice} min={0} name="maxPrice" type="number" /></label></fieldset>
-          <label>نام تور<input className={field} defaultValue={search} minLength={2} name="search" placeholder="نام تور یا مقصد" type="search" /></label>
-          <fieldset className="grid gap-3 border-t border-border pt-4"><legend className="sr-only">ویژگی‌های تور</legend>{[["featured", "فقط پرفروش", featured], ["installmentOnly", "خرید اقساطی", installmentOnly], ["directFlight", "پرواز مستقیم", directFlight], ["lastMinute", "لحظه‌آخری", lastMinute]].map(([name, label, checked]) => <label key={String(name)} className="!flex items-center gap-2"><input defaultChecked={Boolean(checked)} name={String(name)} type="checkbox" value="true" />{label}</label>)}</fieldset>
-          </div>
-        </details>
-        {passengerCount && <input type="hidden" name="passengerCount" value={passengerCount} />}
         <input type="hidden" name="sort" value={sort} />
-        {hasFilters ? <Link className="mt-2 inline-block text-xs font-bold text-muted" href={countryHref}>پاک کردن فیلترها</Link> : null}
-    </form>
+        {hasFilters && <Link className={styles.tourSearchReset} href="/tours/">پاک کردن فیلترها</Link>}
+      </form>}
       <div className={styles.content}>
         <div className={styles.sort}>
           <span className="text-sm text-muted">{payload.total.toLocaleString("fa-IR")} تور موجود</span>
@@ -279,7 +237,7 @@ export default async function ToursPage({ searchParams }: { searchParams: Promis
         </div>
         <section className={country ? styles.countryResults : styles.results} aria-label="فهرست تورها">
           {payload.items.length ? payload.items.map((tour) => {
-            const price = tour.priceAmount ? formatCurrency(tour.priceAmount, tour.currency) : null;
+            const price = tour.displayPrice ?? (tour.priceAmount ? formatCurrency(tour.priceAmount, tour.currency) : null);
             return <TourResultRow
               key={tour.slug}
               title={tour.title}
@@ -289,9 +247,10 @@ export default async function ToursPage({ searchParams }: { searchParams: Promis
               destination={tour.destination?.title ?? "با استعلام"}
               date={tour.departureDate ? formatPersianDate(tour.departureDate) : "با استعلام"}
               duration={tour.durationDays}
-              airline={tour.airlineName || tour.transportation || "با استعلام"}
+              airline={tour.airlineName?.trim() || "با استعلام"}
               price={price ?? "استعلام قیمت"}
-              countryDates={country ? { native: !tour.slug.startsWith("departures/"), departure: tour.departureDate, returning: tour.returnDate ?? null, price } : undefined}
+              countryLayout={Boolean(country)}
+              dateRanges={{ native: !tour.slug.startsWith("departures/"), departure: tour.departureDate, returning: tour.returnDate ?? null, price }}
             />;
           }) : <EmptyState title="توری با این فیلترها پیدا نشد" description="فیلترها را تغییر دهید یا همه را پاک کنید." action={<Link href="/tours/">همه تورها</Link>} />}
         </section>

@@ -21,33 +21,6 @@ type Option = SearchOption;
 
 type TransportServiceType = "flight" | "bus" | "train";
 
-const vehicleOptions: ReadonlyArray<Option & { value: TransportServiceType }> = [
-  { label: "قطار", value: "train" },
-  { label: "اتوبوس", value: "bus" },
-  { label: "هواپیما", value: "flight" },
-];
-
-const transportationAliases: Record<TransportServiceType, string[]> = {
-  flight: ["flight", "plane", "airplane", "پرواز", "هواپیما"],
-  bus: ["bus", "اتوبوس"],
-  train: ["train", "rail", "railway", "قطار"],
-};
-
-function normalizeTransportation(value: string) {
-  return value.trim().toLocaleLowerCase("fa-IR").replace(/[يى]/g, "ی").replace(/ك/g, "ک");
-}
-
-function transportationType(value: string): TransportServiceType | null {
-  const normalized = normalizeTransportation(value);
-  return (Object.entries(transportationAliases) as Array<[TransportServiceType, string[]]>).find(
-    ([, aliases]) => aliases.some((alias) => normalized === alias || normalized.includes(alias)),
-  )?.[0] ?? null;
-}
-
-function isTransportServiceType(value: string): value is TransportServiceType {
-  return vehicleOptions.some((option) => option.value === value);
-}
-
 export type TransportSearchOptions = Record<
   TransportServiceType,
   {
@@ -120,7 +93,6 @@ function RouteSelector({
   onDestinationChange,
   originOptions,
   destinationOptions,
-  disabled = false,
   required = false,
 }: {
   originId: string;
@@ -135,7 +107,6 @@ function RouteSelector({
   onDestinationChange: (value: string) => void;
   originOptions: ReadonlyArray<Option>;
   destinationOptions: ReadonlyArray<Option>;
-  disabled?: boolean;
   required?: boolean;
 }) {
   return (
@@ -151,13 +122,11 @@ function RouteSelector({
         value={originValue}
         onValueChange={onOriginChange}
         className={fieldClassName}
-        disabled={disabled}
       />
       </div>
       <button
         aria-label="جابه‌جایی مبدأ و مقصد"
         className="mb-0.5 grid size-10 place-items-center self-end rounded-full border border-brand/30 bg-white/62 text-base font-black text-brand shadow-[0_5px_14px_rgba(1,37,105,0.12)] transition hover:-translate-y-0.5 hover:border-accent-strong hover:bg-accent/35 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent"
-        disabled={disabled}
         onClick={() => {
           onOriginChange(destinationValue);
           onDestinationChange(originValue);
@@ -177,7 +146,6 @@ function RouteSelector({
         value={destinationValue}
         onValueChange={onDestinationChange}
         className={fieldClassName}
-        disabled={disabled}
       />
       </div>
     </div>
@@ -207,16 +175,14 @@ export function TravelSearch({
   const [searching, setSearching] = useState(false);
   const [routeOrigin, setRouteOrigin] = useState("");
   const [routeDestination, setRouteDestination] = useState("");
-  const [selectedVehicle, setSelectedVehicle] = useState<TransportServiceType | "">("");
   const selectedTransportOptions =
     serviceType === "flight" || serviceType === "bus" || serviceType === "train"
       ? transportOptions[serviceType]
-      : serviceType === "tour" && selectedVehicle
-        ? tourTransportOptions[selectedVehicle]
-        : null;
-  const transportOriginOptions = selectedTransportOptions
-    ? selectedTransportOptions.origins
-    : departures;
+      : null;
+  const tourRoutes = Object.values(tourTransportOptions);
+  const transportOriginOptions = serviceType === "tour"
+    ? Array.from(new Map([...departures, ...tourRoutes.flatMap((options) => options.origins)].map((option) => [option.value, option])).values())
+    : selectedTransportOptions?.origins ?? departures;
   const matchingTransportDestinations = selectedTransportOptions && routeOrigin
     ? selectedTransportOptions.routes
         .filter((route) => route.origin === routeOrigin)
@@ -230,8 +196,7 @@ export function TravelSearch({
   const transportDestinationOptions = serviceType === "tour"
       ? Array.from(new Map(
           [
-            ...matchingTransportDestinations,
-            ...(selectedTransportOptions?.destinations ?? []),
+            ...tourRoutes.flatMap((options) => options.destinations),
             ...destinations,
           ].map((option) => [option.value, option]),
         ).values())
@@ -259,16 +224,6 @@ export function TravelSearch({
     }
   }
 
-  function handleVehicleChange(value: string) {
-    setSelectedVehicle(isTransportServiceType(value) ? value : "");
-    setRouteOrigin("");
-    setRouteDestination("");
-  }
-
-  function tourTransportationValue(value: TransportServiceType) {
-    return transportationType(value) ?? value;
-  }
-
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSearching(true);
@@ -281,7 +236,6 @@ export function TravelSearch({
       "destination",
       "country",
       "departure",
-      "transportation",
       "departureFrom",
       "departureTo",
       "passengerCount",
@@ -306,12 +260,6 @@ export function TravelSearch({
       params.delete("departureTo");
     }
 
-    if (serviceType === "tour") {
-      const transportation = params.get("transportation");
-      if (transportation && isTransportServiceType(transportation)) {
-        params.set("transportation", tourTransportationValue(transportation));
-      }
-    }
     if (["flight", "train", "bus"].includes(serviceType)) {
       params.set("showResults", "1");
       const destinationValue = params.get("destination");
@@ -369,7 +317,6 @@ export function TravelSearch({
                 onClick={() => {
                   setRouteOrigin("");
                   setRouteDestination("");
-                  setSelectedVehicle("");
                   onServiceTypeChange(tab.key);
                 }}
                 className={styles.tab}
@@ -391,14 +338,6 @@ export function TravelSearch({
           className={`travel-search-form ${styles.form}`}
           data-service={serviceType}
         >
-          {serviceType === "tour" ? (
-            <div className={styles.field} data-vehicle-field>
-              <TravelSearchIcon icon="vehicle" className={styles.fieldIcon} />
-              <Select id="transportation" name="transportation" label="وسیله نقلیه"
-                options={vehicleOptions} placeholder="انتخاب وسیله" className={fieldClassName}
-                value={selectedVehicle} onValueChange={handleVehicleChange} />
-            </div>
-          ) : null}
           {serviceType === "hotel" || serviceType === "visa" ? (
             <div className={styles.field} data-country-field>
               <LocationIcon className={styles.fieldIcon} />
@@ -408,13 +347,13 @@ export function TravelSearch({
             </div>
           ) : (
             <RouteSelector originId={`${serviceType}-departure`} originLabel="مبدأ"
-              originPlaceholder={serviceType === "tour" && !selectedVehicle ? "انتخاب وسیله نقلیه" : "انتخاب مبدأ"}
+              originPlaceholder="انتخاب مبدأ"
               originValue={routeOrigin} destinationId={`${serviceType}-destination`} destinationLabel="مقصد"
-              destinationPlaceholder={serviceType === "tour" && !selectedVehicle ? "انتخاب وسیله نقلیه" : "انتخاب مقصد"}
+              destinationPlaceholder="انتخاب مقصد"
               destinationValue={routeDestination} onOriginChange={handleTransportOriginChange}
               onDestinationChange={setRouteDestination} originOptions={transportOriginOptions}
               destinationOptions={transportDestinationOptions}
-              disabled={serviceType === "tour" && !selectedVehicle} required={serviceType === "flight"} />
+              required={serviceType === "flight"} />
           )}
           {serviceType === "visa" ? (
             <div className={styles.field}>
@@ -431,15 +370,17 @@ export function TravelSearch({
             showTripType={["flight", "train", "bus"].includes(serviceType)}
             dateLabels={serviceType === "hotel"
               ? { departure: "تاریخ ورود", return: "تاریخ خروج", field: "تاریخ اقامت" }
-              : { departure: "تاریخ رفت", return: "تاریخ برگشت", field: "تاریخ سفر" }} />}
+              : serviceType === "tour"
+                ? { departure: "از تاریخ", return: "تا تاریخ", field: "بازهٔ تاریخ حرکت" }
+                : { departure: "تاریخ رفت", return: "تاریخ برگشت", field: "تاریخ سفر" }} />}
           <div className={styles.field} data-guests-field>
             <UsersIcon className={styles.fieldIcon} />
-            <PassengerSelector label={serviceType === "visa" ? "تعداد متقاضیان" : "مسافران"} required={serviceType === "flight"} />
+            <PassengerSelector compactIndicator={serviceType === "tour"} tourAgeGroups={serviceType === "tour"} label={serviceType === "visa" ? "تعداد متقاضیان" : "مسافران"} required={serviceType === "flight"} />
           </div>
           <div className={styles.submit}>
             <Button type="submit" loading={searching} className="search-action w-full">
               <SearchIcon className="size-4 shrink-0" />
-              <span>جستجوی {serviceTabs.find(tab => tab.key === serviceType)?.label}</span>
+              <span>{serviceType === "tour" ? "جستجو" : `جستجوی ${serviceTabs.find(tab => tab.key === serviceType)?.label}`}</span>
             </Button>
           </div>
         </form>

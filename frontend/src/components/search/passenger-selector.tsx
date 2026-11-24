@@ -1,20 +1,32 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { ChevronDownIcon } from "@/components/layout/site-icons";
 
 type PassengerSelectorProps = {
   className?: string;
   label?: string;
   name?: string;
   required?: boolean;
+  compactIndicator?: boolean;
+  tourAgeGroups?: boolean;
 };
 
-type PassengerKind = "adults" | "children" | "infants";
+type PassengerKind = "adults" | "children" | "olderChildren" | "infants";
 
-const passengerRows: Array<{ key: PassengerKind; label: string; hint: string; minimum: number }> = [
+type PassengerRow = { key: PassengerKind; label: string; hint: string; minimum: number };
+
+const passengerRows: PassengerRow[] = [
   { key: "adults", label: "بزرگسال", hint: "۱۲ سال به بالا", minimum: 1 },
   { key: "children", label: "کودک", hint: "۲ تا ۱۱ سال", minimum: 0 },
   { key: "infants", label: "نوزاد", hint: "تا ۲ سال", minimum: 0 },
+];
+
+const tourPassengerRows: PassengerRow[] = [
+  passengerRows[0],
+  { key: "children", label: "کودک ۲ تا ۶ سال", hint: "۲ سال تمام تا زیر ۶ سال", minimum: 0 },
+  { key: "olderChildren", label: "کودک ۶ تا ۱۲ سال", hint: "۶ سال تمام تا زیر ۱۲ سال", minimum: 0 },
+  { ...passengerRows[2], hint: "زیر ۲ سال" },
 ];
 
 export function PassengerSelector({
@@ -22,10 +34,13 @@ export function PassengerSelector({
   label = "مسافران",
   name = "passengerCount",
   required = false,
+  compactIndicator = false,
+  tourAgeGroups = false,
 }: PassengerSelectorProps) {
   const [counts, setCounts] = useState<Record<PassengerKind, number>>({
     adults: 1,
     children: 0,
+    olderChildren: 0,
     infants: 0,
   });
   const [open, setOpen] = useState(false);
@@ -49,23 +64,21 @@ export function PassengerSelector({
     };
   }, []);
 
-  const total = useMemo(
-    () => counts.adults + counts.children + counts.infants,
-    [counts],
-  );
+  const childCount = counts.children + (tourAgeGroups ? counts.olderChildren : 0);
+  const total = counts.adults + childCount + counts.infants;
   const summary = [
     `${counts.adults.toLocaleString("fa-IR")} بزرگسال`,
-    counts.children ? `${counts.children.toLocaleString("fa-IR")} کودک` : null,
+    childCount ? `${childCount.toLocaleString("fa-IR")} کودک` : null,
     counts.infants ? `${counts.infants.toLocaleString("fa-IR")} نوزاد` : null,
   ]
     .filter(Boolean)
     .join("، ");
 
   const update = (key: PassengerKind, delta: number, minimum: number) => {
-    setCounts((current) => ({
-      ...current,
-      [key]: Math.max(minimum, Math.min(20, current[key] + delta)),
-    }));
+    setCounts((current) => {
+      if (tourAgeGroups && delta > 0 && Object.values(current).reduce((sum, count) => sum + count, 0) >= 20) return current;
+      return { ...current, [key]: Math.max(minimum, Math.min(20, current[key] + delta)) };
+    });
   };
 
   return (
@@ -73,7 +86,7 @@ export function PassengerSelector({
       <span className="text-[10px] font-bold sm:text-xs">{label}</span>
       <input name={name} required={required} type="hidden" value={total} />
       <input name="adultCount" type="hidden" value={counts.adults} />
-      <input name="childCount" type="hidden" value={counts.children} />
+      <input name="childCount" type="hidden" value={childCount} />
       <input name="infantCount" type="hidden" value={counts.infants} />
       <div className="relative">
         <button
@@ -84,11 +97,11 @@ export function PassengerSelector({
           type="button"
         >
           <span className="min-w-0 flex-1 truncate">{summary}</span>
-          <span aria-hidden="true" className={`shrink-0 transition ${open ? "rotate-180" : ""}`}>⌄</span>
+          <span aria-hidden="true" className={`shrink-0 transition ${open ? "rotate-180" : ""}`}>{compactIndicator ? <ChevronDownIcon className="size-4" /> : "⌄"}</span>
         </button>
         {open ? (
           <div className="absolute start-0 top-[calc(100%+0.4rem)] z-50 w-[min(19rem,calc(100vw-2rem))] max-w-none rounded-2xl border border-brand/25 bg-surface p-3 shadow-[0_18px_42px_rgba(1,37,105,0.18)]" role="dialog" aria-label={label}>
-          {passengerRows.map((row) => (
+          {(tourAgeGroups ? tourPassengerRows : passengerRows).map((row) => (
             <div className="flex items-center justify-between gap-3 border-b border-border py-2 last:border-0" key={row.key}>
               <div>
                 <p className="text-sm font-black text-brand">{row.label}</p>
@@ -112,6 +125,7 @@ export function PassengerSelector({
                 </output>
                 <button
                   aria-label={`زیاد کردن ${row.label}`}
+                  disabled={tourAgeGroups && total >= 20}
                   className="grid size-7 place-items-center rounded-lg text-brand transition hover:bg-accent hover:text-brand"
                   onClick={(event) => {
                     event.preventDefault();

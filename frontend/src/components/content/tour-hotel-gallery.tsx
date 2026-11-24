@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { ArrowLeftIcon } from "@/components/layout/site-icons";
 import styles from "./tour-hotel-presentation.module.css";
 
 export function TourHotelGallery({ name, gallery }: { name: string; gallery: string[] }) {
@@ -15,7 +16,7 @@ export function TourHotelGallery({ name, gallery }: { name: string; gallery: str
   }
 
   return (
-    <section aria-label={`گالری تصاویر ${name}`} className={styles.gallery}>
+    <section aria-label={`گالری تصاویر ${name}`} className={styles.gallery} dir="rtl">
       <div className={styles.galleryStage}>
         <Image
           alt={name}
@@ -27,10 +28,10 @@ export function TourHotelGallery({ name, gallery }: { name: string; gallery: str
         {gallery.length > 1 && <>
           <span className={styles.galleryCount} aria-live="polite">{(index + 1).toLocaleString("fa-IR")} از {gallery.length.toLocaleString("fa-IR")}</span>
           <button aria-label="تصویر قبلی هتل" className={styles.galleryArrow} onClick={() => move(-1)} type="button">
-            <span aria-hidden="true">›</span>
+            <ArrowLeftIcon aria-hidden="true" className="size-4 rotate-180" />
           </button>
           <button aria-label="تصویر بعدی هتل" className={styles.galleryArrow} onClick={() => move(1)} type="button">
-            <span aria-hidden="true">‹</span>
+            <ArrowLeftIcon aria-hidden="true" className="size-4" />
           </button>
         </>}
       </div>
