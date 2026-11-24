@@ -641,8 +641,8 @@ function TourFlightTickets({
   });
 
   return (
-    <section className="grid gap-3 lg:grid-cols-2" aria-label="اطلاعات پرواز رفت و برگشت">
-      <h2 className="text-lg font-black text-brand lg:col-span-2">پروازهای رفت و برگشت</h2>
+    <section className="grid gap-2 md:grid-cols-2" aria-label="اطلاعات پرواز رفت و برگشت">
+      <h2 className="text-sm font-black text-brand md:col-span-2">پروازهای رفت و برگشت</h2>
       {flights.map((flight) => {
         const time = [flight.departureTime?.slice(0, 5), flight.arrivalTime?.slice(0, 5)]
           .filter(Boolean)
@@ -653,38 +653,38 @@ function TourFlightTickets({
         ].filter(Boolean).join(" · ");
 
         return (
-          <article className="grid content-start gap-3 rounded-2xl border border-border bg-white p-4 shadow-sm sm:p-5" dir="rtl" key={flight.key}>
-            <div className="flex min-w-0 flex-wrap items-start justify-between gap-3 border-b border-border pb-3">
-              <div className="text-brand">
+          <article className="grid min-w-0 content-start gap-2 overflow-hidden rounded-xl border border-border bg-white" dir="rtl" key={flight.key}>
+            <div className="flex min-w-0 flex-wrap items-start justify-between gap-2 bg-brand px-3 py-2 text-white">
+              <div>
                 <p className="text-sm font-bold">تاریخ پرواز</p>
                 {flight.date ? (
-                  <time className="mt-2 block text-2xl font-black leading-relaxed" dateTime={flight.date}>{formatPersianDate(flight.date)}</time>
+                  <time className="mt-0.5 block text-base font-black leading-snug" dateTime={flight.date}>{formatPersianDate(flight.date)}</time>
                 ) : (
-                  <p className="mt-2 text-lg font-black">اعلام نشده</p>
+                  <p className="mt-0.5 text-sm font-black">اعلام نشده</p>
                 )}
               </div>
               <div className="min-w-0">
                 {flight.airlineLogoImageId ? (
                   <Image
                     alt={`لوگوی ${flight.airline ?? "ایرلاین"}`}
-                    className="mb-3 h-12 w-20 rounded-xl border border-brand/10 bg-white object-contain p-2 shadow-sm"
+                    className="mb-1 h-8 w-12 rounded-md bg-white object-contain p-1"
                     height={48}
                     src={`${PUBLIC_API_BASE_URL}/media/${flight.airlineLogoImageId}`}
                     width={80}
                   />
                 ) : null}
                 <div className="flex flex-wrap gap-2">
-                  <span className="inline-flex rounded-full bg-brand-soft px-3 py-1 text-xs font-black text-brand">{flight.title}</span>
+                  <span className="inline-flex rounded-md bg-white/15 px-2 py-0.5 text-xs font-bold text-white">{flight.title}</span>
                 </div>
-                <h3 className="mt-3 flex items-center gap-1.5 text-lg font-black" dir="rtl" aria-label={`از ${flight.originCity || "مبدأ"} به ${flight.destinationCity || "مقصد"}`}>
+                <h3 className="mt-1 flex flex-wrap items-center gap-1.5 text-sm font-black" dir="rtl" aria-label={`از ${flight.originCity || "مبدأ"} به ${flight.destinationCity || "مقصد"}`}>
                   <bdi>{flight.originCity}</bdi>
                   {flight.originCity && flight.destinationCity ? <span aria-hidden="true">←</span> : null}
                   <bdi>{flight.destinationCity}</bdi>
                 </h3>
-                {airlineDetails ? <p className="mt-1 text-sm text-muted">{airlineDetails}</p> : null}
+                {airlineDetails ? <p className="mt-0.5 text-xs text-white/80">{airlineDetails}</p> : null}
               </div>
             </div>
-            <dl className="grid grid-cols-2 gap-2 text-sm">
+            <dl className="grid grid-cols-2 gap-1.5 px-2 pb-2 text-xs">
               {time ? <Fact label="ساعت" value={time} /> : null}
               {flight.originAirport || flight.originAirportCode ? <Fact label="فرودگاه مبدأ" value={airportLabel(flight.originAirport, flight.originAirportCode)} /> : null}
               {flight.destinationAirport || flight.destinationAirportCode ? <Fact label="فرودگاه مقصد" value={airportLabel(flight.destinationAirport, flight.destinationAirportCode)} /> : null}
@@ -699,7 +699,7 @@ function TourFlightTickets({
   );
 }
 function Fact({ label, value }: { label: string; value: string }) {
-  return <div className="rounded-xl bg-surface-muted p-3"><dt className="text-xs text-muted">{label}</dt><dd className="mt-1 font-black">{value}</dd></div>;
+  return <div className="min-w-0 rounded-md bg-surface-muted px-2 py-1.5"><dt className="text-xs text-muted">{label}</dt><dd className="mt-0.5 break-words font-bold text-brand">{value}</dd></div>;
 }
 
 function lines(value: string | null) {
