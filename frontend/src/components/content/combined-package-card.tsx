@@ -62,9 +62,8 @@ type SelectionKey = "double" | "single" | "extra" | "childWithBed" | "childWitho
 type Selection = Record<SelectionKey, number>;
 const emptySelection: Selection = { double: 0, single: 0, extra: 0, childWithBed: 0, childWithoutBed: 0, infant: 0 };
 
-export function CombinedPackageCard({ item, index, tourId, departureId, capacityRemaining, bookingDisabled, exchangeRates }: {
+export function CombinedPackageCard({ item, tourId, departureId, capacityRemaining, bookingDisabled, exchangeRates }: {
   item: CombinedPackage;
-  index: number;
   tourId?: number;
   departureId?: number | null;
   capacityRemaining?: number | null;
@@ -98,20 +97,10 @@ export function CombinedPackageCard({ item, index, tourId, departureId, capacity
   }, 0);
   const canPurchase = Boolean(tourId && departureId && item.combinedDeparturePriceId);
   const requiresFlightQuote = canPurchase && item.regularFlightPrice === null;
-  const totalNights = item.hotels.reduce((sum, hotel) => sum + hotel.nights, 0);
   const capacityExceeded = capacityRemaining !== null && capacityRemaining !== undefined && passengerCount > capacityRemaining;
   const updateSelection = (key: SelectionKey, delta: number) => setSelection((current) => ({ ...current, [key]: Math.max(0, Math.min(20, current[key] + delta)) }));
   return (
     <article className="mx-auto w-full max-w-[880px] overflow-hidden rounded-xl border border-border bg-surface-muted shadow-sm">
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-white px-3 py-2">
-        <div>
-          <p className="text-xs font-black text-violet-600">ترکیب {(index + 1).toLocaleString("fa-IR")}</p>
-          <h3 className="text-sm font-black text-brand">{item.title}</h3>
-        </div>
-        {totalNights > 0 ? <span className="rounded-full bg-violet-100 px-3 py-1.5 text-xs font-black text-violet-700">
-          {totalNights.toLocaleString("fa-IR")} شب
-        </span> : null}
-      </div>
       <div className="grid grid-cols-2 gap-2 p-2">
         {item.hotels.map((assignment, hotelIndex) => {
           const images = [assignment.hotel.imageId, ...assignment.hotel.galleryImageIds].filter(

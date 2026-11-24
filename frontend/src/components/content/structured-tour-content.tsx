@@ -284,7 +284,7 @@ export function StructuredTourContent({ item, showHotelPackages = true, showDepa
       {showHotelPackages && combinedPackages.length ? (
         <Card className={styles.combinedSection}>
           <div><p className="text-sm font-black text-violet-600">اقامت چند هتلی</p><h2 className="mt-1 text-xl font-black sm:text-2xl">پکیج‌های اقامت ترکیبی</h2><p className="mt-2 text-sm leading-7 text-muted">قیمت اقامت و پرواز هر ترکیب جدا نمایش داده شده است.</p></div>
-          <div className="mt-5 space-y-5">{combinedPackages.map((combinedPackage, index) => <CombinedPackageCard index={index} item={combinedPackage} key={`${combinedPackage.title}-${index}`} />)}</div>
+          <div className="mt-5 space-y-5">{combinedPackages.map((combinedPackage, index) => <CombinedPackageCard item={combinedPackage} key={`${combinedPackage.title}-${index}`} />)}</div>
         </Card>
       ) : null}
 

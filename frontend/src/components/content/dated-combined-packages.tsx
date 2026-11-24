@@ -56,7 +56,7 @@ export function DatedCombinedPackages({ packages, departures, standaloneHotels =
         </select>
       </label> : null}
       {closed ? <p className="rounded-xl bg-amber-50 p-3 font-bold text-amber-900" role="status">این تاریخ در حال حاضر قابل رزرو نیست.</p> : null}
-      {offers.length ? offers.map((item, index) => <CombinedPackageCard bookingDisabled={Boolean(closed)} capacityRemaining={selected?.capacityRemaining ?? null} departureId={selected?.id ?? null} exchangeRates={exchangeRates} item={item} index={index} key={`${item.id ?? index}-${item.combinedDeparturePriceId ?? "base"}`} tourId={tourId} />) : <p className="py-6 text-center text-muted">قیمت ترکیب‌ها برای این تاریخ هنوز ثبت نشده است.</p>}
+      {offers.length ? offers.map((item, index) => <CombinedPackageCard bookingDisabled={Boolean(closed)} capacityRemaining={selected?.capacityRemaining ?? null} departureId={selected?.id ?? null} exchangeRates={exchangeRates} item={item} key={`${item.id ?? index}-${item.combinedDeparturePriceId ?? "base"}`} tourId={tourId} />) : <p className="py-6 text-center text-muted">قیمت ترکیب‌ها برای این تاریخ هنوز ثبت نشده است.</p>}
     </section>
   );
 }
