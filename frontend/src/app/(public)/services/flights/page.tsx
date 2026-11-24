@@ -430,7 +430,7 @@ export default async function FlightsPage({ searchParams }: { searchParams: Prom
 
   return (
     <>
-      <PageIntro compact bannerSrc="/images/service-banners/flight-v2.webp"
+      <PageIntro compact bannerSrc="/images/service-banners/flight-panorama.webp"
         eyebrow="خدمات سفر / پرواز"
         title={country ? `پروازهای ${country}` : "پرواز بر اساس کشور"}
       />

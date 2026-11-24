@@ -550,7 +550,7 @@ html[data-theme="night"] select:not([multiple]) {
 
 /* A consistent, tactile hover state for every actionable control. */
 @media (hover: hover) {
-  button:not(:disabled):hover,
+  button:not(:disabled):not(:where([data-menu-backdrop])):hover,
   input[type="button"]:not(:disabled):hover,
   input[type="submit"]:not(:disabled):hover,
   input[type="reset"]:not(:disabled):hover,

@@ -171,7 +171,7 @@ export function SiteHeader() {
         <>
           <button
             type="button"
-            aria-label="بستن منو از بیرون"
+            data-menu-backdrop aria-label="بستن منو از بیرون"
             tabIndex={-1}
             className={styles.backdrop}
             onClick={() => setMenuOpen(false)}
