@@ -375,7 +375,7 @@ export function TravelSearch({
                 : { departure: "تاریخ رفت", return: "تاریخ برگشت", field: "تاریخ سفر" }} />}
           <div className={styles.field} data-guests-field>
             <UsersIcon className={styles.fieldIcon} />
-            <PassengerSelector tourAgeGroups={serviceType === "tour"} label={serviceType === "visa" ? "تعداد متقاضیان" : "مسافران"} required={serviceType === "flight"} />
+            <PassengerSelector tourAgeGroups={serviceType === "tour" || serviceType === "hotel"} label={serviceType === "visa" ? "تعداد متقاضیان" : "مسافران"} required={serviceType === "flight"} />
           </div>
           <div className={styles.submit}>
             <Button type="submit" loading={searching} className="search-action w-full">
