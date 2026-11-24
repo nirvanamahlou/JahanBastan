@@ -20,7 +20,7 @@ import { getPublicSettings } from "@/lib/api/public-settings";
 type Settings = { socialLinks: Record<string, string> };
 export default async function PublicLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const hasSessionCookie = (await cookies()).has(process.env.CUSTOMER_SESSION_COOKIE_NAME ?? "customer_session");
-  return <Suspense fallback={null}><AppAccessGate hasSessionCookie={hasSessionCookie}><Suspense fallback={<div className="public-shell"><SiteHeader /><main id="main-content"><PublicPageSkeleton /></main><MobileBottomNav /></div>}>
+  return <Suspense fallback={null}><AppAccessGate hasSessionCookie={hasSessionCookie}><Suspense fallback={<PublicPageSkeleton />}>
     <PublicLayoutContent>{children}</PublicLayoutContent>
   </Suspense></AppAccessGate></Suspense>;
 }
