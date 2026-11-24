@@ -42,6 +42,7 @@ export type PublicCombinedPackage = Omit<CombinedDeparturePrice, "id" | "departu
   hotels: {
     nights: number;
     boardType: string | null;
+    roomType?: string | null;
     hotel: {
       name: string;
       slug: string;
