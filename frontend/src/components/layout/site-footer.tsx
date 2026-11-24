@@ -6,7 +6,6 @@ import { siteConfig } from "@/config/site";
 import { getPublicSettings } from "@/lib/api/public-settings";
 import { toPersianDigits } from "@/lib/persian-number";
 
-import { BrandLogo } from "./brand-logo";
 import { EnamadSeal } from "./enamad-seal";
 import {
   ClockIcon,
@@ -59,7 +58,6 @@ export async function SiteFooter() {
       ? siteConfig.businessHours
       : normalizedSavedWorkingHours || siteConfig.businessHours,
   );
-  const footerBrandTitle = values.footerBrandTitle?.trim() || siteName;
   const footerQuickTitle = values.footerQuickTitle?.trim() || "دسترسی سریع";
   const footerOfficeTitle =
     values.footerOfficeTitle?.trim() || `دفتر ${siteName}`;
@@ -108,27 +106,8 @@ export async function SiteFooter() {
       <div className={styles.layout}>
 
         <Container className={styles.main}>
-          <section aria-labelledby="footer-brand-title" className="min-w-0">
-            <Link
-              href="/"
-              className="group flex w-fit items-center gap-2 rounded-xl"
-            >
-              <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-transparent transition-transform group-hover:-translate-y-1">
-                <BrandLogo decorative className="h-full w-full object-contain drop-shadow-[0_5px_12px_rgba(0,0,0,.16)]" />
-              </span>
-              <span>
-                <strong
-                  id="footer-brand-title"
-                  className="block text-base leading-tight font-black text-white"
-                >
-                  {footerBrandTitle}
-                </strong>
-                <span className="mt-0.5 block text-xs leading-tight text-white/75">
-                  {siteConfig.description}
-                </span>
-              </span>
-            </Link>
-            <div className="mt-2 grid max-w-64 grid-cols-4 gap-1.5" aria-label="پیوندهای سازمان‌های هواپیمایی و اینماد">
+          <section aria-label="مجوزها و پیوندهای رسمی" className="min-w-0">
+            <div className="grid max-w-64 grid-cols-4 gap-1.5" aria-label="پیوندهای سازمان‌های هواپیمایی و اینماد">
               <EnamadSeal compact />
               {[
                 { name: "انجمن بین‌المللی حمل‌ونقل هوایی (IATA)", href: "https://www.iata.org/", image: "/images/organizations/iata.svg" },

@@ -36,7 +36,6 @@
 .footer :global(.footer-bottom) p { line-height: 1.45; }
 .footer nav ul, .footer a { font-size: .75rem; }
 .column { min-width: 0; border-inline-start: 1px solid #ffffff2b; padding-inline-start: 1rem; }
-.footer [aria-labelledby="footer-brand-title"] > a > span:first-child { background: #fff; padding: .16rem; }
 
 .links a {
   line-height: 1.4;
