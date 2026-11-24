@@ -27,11 +27,14 @@ type SupportConversation = {
   status: "open" | "in_progress" | "closed";
   lastSender: SenderType;
   messages: SupportMessage[];
+  requiresContact: boolean;
   accessToken?: string;
 };
 
 type StoredSession = { id: number; token: string };
-type AuthenticationState = "checking" | "authenticated" | "guest";
+type Customer = { id: number; fullName: string; phone?: string | null; buyerMobile?: string | null };
+type SupportContact = { fullName: string; phone: string };
+
 type LauncherPosition = { left: number; top: number };
 type LauncherDrag = {
   pointerId: number;
@@ -50,6 +53,7 @@ function clampLauncher(position: LauncherPosition, button: HTMLButtonElement): L
 }
 
 const STORAGE_KEY = "jahan-bastan-support-chat";
+const CONTACT_INPUT = "min-h-11 w-full rounded-xl border border-border bg-white px-3 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/15";
 const quickReplies: Array<{
   key: QuickReplyKey;
   label: string;
@@ -69,9 +73,9 @@ function ChatIcon({ className = "" }: { className?: string }) {
   );
 }
 
-function readStoredSession(): StoredSession | null {
+function readStoredSession(customerId: number): StoredSession | null {
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
+    const raw = window.localStorage.getItem(`${STORAGE_KEY}:${customerId}`) ?? window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Partial<StoredSession>;
     return typeof parsed.id === "number" && typeof parsed.token === "string"
@@ -80,6 +84,30 @@ function readStoredSession(): StoredSession | null {
   } catch {
     return null;
   }
+}
+
+function forgetStoredSession(customerId: number, conversationId?: number) {
+  try {
+    window.localStorage.removeItem(`${STORAGE_KEY}:${customerId}`);
+    if (conversationId && readStoredSession(customerId)?.id === conversationId) {
+      window.localStorage.removeItem(STORAGE_KEY);
+    }
+  } catch {
+    // This browser does not allow local storage.
+  }
+}
+
+function normalizePhone(value: string) {
+  let phone = value.replace(/[۰-۹٠-٩]/g, character => String("۰۱۲۳۴۵۶۷۸۹٠١٢٣٤٥٦٧٨٩".indexOf(character) % 10)).replace(/[\s()-]/g, "");
+  if (phone.startsWith("00")) phone = "+" + phone.slice(2);
+  else if (/^0[1-9][0-9]{9}$/.test(phone)) phone = "+98" + phone.slice(1);
+  else if (/^9[0-9]{9}$/.test(phone)) phone = "+98" + phone;
+  return /^\+[1-9][0-9]{9,14}$/.test(phone) ? phone : null;
+}
+
+function profileContact(customer: Customer | null): SupportContact {
+  const fullName = customer?.fullName?.trim() ?? "";
+  return { fullName: fullName === "کاربر جهان باستان" ? "" : fullName, phone: customer?.phone || customer?.buyerMobile || "" };
 }
 
 export function SupportChatWidget() {
@@ -130,27 +158,43 @@ export function SupportChatWidget() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [unread, setUnread] = useState(false);
-  const [authenticationState, setAuthenticationState] =
-    useState<AuthenticationState>("checking");
-  const isAuthenticated = authenticationState === "authenticated";
+  const [customer, setCustomer] = useState<Customer | null>();
+  const [contact, setContact] = useState<SupportContact>(profileContact(null));
+  const [confirmedContact, setConfirmedContact] = useState<SupportContact | null>(null);
+  const customerId = useRef<number | undefined>(undefined);
   const inputRef = useRef<HTMLInputElement>(null);
+  const contactRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messageCountRef = useRef(0);
+  const sendingRef = useRef(false);
 
-  useEffect(() => {
-    const timer = window.setTimeout(() => setSession(readStoredSession()), 0);
-    return () => window.clearTimeout(timer);
-  }, []);
+  const requiresContact = !session || conversation?.requiresContact === true;
+  const canSend = Boolean(customer && (!requiresContact || confirmedContact) && (!session || conversation));
+  const showContact = Boolean(customer && requiresContact && !confirmedContact);
 
   useEffect(() => {
     let cancelled = false;
-    let checkId = 0;
+    let requestId = 0;
     async function checkAuthentication() {
-      const currentCheck = ++checkId;
+      const currentRequest = ++requestId;
       const response = await readCustomerSession().catch(() => null);
-      if (!cancelled && currentCheck === checkId) {
-        setAuthenticationState(response?.ok ? "authenticated" : "guest");
+      const profile = response?.ok
+        ? await (response.json() as Promise<{ user: Customer }>).catch(() => null)
+        : null;
+      if (cancelled || currentRequest !== requestId) return;
+      const nextCustomer = typeof profile?.user?.id === "number" ? profile.user : null;
+      if (nextCustomer?.id !== customerId.current) {
+        customerId.current = nextCustomer?.id;
+        setSession(nextCustomer ? readStoredSession(nextCustomer.id) : null);
+        setConversation(null);
+        setContact(profileContact(nextCustomer));
+        setConfirmedContact(null);
+        setDraft("");
+        setError("");
+        setUnread(false);
+        messageCountRef.current = 0;
       }
+      setCustomer(nextCustomer);
     }
     const handleSessionChange = () => void checkAuthentication();
     void checkAuthentication();
@@ -164,33 +208,37 @@ export function SupportChatWidget() {
   }, []);
 
   useEffect(() => {
-    if (!open || !isAuthenticated) return;
-    const timer = window.setTimeout(() => inputRef.current?.focus(), 120);
+    if (!open || (!showContact && !canSend)) return;
+    const timer = window.setTimeout(() => (showContact ? contactRef : inputRef).current?.focus(), 120);
     return () => window.clearTimeout(timer);
-  }, [isAuthenticated, open]);
+  }, [canSend, open, showContact]);
 
   useEffect(() => {
-    if (!isAuthenticated || !session) return;
+    if (!customer || !session) return;
+    const ownerId = customer.id;
+    const { id, token } = session;
     let cancelled = false;
 
     async function loadConversation(showLoading = false) {
       if (showLoading) setLoading(true);
       try {
         const response = await fetch(
-          `${PUBLIC_API_BASE_URL}/support/conversations/${session?.id}?token=${encodeURIComponent(session?.token ?? "")}`,
-          { cache: "no-store" },
+          `${PUBLIC_API_BASE_URL}/support/conversations/${id}?token=${encodeURIComponent(token)}`,
+          { cache: "no-store", credentials: "include" },
         );
         if (response.status === 404) {
-          window.localStorage.removeItem(STORAGE_KEY);
           if (!cancelled) {
+            forgetStoredSession(ownerId, id);
             setSession(null);
             setConversation(null);
+            setConfirmedContact(null);
+            messageCountRef.current = 0;
           }
           return;
         }
         if (!response.ok) throw new Error("load failed");
         const payload = (await response.json()) as SupportConversation;
-        if (!cancelled) {
+        if (!cancelled && payload.messages.length >= messageCountRef.current) {
           if (
             payload.messages.length > messageCountRef.current &&
             payload.lastSender === "admin" &&
@@ -200,7 +248,6 @@ export function SupportChatWidget() {
           }
           messageCountRef.current = payload.messages.length;
           setConversation(payload);
-          setError("");
         }
       } catch {
         if (!cancelled && showLoading) {
@@ -220,7 +267,7 @@ export function SupportChatWidget() {
       cancelled = true;
       window.clearInterval(timer);
     };
-  }, [isAuthenticated, open, session]);
+  }, [customer, open, session]);
 
   useEffect(() => {
     if (open) messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -230,7 +277,10 @@ export function SupportChatWidget() {
 
   async function sendMessage(message: string, quickReplyKey?: QuickReplyKey) {
     const cleanMessage = message.trim();
-    if (!cleanMessage || sending || !isAuthenticated) return;
+    if (cleanMessage.length < 2 || !customer || !canSend || sendingRef.current) return;
+    const senderId = customer.id;
+    const newContact = requiresContact ? confirmedContact : undefined;
+    sendingRef.current = true;
     setSending(true);
     setError("");
     try {
@@ -239,36 +289,57 @@ export function SupportChatWidget() {
             `${PUBLIC_API_BASE_URL}/support/conversations/${session.id}/messages`,
             {
               method: "POST",
+              credentials: "include",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 accessToken: session.token,
                 message: cleanMessage,
                 quickReplyKey,
+                contact: newContact,
               }),
             },
           )
         : await fetch(`${PUBLIC_API_BASE_URL}/support/conversations`, {
             method: "POST",
+            credentials: "include",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               message: cleanMessage,
               quickReplyKey,
+              contact: newContact,
               subject: quickReplyKey ? "راهنمای سریع سایت" : "گفتگو با پشتیبانی",
             }),
           });
+      if (customerId.current !== senderId) return;
+      if (response.status === 409 && conversation?.requiresContact === false) {
+        const payload = await response.json().catch(() => null);
+        if (payload?.detail === "support_contact_required") {
+          setConversation({ ...conversation, requiresContact: true });
+          setConfirmedContact(null);
+          return;
+        }
+      }
       if (!response.ok) throw new Error("send failed");
       const payload = (await response.json()) as SupportConversation;
-      if (!session && payload.accessToken) {
-        const nextSession = { id: payload.id, token: payload.accessToken };
-        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextSession));
-        setSession(nextSession);
+      if (customerId.current !== senderId) return;
+      const nextSession = session ?? (payload.accessToken ? { id: payload.id, token: payload.accessToken } : null);
+      if (nextSession && (!session || newContact)) {
+        forgetStoredSession(senderId, nextSession.id);
+        try {
+          window.localStorage.setItem(`${STORAGE_KEY}:${senderId}`, JSON.stringify(nextSession));
+        } catch {
+          // Keep the chat open in memory when browser storage is unavailable.
+        }
+        if (!session) setSession(nextSession);
       }
       messageCountRef.current = payload.messages.length;
       setConversation(payload);
       setDraft("");
+      setConfirmedContact(null);
     } catch {
-      setError("پیام ارسال نشد. لطفاً دوباره تلاش کنید.");
+      if (customerId.current === senderId) setError("پیام ارسال نشد. لطفاً دوباره تلاش کنید.");
     } finally {
+      sendingRef.current = false;
       setSending(false);
     }
   }
@@ -277,15 +348,29 @@ export function SupportChatWidget() {
     event.preventDefault();
     void sendMessage(draft);
   }
+
+  function confirmContact(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const fullName = contact.fullName.trim();
+    const phone = normalizePhone(contact.phone);
+    if (!fullName || !phone) {
+      setError("نام و نام خانوادگی و شماره تماس معتبر را وارد کنید.");
+      return;
+    }
+    setError("");
+    setConfirmedContact({ fullName, phone });
+  }
+
   function resetConversation() {
-    window.localStorage.removeItem(STORAGE_KEY);
+    if (customer) forgetStoredSession(customer.id, session?.id);
     setSession(null);
     setConversation(null);
+    setContact(profileContact(customer ?? null));
+    setConfirmedContact(null);
     setDraft("");
     setError("");
     setUnread(false);
     messageCountRef.current = 0;
-    window.setTimeout(() => inputRef.current?.focus(), 0);
   }
 
   const accountPath = pathname.startsWith("/") ? pathname : "/";
@@ -298,7 +383,7 @@ export function SupportChatWidget() {
       {open ? (
         <section
           aria-labelledby="support-chat-title"
-          className={`mb-3 flex w-[min(23rem,calc(100vw-1.5rem))] flex-col overflow-hidden rounded-3xl border border-brand/20 bg-white text-foreground shadow-[0_24px_70px_rgba(1,37,105,0.28)] ${isAuthenticated ? "h-[min(34rem,calc(100dvh-7rem))]" : ""}`}
+          className={`mb-3 flex w-[min(23rem,calc(100vw-1.5rem))] flex-col overflow-hidden rounded-3xl border border-brand/20 bg-white text-foreground shadow-[0_24px_70px_rgba(1,37,105,0.28)] ${canSend ? "h-[min(34rem,calc(100dvh-7rem))]" : ""}`}
           role="dialog"
         >
           <header className="flex items-center justify-between gap-3 bg-brand px-4 py-3.5 text-white">
@@ -308,15 +393,15 @@ export function SupportChatWidget() {
               </span>
               <div className="min-w-0">
                 <h2 className="truncate font-black" id="support-chat-title">پشتیبانی جهان باستان</h2>
-                {isAuthenticated ? <p className="mt-0.5 text-[11px] text-white/75">پاسخ خودکار و ارتباط با پشتیبان</p> : null}
               </div>
             </div>
             <div className="flex shrink-0 items-center gap-1.5">
-              {isAuthenticated && session ? (
+              {customer && session ? (
                 <button
                   aria-label="گفت‌وگوی جدید"
                   className="min-h-9 rounded-xl bg-white/10 px-2.5 text-[11px] font-bold transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
                   onClick={resetConversation}
+                  disabled={sending}
                   type="button"
                 >
                   گفت‌وگوی جدید
@@ -333,14 +418,45 @@ export function SupportChatWidget() {
             </div>
           </header>
 
-          {isAuthenticated ? (
+          {showContact ? (
+            <form className="space-y-3 overflow-y-auto bg-surface-muted p-4" onSubmit={confirmContact}>
+              <p className="text-sm leading-6 text-muted">برای شروع، نام و شماره تماس خود را تأیید کنید.</p>
+              <label className="block space-y-1 text-sm font-bold text-brand">
+                <span>نام و نام خانوادگی</span>
+                <input
+                  autoComplete="name"
+                  className={CONTACT_INPUT}
+                  maxLength={150}
+                  name="fullName"
+                  onChange={(event) => setContact({ ...contact, fullName: event.target.value })}
+                  ref={contactRef}
+                  required
+                  value={contact.fullName}
+                />
+              </label>
+              <label className="block space-y-1 text-sm font-bold text-brand">
+                <span>شماره تماس</span>
+                <input
+                  autoComplete="tel"
+                  className={CONTACT_INPUT}
+                  dir="ltr"
+                  inputMode="tel"
+                  maxLength={32}
+                  name="phone"
+                  onChange={(event) => setContact({ ...contact, phone: event.target.value })}
+                  required
+                  type="tel"
+                  value={contact.phone}
+                />
+              </label>
+              {error ? <p className="text-xs font-bold text-red-700" role="alert">{error}</p> : null}
+              <button className="min-h-11 w-full rounded-xl bg-brand px-4 text-sm font-black text-white hover:bg-brand-strong focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent" type="submit">
+                ادامه به گفتگو
+              </button>
+            </form>
+          ) : canSend ? (
             <>
               <div className="flex-1 space-y-3 overflow-y-auto bg-[#f5f8ff] p-3.5" aria-live="polite">
-                <div className="max-w-[88%] rounded-2xl rounded-tr-md border border-brand/10 bg-white px-3.5 py-3 text-sm leading-6 shadow-sm">
-                  <strong className="block text-brand">خوش آمدید 👋</strong>
-                  <span>چه کاری از من برمی‌آید؟ یکی از گزینه‌ها را انتخاب کنید یا سوالتان را بنویسید.</span>
-                </div>
-
                 {!conversation?.messages.length ? (
                   <div className="grid gap-2">
                     {quickReplies.map((item) => (
@@ -357,7 +473,6 @@ export function SupportChatWidget() {
                   </div>
                 ) : null}
 
-                {loading && !conversation ? <p className="text-center text-xs text-muted">در حال بازیابی گفتگو…</p> : null}
                 {conversation?.messages.map((message) => {
                   const isCustomer = message.senderType === "customer";
                   return (
@@ -384,7 +499,7 @@ export function SupportChatWidget() {
               </div>
 
               <form className="border-t border-border bg-white p-3" onSubmit={submit}>
-                {error ? <p className="mb-2 text-xs font-bold text-red-600">{error}</p> : null}
+                {error ? <p className="mb-2 text-xs font-bold text-red-700" role="alert">{error}</p> : null}
                 <div className="flex items-center gap-2">
                   <input
                     aria-label="پیام شما برای پشتیبانی"
@@ -404,11 +519,12 @@ export function SupportChatWidget() {
                     {sending ? "…" : "←"}
                   </button>
                 </div>
-                <p className="mt-2 text-center text-[10px] text-muted">پاسخ پشتیبان به‌صورت خودکار در همین گفتگو نمایش داده می‌شود.</p>
+                {confirmedContact ? <button className="mt-2 text-xs font-bold text-brand underline" disabled={sending} onClick={() => setConfirmedContact(null)} type="button">تغییر اطلاعات تماس</button> : null}
               </form>
             </>
-          ) : authenticationState === "guest" ? (
-            <div className="p-3">
+          ) : customer === null ? (
+            <div className="space-y-3 bg-surface-muted p-4">
+              <p className="text-sm leading-6 text-muted">برای شروع گفتگو وارد حساب شوید یا ثبت‌نام کنید.</p>
               <Link
                 className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#eb5d9f] px-4 text-sm font-black text-white transition hover:bg-[#d94a8c] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-pink-200"
                 href={registrationHref}
@@ -418,7 +534,7 @@ export function SupportChatWidget() {
               </Link>
             </div>
           ) : (
-            <span className="sr-only" role="status">در حال بررسی حساب کاربری…</span>
+            <p className="p-4 text-center text-sm text-muted" role="status">{error || (loading ? "در حال بازیابی گفتگو…" : "در حال بررسی حساب کاربری…")}</p>
           )}
         </section>
       ) : null}
@@ -447,7 +563,7 @@ export function SupportChatWidget() {
         type="button"
       >
         <ChatIcon className="block size-6 shrink-0 sm:size-8" />
-        {isAuthenticated && unread ? <span className="absolute -right-1 -top-1 size-4 rounded-full border-2 border-white bg-amber-400" aria-label="پاسخ جدید" /> : null}
+        {customer && unread ? <span className="absolute -right-1 -top-1 size-4 rounded-full border-2 border-white bg-amber-400" aria-label="پاسخ جدید" /> : null}
       </button>
     </div>
   );
