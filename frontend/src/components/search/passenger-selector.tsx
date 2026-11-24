@@ -8,7 +8,6 @@ type PassengerSelectorProps = {
   label?: string;
   name?: string;
   required?: boolean;
-  compactIndicator?: boolean;
   tourAgeGroups?: boolean;
 };
 
@@ -34,7 +33,6 @@ export function PassengerSelector({
   label = "مسافران",
   name = "passengerCount",
   required = false,
-  compactIndicator = false,
   tourAgeGroups = false,
 }: PassengerSelectorProps) {
   const [counts, setCounts] = useState<Record<PassengerKind, number>>({
@@ -97,7 +95,9 @@ export function PassengerSelector({
           type="button"
         >
           <span className="min-w-0 flex-1 truncate">{summary}</span>
-          <span aria-hidden="true" className={`shrink-0 transition ${open ? "rotate-180" : ""}`}>{compactIndicator ? <ChevronDownIcon className="size-4" /> : "⌄"}</span>
+          <span aria-hidden="true" className={`shrink-0 transition-transform motion-reduce:transition-none ${open ? "rotate-180" : ""}`}>
+            <ChevronDownIcon className="size-4" />
+          </span>
         </button>
         {open ? (
           <div className="absolute start-0 top-[calc(100%+0.4rem)] z-50 w-[min(19rem,calc(100vw-2rem))] max-w-none rounded-2xl border border-brand/25 bg-surface p-3 shadow-[0_18px_42px_rgba(1,37,105,0.18)]" role="dialog" aria-label={label}>

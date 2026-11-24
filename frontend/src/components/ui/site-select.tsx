@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 
+import { ChevronDownIcon } from "@/components/layout/site-icons";
+
 export type SiteSelectOption = {
   description?: string;
   label: string;
@@ -176,7 +178,9 @@ export function SiteSelect({
         <span data-select-empty={!selectedValue || undefined} className={`min-w-0 flex-1 truncate ${selected ? "" : "text-muted"}`}>
           {selected?.label || placeholder}
         </span>
-        <span aria-hidden="true" className={`shrink-0 transition ${compactMenu ? "text-accent-strong" : "text-brand"} ${open ? "rotate-180" : ""}`}>{compactMenu ? "▾" : "⌄"}</span>
+        <span aria-hidden="true" className={`shrink-0 transition-transform motion-reduce:transition-none ${compactMenu ? "text-accent-strong" : "text-brand"} ${open ? "rotate-180" : ""}`}>
+          <ChevronDownIcon className="size-4" />
+        </span>
       </button>
 
       {open ? (
