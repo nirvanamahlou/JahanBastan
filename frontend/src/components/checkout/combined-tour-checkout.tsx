@@ -40,6 +40,9 @@ export function CombinedTourCheckout({ combinedDeparturePriceId, departureId, on
           termsAccepted,
           passengers: passengers.map((passenger) => ({
             ...passenger,
+            fatherName: passenger.fatherName || null,
+            firstNameEn: passenger.firstNameEn || null,
+            lastNameEn: passenger.lastNameEn || null,
             age: passenger.age ? Number(passenger.age) : null,
             birthDate: passenger.birthDate || null,
             passportExpiryDate: passenger.passportExpiryDate || null,
