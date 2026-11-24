@@ -1,4 +1,3 @@
-import { homepageHeroAssets } from "@/lib/homepage-hero-assets";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -9,7 +8,7 @@ import { BookIcon, ClockIcon, HotelIcon, LocationIcon, PhoneIcon } from "@/compo
 import { HomepageSearchGuide, HomepageSearchProvider } from "@/components/search/homepage-search-guide";
 import { HomepageHero } from "@/components/search/homepage-hero";
 import type { ErpFlightRate } from "@/components/content/erp-flight-result-card";
-import type { ServiceType, TransportSearchOptions } from "@/components/search/travel-search";
+import type { TransportSearchOptions } from "@/components/search/travel-search";
 import { Container } from "@/components/ui/container";
 import { apiGet, PUBLIC_API_BASE_URL } from "@/lib/api/client";
 import { loadAllPages } from "@/lib/api/load-all-pages";
@@ -110,22 +109,6 @@ export default async function HomePage() {
   const hotelDirectory = allHotelDirectory.filter(country => isHomepageCountry(country.country));
   const destinationPayload = { items: searchDestinationPayload.items.slice(0, 12) };
 
-  const heroImageId = Number(settings?.socialLinks.heroBannerImageId);
-  const heroImageUrl = Number.isInteger(heroImageId) && heroImageId > 0
-    ? `${PUBLIC_API_BASE_URL}/media/${heroImageId}`
-    : null;
-  const heroImages = Object.fromEntries(
-    (["tour", "hotel", "flight", "bus", "train", "visa"] satisfies ServiceType[]).map((serviceType) => {
-      const serviceName = `${serviceType[0].toUpperCase()}${serviceType.slice(1)}`;
-      const serviceImageId = Number(settings?.socialLinks[`hero${serviceName}BannerImageId`]);
-      return [
-        serviceType,
-        Number.isInteger(serviceImageId) && serviceImageId > 0
-          ? `${PUBLIC_API_BASE_URL}/media/${serviceImageId}`
-          : heroImageUrl ?? homepageHeroAssets[serviceType],
-      ];
-    }),
-  ) as Record<ServiceType, string>;
   const countryCards = [...homepageCountries];
   const knownCountries = new Set(
     countryCards.map((country) => normalizeCountryName(country.name)),
@@ -354,7 +337,6 @@ export default async function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(homeJsonLd).replace(/</g, "\\u003c") }}
       />
       <HomepageHero
-        heroImages={heroImages}
         hotelCountries={hotelCountries.map((country) => ({ label: country.name, value: country.name }))}
         visaCountries={visaCountries.map((country) => ({ label: country.name, value: country.name }))}
         destinations={searchDestinationPayload.items.map((destination) => ({ label: destination.title, value: destination.slug }))}
