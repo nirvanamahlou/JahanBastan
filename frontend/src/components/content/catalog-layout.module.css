@@ -94,7 +94,7 @@
 .dateDisclosure .hideDates, .dateDisclosure[open] .showDates { display: none; }
 .dateDisclosure[open] .hideDates { display: inline; }
 .dateDisclosure summary:focus-visible, .countryHero a:focus-visible, .dateLink:focus-visible { outline: 2px solid #d33d7a; outline-offset: 2px; }
-.dateBody { padding: .55rem .75rem .7rem; }
+.dateBody { padding: .55rem .75rem .7rem; background: #fff; }
 .dateBody .dateHeading { margin-bottom: .38rem; font-size: .74rem; font-weight: 750; color: #102747; }
 .dateRanges { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .48rem; }
 .dateRange {

@@ -8,7 +8,7 @@ import { readCustomerSession, invalidateCustomerSession } from "@/lib/customer-s
 import { PhoneIcon } from "./site-icons";
 import styles from "./footer-newsletter.module.css";
 
-type Request = { phone: string; origin: string; destination: string; departure: string; returnDate: string; budget: string; hotelModel: string };
+type Request = { phone: string; origin: string; destination: string; departure: string; returnDate: string; budget: string };
 export function FooterNewsletter({ backgroundImageUrl }: { backgroundImageUrl?: string }) {
   const [busy, setBusy] = useState(false);
   const [login, setLogin] = useState(false);
@@ -29,7 +29,7 @@ export function FooterNewsletter({ backgroundImageUrl }: { backgroundImageUrl?: 
         body: JSON.stringify({
           subject: `درخواست پیگیری تور ${request.origin} به ${request.destination}`,
           contactName: customer.fullName, contactPhone: request.phone,
-          details: `مبدأ: ${request.origin}\nمقصد: ${request.destination}\nرفت: ${request.departure}\nبرگشت: ${request.returnDate || "مشخص نشده"}\nمدل هتل: ${request.hotelModel}`,
+          details: `مبدأ: ${request.origin}\nمقصد: ${request.destination}\nرفت: ${request.departure}\nبرگشت: ${request.returnDate || "مشخص نشده"}`,
           expectedAmount: request.budget ? Number(request.budget) : null, currency: "IRT",
         }),
       });
@@ -42,7 +42,7 @@ export function FooterNewsletter({ backgroundImageUrl }: { backgroundImageUrl?: 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
-    pending.current = { phone: String(form.get("phone") || ""), origin: String(form.get("origin") || ""), destination: String(form.get("destination") || ""), departure: String(form.get("departureFrom") || ""), returnDate: String(form.get("departureTo") || ""), budget: String(form.get("budget") || ""), hotelModel: String(form.get("hotelModel") || "۵ ستاره") };
+    pending.current = { phone: String(form.get("phone") || ""), origin: String(form.get("origin") || ""), destination: String(form.get("destination") || ""), departure: String(form.get("departureFrom") || ""), returnDate: String(form.get("departureTo") || ""), budget: String(form.get("budget") || "") };
     if (!pending.current.departure) { setError("تاریخ رفت را انتخاب کنید."); return; }
     void sendRequest();
   }
@@ -57,7 +57,7 @@ export function FooterNewsletter({ backgroundImageUrl }: { backgroundImageUrl?: 
           <JalaliDateRangeInput compact showTripType={false} dateLabels={{ departure: "تاریخ رفت", return: "تاریخ برگشت", field: "تاریخ سفر" }} />
           <label><input type="number" name="budget" dir="ltr" min="1" step="1" placeholder=" " /><span>سقف بودجه (تومان)</span></label>
         </div>
-        <div className={styles.bottom}><fieldset><legend>مدل هتل</legend>{["۳ ستاره", "۴ ستاره", "۵ ستاره", "UALL"].map(model => <label key={model}><input type="radio" name="hotelModel" value={model} defaultChecked={model === "۵ ستاره"} /> {model}</label>)}</fieldset><button type="submit" disabled={busy}>{busy ? "در حال ثبت…" : "ثبت درخواست پیگیری ←"}</button></div>
+        <div className={styles.bottom}><button type="submit" disabled={busy}>{busy ? "در حال ثبت…" : "ثبت درخواست پیگیری ←"}</button></div>
         {message ? <p role="status" className={styles.success}>{message}</p> : null}
         {error ? <p role="alert" className={styles.error}>{error}</p> : null}
       </form>
