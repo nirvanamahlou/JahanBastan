@@ -471,7 +471,6 @@ export function AccountForm({ onAuthenticated, refreshAfterAuthentication = true
           )}
         </div>
       </div>
-      <p className="mt-4 px-4 text-center text-xs leading-6 text-muted">با ورود یا ساخت حساب، <Link className="font-bold text-brand underline" href="/terms/">شرایط استفاده</Link> و <Link className="font-bold text-brand underline" href="/privacy/">حریم خصوصی</Link> جهان باستان را می‌پذیرید.</p>
     </section>
   );
 }
