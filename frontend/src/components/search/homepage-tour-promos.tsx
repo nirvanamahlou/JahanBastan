@@ -9,11 +9,10 @@ export function HomepageTourPromos({ imageUrl, title, href }: { imageUrl: string
   const { serviceType } = useHomepageSearchService();
   if (serviceType !== "tour") return null;
   const items = [
-    { image: imageUrl || "/images/design-rev48/tour-promo-1.webp", eyebrow: "پیشنهاد ویژه جهان باستان", title: imageUrl ? title : "تورهای خارجی، با برنامه‌ای روشن", description: "مقصد محبوبتان را با تاریخ و بودجه مناسب پیدا کنید.", href: imageUrl ? href : "/tours/", action: "مشاهده تورها" },
-    { image: "/images/design-rev48/tour-promo-2.webp", eyebrow: "انتخاب دقیق‌تر سفر", title: "برای انتخاب تور مطمئن نیستید؟", description: "کارشناسان سفر برای مقایسه مسیرها همراه شما هستند.", href: "/contact/", action: "مشاوره رایگان" },
+    { image: imageUrl || "/images/design-rev48/tour-promo-1.webp", href: imageUrl ? href : "/tours/", label: imageUrl && title ? title : "مشاهده تورها" },
+    { image: "/images/design-rev48/tour-promo-2.webp", href: "/contact/", label: "مشاوره رایگان" },
   ];
-  return <section className={styles.promos} aria-label="پیشنهادهای ویژه تور">{items.map(item => <Link key={item.href} href={item.href} className={styles.promo}>
+  return <section className={styles.promos} aria-label="پیشنهادهای ویژه تور">{items.map(item => <Link key={item.href} href={item.href} className={styles.promo} aria-label={item.label}>
     <Image src={item.image} alt="" fill sizes="(max-width:760px) 94vw, 46vw" />
-    <span><small>{item.eyebrow}</small><b>{item.title}</b><em>{item.description}</em><i>{item.action} ←</i></span>
   </Link>)}</section>;
 }
