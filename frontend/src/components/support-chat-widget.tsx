@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { type FormEvent, useEffect, useRef, useState } from "react";
+import { type FormEvent, type PointerEvent, useEffect, useRef, useState } from "react";
 
 import { readCustomerSession } from "@/lib/customer-session";
 import { PUBLIC_API_BASE_URL } from "@/lib/api/client";
@@ -32,6 +32,22 @@ type SupportConversation = {
 
 type StoredSession = { id: number; token: string };
 type AuthenticationState = "checking" | "authenticated" | "guest";
+type LauncherPosition = { left: number; top: number };
+type LauncherDrag = {
+  pointerId: number;
+  startX: number;
+  startY: number;
+  origin: LauncherPosition;
+  moved: boolean;
+};
+
+function clampLauncher(position: LauncherPosition, button: HTMLButtonElement): LauncherPosition {
+  const inset = 8;
+  return {
+    left: Math.max(inset, Math.min(position.left, window.innerWidth - button.offsetWidth - inset)),
+    top: Math.max(inset, Math.min(position.top, window.innerHeight - button.offsetHeight - inset)),
+  };
+}
 
 const STORAGE_KEY = "jahan-bastan-support-chat";
 const quickReplies: Array<{
@@ -69,6 +85,44 @@ function readStoredSession(): StoredSession | null {
 export function SupportChatWidget() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [launcherPosition, setLauncherPosition] = useState<LauncherPosition | null>(null);
+  const launcherRef = useRef<HTMLButtonElement>(null);
+  const launcherDrag = useRef<LauncherDrag | null>(null);
+  const suppressLauncherClick = useRef(false);
+
+  useEffect(() => {
+    const clampPosition = () => {
+      const button = launcherRef.current;
+      if (button) setLauncherPosition((current) => current && clampLauncher(current, button));
+    };
+    window.addEventListener("resize", clampPosition);
+    return () => window.removeEventListener("resize", clampPosition);
+  }, []);
+
+  function startLauncherDrag(event: PointerEvent<HTMLButtonElement>) {
+    if (open || !event.isPrimary || event.button !== 0) return;
+    const { left, top } = event.currentTarget.getBoundingClientRect();
+    suppressLauncherClick.current = false;
+    launcherDrag.current = { pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, origin: { left, top }, moved: false };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }
+
+  function moveLauncher(event: PointerEvent<HTMLButtonElement>) {
+    const drag = launcherDrag.current;
+    if (!drag || event.pointerId !== drag.pointerId) return;
+    const dx = event.clientX - drag.startX;
+    const dy = event.clientY - drag.startY;
+    if (!drag.moved && Math.hypot(dx, dy) < 6) return;
+    drag.moved = true;
+    setLauncherPosition(clampLauncher({ left: drag.origin.left + dx, top: drag.origin.top + dy }, event.currentTarget));
+  }
+
+  function finishLauncherDrag(event: PointerEvent<HTMLButtonElement>) {
+    const drag = launcherDrag.current;
+    if (!drag || event.pointerId !== drag.pointerId) return;
+    suppressLauncherClick.current = drag.moved;
+    launcherDrag.current = null;
+  }
   const [session, setSession] = useState<StoredSession | null>(null);
   const [conversation, setConversation] = useState<SupportConversation | null>(null);
   const [draft, setDraft] = useState("");
@@ -238,7 +292,9 @@ export function SupportChatWidget() {
   const registrationHref = `/account/?mode=register&next=${encodeURIComponent(accountPath)}`;
 
   return (
-    <div className="support-chat-widget fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-[max(.75rem,env(safe-area-inset-right))] z-[90] sm:bottom-6 sm:right-6" dir="rtl">
+    <div className="support-chat-widget fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-[max(.75rem,env(safe-area-inset-right))] z-[90] sm:bottom-6 sm:right-6" dir="rtl"
+      style={!open && launcherPosition ? { ...launcherPosition, right: "auto", bottom: "auto" } : undefined}
+    >
       {open ? (
         <section
           aria-labelledby="support-chat-title"
@@ -370,8 +426,18 @@ export function SupportChatWidget() {
       <button
         aria-expanded={open}
         aria-label={open ? "بستن پشتیبانی آنلاین" : "باز کردن پشتیبانی آنلاین"}
-        className="relative flex size-14 items-center justify-center rounded-2xl border-2 border-white bg-[#eb5d9f] p-0 leading-none text-white shadow-[0_12px_30px_rgba(235,93,159,0.42)] transition hover:-translate-y-0.5 hover:bg-[#d94a8c] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-pink-200 sm:size-16"
-        onClick={() => {
+        className="support-chat-launcher relative flex size-11 touch-none select-none items-center justify-center rounded-xl border-2 border-white bg-[#102747] p-0 leading-none text-white shadow-[0_8px_22px_rgba(16,39,71,0.3)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-200 sm:size-16 sm:rounded-2xl"
+        ref={launcherRef}
+        onPointerDown={startLauncherDrag}
+        onPointerMove={moveLauncher}
+        onPointerUp={finishLauncherDrag}
+        onPointerCancel={finishLauncherDrag}
+        onLostPointerCapture={finishLauncherDrag}
+        onClick={(event) => {
+          if (event.detail !== 0 && suppressLauncherClick.current) {
+            suppressLauncherClick.current = false;
+            return;
+          }
           setOpen((current) => {
             const next = !current;
             if (next) setUnread(false);
@@ -380,7 +446,7 @@ export function SupportChatWidget() {
         }}
         type="button"
       >
-        <ChatIcon className="block size-7 shrink-0 sm:size-8" />
+        <ChatIcon className="block size-6 shrink-0 sm:size-8" />
         {isAuthenticated && unread ? <span className="absolute -right-1 -top-1 size-4 rounded-full border-2 border-white bg-amber-400" aria-label="پاسخ جدید" /> : null}
       </button>
     </div>

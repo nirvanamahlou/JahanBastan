@@ -293,3 +293,9 @@
   .form > .route { grid-template-columns: minmax(0, 1fr) 2rem minmax(0, 1fr); }
   .form > .route > button { transform: none; }
 }
+
+@media (max-width: 639px) {
+  :global(#trip-search) .form[data-service] .field [data-passenger-selector] > div > button {
+    min-height: 2.25rem;
+  }
+}

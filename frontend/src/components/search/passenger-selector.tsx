@@ -100,9 +100,9 @@ export function PassengerSelector({
           </span>
         </button>
         {open ? (
-          <div className="absolute start-0 top-[calc(100%+0.4rem)] z-50 w-[min(19rem,calc(100vw-2rem))] max-w-none rounded-2xl border border-brand/25 bg-surface p-3 shadow-[0_18px_42px_rgba(1,37,105,0.18)]" role="dialog" aria-label={label}>
+          <div className="absolute start-0 top-[calc(100%+0.4rem)] z-50 w-[min(15rem,calc(100vw-2rem))] max-w-none rounded-xl border border-brand/25 bg-surface p-2 sm:w-[min(19rem,calc(100vw-2rem))] sm:rounded-2xl sm:p-3 shadow-[0_18px_42px_rgba(1,37,105,0.18)]" role="dialog" aria-label={label}>
           {(tourAgeGroups ? tourPassengerRows : passengerRows).map((row) => (
-            <div className="flex items-center justify-between gap-3 border-b border-border py-2 last:border-0" key={row.key}>
+            <div className="flex items-center justify-between gap-2 border-b border-border py-1 last:border-0 sm:gap-3 sm:py-2" key={row.key}>
               <div>
                 <p className="text-sm font-black text-brand">{row.label}</p>
                 <p className="mt-0.5 text-[11px] text-muted">{row.hint}</p>

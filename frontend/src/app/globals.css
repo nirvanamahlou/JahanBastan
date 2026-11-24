@@ -563,6 +563,14 @@ html[data-theme="night"] select:not([multiple]) {
   }
 }
 
+@media (hover: hover) {
+  .support-chat-widget button.support-chat-launcher:hover {
+    background-color: #25466e !important;
+    border-color: #fff !important;
+    box-shadow: 0 8px 22px rgb(16 39 71 / 30%) !important;
+  }
+}
+
 /* Controls use pink feedback; secondary cards and panels use a calm blue hover state. */
 @media (hover: hover) {
   :is(input:not([type="hidden"]), select, textarea):not(:disabled):hover {
