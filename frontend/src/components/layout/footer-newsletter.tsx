@@ -51,11 +51,11 @@ export function FooterNewsletter({ backgroundImageUrl }: { backgroundImageUrl?: 
       <header><span className={styles.icon}><PhoneIcon /></span><div><h2 id="footer-newsletter-title">اعلان موجودی تور</h2><p>درخواستتان را ثبت کنید تا وقتی تور دلخواهتان موجود شد، باخبر شوید.</p></div></header>
       <form onSubmit={submit}>
         <div className={styles.fields}>
-          <label>شماره موبایل<input name="phone" type="tel" inputMode="tel" dir="ltr" autoComplete="tel" placeholder="0912…" required maxLength={32} /></label>
-          <label>مبدأ<input name="origin" placeholder="شهر مبدأ" required maxLength={120} /></label>
-          <label>مقصد<input name="destination" placeholder="شهر مقصد" required maxLength={120} /></label>
+          <label><input name="phone" type="tel" inputMode="tel" dir="ltr" autoComplete="tel" placeholder=" " required maxLength={32} /><span>شماره موبایل</span></label>
+          <label><input name="origin" placeholder=" " required maxLength={120} /><span>مبدأ</span></label>
+          <label><input name="destination" placeholder=" " required maxLength={120} /><span>مقصد</span></label>
           <JalaliDateRangeInput compact showTripType={false} dateLabels={{ departure: "تاریخ رفت", return: "تاریخ برگشت", field: "تاریخ سفر" }} />
-          <label>سقف بودجه (تومان)<input type="number" name="budget" dir="ltr" min="1" step="1" placeholder="بودجه سفر" /></label>
+          <label><input type="number" name="budget" dir="ltr" min="1" step="1" placeholder=" " /><span>سقف بودجه (تومان)</span></label>
         </div>
         <div className={styles.bottom}><fieldset><legend>مدل هتل</legend>{["۳ ستاره", "۴ ستاره", "۵ ستاره", "UALL"].map(model => <label key={model}><input type="radio" name="hotelModel" value={model} defaultChecked={model === "۵ ستاره"} /> {model}</label>)}</fieldset><button type="submit" disabled={busy}>{busy ? "در حال ثبت…" : "ثبت درخواست پیگیری ←"}</button></div>
         {message ? <p role="status" className={styles.success}>{message}</p> : null}
