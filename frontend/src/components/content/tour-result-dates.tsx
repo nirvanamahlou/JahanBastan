@@ -86,7 +86,7 @@ export function TourResultDates({
           <ul className={styles.dateRanges}>
             {visible.map((range) => {
               const query = range.departureId ? `?departureId=${range.departureId}` : "";
-              const rangeHref = slug ? `${href}${query}#tour-dates` : href;
+              const rangeHref = slug ? `${href}${query}` : href;
               const nights = getNightCount(range);
               return (
                 <li key={range.departureId ?? range.departureDate}>
