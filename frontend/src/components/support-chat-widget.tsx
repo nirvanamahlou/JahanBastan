@@ -78,6 +78,7 @@ export function SupportChatWidget() {
   const [unread, setUnread] = useState(false);
   const [authenticationState, setAuthenticationState] =
     useState<AuthenticationState>("checking");
+  const isAuthenticated = authenticationState === "authenticated";
   const inputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messageCountRef = useRef(0);
@@ -89,29 +90,33 @@ export function SupportChatWidget() {
 
   useEffect(() => {
     let cancelled = false;
+    let checkId = 0;
     async function checkAuthentication() {
+      const currentCheck = ++checkId;
       const response = await readCustomerSession().catch(() => null);
-      if (!cancelled) {
+      if (!cancelled && currentCheck === checkId) {
         setAuthenticationState(response?.ok ? "authenticated" : "guest");
       }
     }
-    const handleAuthenticated = () => void checkAuthentication();
+    const handleSessionChange = () => void checkAuthentication();
     void checkAuthentication();
-    window.addEventListener("customer-authenticated", handleAuthenticated);
+    window.addEventListener("customer-authenticated", handleSessionChange);
+    window.addEventListener("customer-logged-out", handleSessionChange);
     return () => {
       cancelled = true;
-      window.removeEventListener("customer-authenticated", handleAuthenticated);
+      window.removeEventListener("customer-authenticated", handleSessionChange);
+      window.removeEventListener("customer-logged-out", handleSessionChange);
     };
   }, []);
 
   useEffect(() => {
-    if (!open || authenticationState !== "authenticated") return;
+    if (!open || !isAuthenticated) return;
     const timer = window.setTimeout(() => inputRef.current?.focus(), 120);
     return () => window.clearTimeout(timer);
-  }, [authenticationState, open]);
+  }, [isAuthenticated, open]);
 
   useEffect(() => {
-    if (!session) return;
+    if (!isAuthenticated || !session) return;
     let cancelled = false;
 
     async function loadConversation(showLoading = false) {
@@ -161,7 +166,7 @@ export function SupportChatWidget() {
       cancelled = true;
       window.clearInterval(timer);
     };
-  }, [open, session]);
+  }, [isAuthenticated, open, session]);
 
   useEffect(() => {
     if (open) messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -171,7 +176,7 @@ export function SupportChatWidget() {
 
   async function sendMessage(message: string, quickReplyKey?: QuickReplyKey) {
     const cleanMessage = message.trim();
-    if (!cleanMessage || sending || authenticationState !== "authenticated") return;
+    if (!cleanMessage || sending || !isAuthenticated) return;
     setSending(true);
     setError("");
     try {
@@ -237,7 +242,7 @@ export function SupportChatWidget() {
       {open ? (
         <section
           aria-labelledby="support-chat-title"
-          className="mb-3 flex h-[min(34rem,calc(100dvh-7rem))] w-[min(23rem,calc(100vw-1.5rem))] flex-col overflow-hidden rounded-3xl border border-brand/20 bg-white text-foreground shadow-[0_24px_70px_rgba(1,37,105,0.28)]"
+          className={`mb-3 flex w-[min(23rem,calc(100vw-1.5rem))] flex-col overflow-hidden rounded-3xl border border-brand/20 bg-white text-foreground shadow-[0_24px_70px_rgba(1,37,105,0.28)] ${isAuthenticated ? "h-[min(34rem,calc(100dvh-7rem))]" : ""}`}
           role="dialog"
         >
           <header className="flex items-center justify-between gap-3 bg-brand px-4 py-3.5 text-white">
@@ -247,11 +252,11 @@ export function SupportChatWidget() {
               </span>
               <div className="min-w-0">
                 <h2 className="truncate font-black" id="support-chat-title">پشتیبانی جهان باستان</h2>
-                <p className="mt-0.5 text-[11px] text-white/75">پاسخ خودکار و ارتباط با پشتیبان</p>
+                {isAuthenticated ? <p className="mt-0.5 text-[11px] text-white/75">پاسخ خودکار و ارتباط با پشتیبان</p> : null}
               </div>
             </div>
             <div className="flex shrink-0 items-center gap-1.5">
-              {session ? (
+              {isAuthenticated && session ? (
                 <button
                   aria-label="گفت‌وگوی جدید"
                   className="min-h-9 rounded-xl bg-white/10 px-2.5 text-[11px] font-bold transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
@@ -262,119 +267,102 @@ export function SupportChatWidget() {
                 </button>
               ) : null}
               <button
-              aria-label="بستن پنجره پشتیبانی"
-              className="grid size-9 shrink-0 place-items-center rounded-xl bg-white/10 text-xl transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-              onClick={() => setOpen(false)}
-              type="button"
-            >
-              ×
-            </button>
+                aria-label="بستن پنجره پشتیبانی"
+                className="grid size-9 shrink-0 place-items-center rounded-xl bg-white/10 text-xl transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                onClick={() => setOpen(false)}
+                type="button"
+              >
+                ×
+              </button>
             </div>
           </header>
 
-          <div className="flex-1 space-y-3 overflow-y-auto bg-[#f5f8ff] p-3.5" aria-live="polite">
-            <div className="max-w-[88%] rounded-2xl rounded-tr-md border border-brand/10 bg-white px-3.5 py-3 text-sm leading-6 shadow-sm">
-              <strong className="block text-brand">خوش آمدید 👋</strong>
-              <span>
-                {authenticationState === "authenticated"
-                  ? "چه کاری از من برمی‌آید؟ یکی از گزینه‌ها را انتخاب کنید یا سوالتان را بنویسید."
-                  : "برای ارسال پیام و پیگیری پاسخ، ابتدا وارد حساب شوید یا ثبت‌نام کنید."}
-              </span>
-            </div>
+          {isAuthenticated ? (
+            <>
+              <div className="flex-1 space-y-3 overflow-y-auto bg-[#f5f8ff] p-3.5" aria-live="polite">
+                <div className="max-w-[88%] rounded-2xl rounded-tr-md border border-brand/10 bg-white px-3.5 py-3 text-sm leading-6 shadow-sm">
+                  <strong className="block text-brand">خوش آمدید 👋</strong>
+                  <span>چه کاری از من برمی‌آید؟ یکی از گزینه‌ها را انتخاب کنید یا سوالتان را بنویسید.</span>
+                </div>
 
-            {authenticationState === "guest" && !conversation?.messages.length ? (
-              <div className="rounded-2xl border border-brand/15 bg-white p-4 text-center shadow-sm">
-                <strong className="block text-sm text-brand">برای ارسال پیام، ابتدا حساب بسازید</strong>
-                <p className="mt-1 text-xs leading-6 text-muted">ثبت‌نام سریع است و پاسخ پشتیبانی داخل پنل شما قابل پیگیری می‌ماند.</p>
-                <Link
-                  className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#eb5d9f] px-4 text-sm font-black text-white transition hover:bg-[#d94a8c] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-pink-200"
-                  href={registrationHref}
-                  onClick={() => setOpen(false)}
-                >
-                  ثبت‌نام در سایت و ارسال پیام
-                </Link>
-                <p className="mt-2 text-[11px] text-muted">اگر حساب دارید، در همان صفحه گزینه «ورود» را بزنید.</p>
+                {!conversation?.messages.length ? (
+                  <div className="grid gap-2">
+                    {quickReplies.map((item) => (
+                      <button
+                        className="min-h-10 rounded-xl border border-brand/15 bg-white px-3 text-right text-xs font-bold text-brand transition hover:border-brand/35 hover:bg-accent/25 disabled:opacity-60"
+                        disabled={sending}
+                        key={item.key}
+                        onClick={() => void sendMessage(item.label, item.key)}
+                        type="button"
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
+
+                {loading && !conversation ? <p className="text-center text-xs text-muted">در حال بازیابی گفتگو…</p> : null}
+                {conversation?.messages.map((message) => {
+                  const isCustomer = message.senderType === "customer";
+                  return (
+                    <article
+                      className={`max-w-[88%] rounded-2xl px-3.5 py-2.5 text-sm leading-6 shadow-sm ${
+                        isCustomer
+                          ? "mr-auto rounded-tl-md bg-brand text-white"
+                          : message.senderType === "admin"
+                            ? "ml-auto rounded-tr-md border border-pink-200 bg-pink-50 text-brand"
+                            : "ml-auto rounded-tr-md border border-brand/10 bg-white"
+                      }`}
+                      key={message.id}
+                    >
+                      {!isCustomer ? (
+                        <strong className="mb-1 block text-[11px] text-brand">
+                          {message.senderType === "admin" ? "پشتیبان" : "راهنمای خودکار"}
+                        </strong>
+                      ) : null}
+                      <p className="whitespace-pre-line">{message.body}</p>
+                    </article>
+                  );
+                })}
+                <div ref={messagesEndRef} />
               </div>
-            ) : null}
 
-            {authenticationState === "checking" && !conversation?.messages.length ? (
-              <p className="rounded-2xl border border-brand/10 bg-white px-4 py-3 text-center text-xs text-muted">در حال بررسی حساب کاربری…</p>
-            ) : null}
-
-            {authenticationState === "authenticated" && !conversation?.messages.length ? (
-              <div className="grid gap-2">
-                {quickReplies.map((item) => (
+              <form className="border-t border-border bg-white p-3" onSubmit={submit}>
+                {error ? <p className="mb-2 text-xs font-bold text-red-600">{error}</p> : null}
+                <div className="flex items-center gap-2">
+                  <input
+                    aria-label="پیام شما برای پشتیبانی"
+                    className="min-h-11 min-w-0 flex-1 rounded-xl border border-border bg-white px-3 text-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/15"
+                    maxLength={4000}
+                    onChange={(event) => setDraft(event.target.value)}
+                    placeholder="سوالتان را بنویسید…"
+                    ref={inputRef}
+                    value={draft}
+                  />
                   <button
-                    className="min-h-10 rounded-xl border border-brand/15 bg-white px-3 text-right text-xs font-bold text-brand transition hover:border-brand/35 hover:bg-accent/25 disabled:opacity-60"
-                    disabled={sending}
-                    key={item.key}
-                    onClick={() => void sendMessage(item.label, item.key)}
-                    type="button"
+                    aria-label="ارسال پیام"
+                    className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#eb5d9f] text-white shadow-md transition hover:bg-[#d94a8c] disabled:cursor-not-allowed disabled:opacity-60"
+                    disabled={sending || draft.trim().length < 2}
+                    type="submit"
                   >
-                    {item.label}
+                    {sending ? "…" : "←"}
                   </button>
-                ))}
-              </div>
-            ) : null}
-
-            {loading && !conversation ? <p className="text-center text-xs text-muted">در حال بازیابی گفتگو…</p> : null}
-            {conversation?.messages.map((message) => {
-              const isCustomer = message.senderType === "customer";
-              return (
-                <article
-                  className={`max-w-[88%] rounded-2xl px-3.5 py-2.5 text-sm leading-6 shadow-sm ${
-                    isCustomer
-                      ? "mr-auto rounded-tl-md bg-brand text-white"
-                      : message.senderType === "admin"
-                        ? "ml-auto rounded-tr-md border border-pink-200 bg-pink-50 text-brand"
-                        : "ml-auto rounded-tr-md border border-brand/10 bg-white"
-                  }`}
-                  key={message.id}
-                >
-                  {!isCustomer ? (
-                    <strong className="mb-1 block text-[11px] text-brand">
-                      {message.senderType === "admin" ? "پشتیبان" : "راهنمای خودکار"}
-                    </strong>
-                  ) : null}
-                  <p className="whitespace-pre-line">{message.body}</p>
-                </article>
-              );
-            })}
-            <div ref={messagesEndRef} />
-          </div>
-
-          {authenticationState === "authenticated" ? <form className="border-t border-border bg-white p-3" onSubmit={submit}>
-            {error ? <p className="mb-2 text-xs font-bold text-red-600">{error}</p> : null}
-            <div className="flex items-center gap-2">
-              <input
-                aria-label="پیام شما برای پشتیبانی"
-                className="min-h-11 min-w-0 flex-1 rounded-xl border border-border bg-white px-3 text-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/15"
-                maxLength={4000}
-                onChange={(event) => setDraft(event.target.value)}
-                placeholder="سوالتان را بنویسید…"
-                ref={inputRef}
-                value={draft}
-              />
-              <button
-                aria-label="ارسال پیام"
-                className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#eb5d9f] text-white shadow-md transition hover:bg-[#d94a8c] disabled:cursor-not-allowed disabled:opacity-60"
-                disabled={sending || draft.trim().length < 2}
-                type="submit"
-              >
-                {sending ? "…" : "←"}
-              </button>
-            </div>
-            <p className="mt-2 text-center text-[10px] text-muted">پاسخ پشتیبان به‌صورت خودکار در همین گفتگو نمایش داده می‌شود.</p>
-          </form> : (
-            <div className="border-t border-border bg-white p-3">
+                </div>
+                <p className="mt-2 text-center text-[10px] text-muted">پاسخ پشتیبان به‌صورت خودکار در همین گفتگو نمایش داده می‌شود.</p>
+              </form>
+            </>
+          ) : authenticationState === "guest" ? (
+            <div className="p-3">
               <Link
                 className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#eb5d9f] px-4 text-sm font-black text-white transition hover:bg-[#d94a8c] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-pink-200"
                 href={registrationHref}
                 onClick={() => setOpen(false)}
               >
-                {authenticationState === "checking" ? "در حال بررسی حساب…" : "ثبت‌نام و شروع گفتگو"}
+                ثبت‌نام
               </Link>
             </div>
+          ) : (
+            <span className="sr-only" role="status">در حال بررسی حساب کاربری…</span>
           )}
         </section>
       ) : null}
@@ -393,7 +381,7 @@ export function SupportChatWidget() {
         type="button"
       >
         <ChatIcon className="block size-7 shrink-0 sm:size-8" />
-        {unread ? <span className="absolute -right-1 -top-1 size-4 rounded-full border-2 border-white bg-amber-400" aria-label="پاسخ جدید" /> : null}
+        {isAuthenticated && unread ? <span className="absolute -right-1 -top-1 size-4 rounded-full border-2 border-white bg-amber-400" aria-label="پاسخ جدید" /> : null}
       </button>
     </div>
   );
