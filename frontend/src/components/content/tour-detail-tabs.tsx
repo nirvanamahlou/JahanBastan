@@ -54,7 +54,7 @@ export function TourDetailTabs({ sections }: { sections: TourSection[] }) {
 
   return (
     <>
-      <nav aria-label="بخش‌های تور" className="mt-6 flex gap-2 overflow-x-auto rounded-2xl border border-border bg-white p-2 shadow-sm" role="tablist">
+      <nav data-inline-tour-hotels={active === "dates" && showHotelsUnderDates ? "true" : undefined} aria-label="بخش‌های تور" className="mt-6 flex gap-2 overflow-x-auto rounded-2xl border border-border bg-white p-2 shadow-sm" role="tablist">
         {visibleItems.map((item) => (
           <button
             aria-controls={item.hash}
@@ -73,7 +73,7 @@ export function TourDetailTabs({ sections }: { sections: TourSection[] }) {
         .tour-tab-panel { display: none; }
         .tour-tab-panel[data-tour-section="${active}"] { display: block !important; }
         .tour-tab-grid[data-tour-section="${active}"] { display: grid !important; }
-        ${active === "dates" && showHotelsUnderDates ? '.tour-tab-panel[data-tour-section="hotels"] { display: block !important; }' : ""}
+        [data-inline-tour-hotels="true"] ~ .tour-tab-panel[data-tour-section="hotels"] { display: block !important; }
         ${active !== "hotels" ? `@media (min-width: 1024px) { .tour-tab-layout { grid-template-columns: minmax(0, 1fr); } }` : ""}
       `}</style>
     </>
