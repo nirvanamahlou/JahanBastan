@@ -50,7 +50,6 @@ export default async function HotelsPage({
   return (
     <>
       <PageIntro compact className={catalogStyles.hotelListIntro}
-        description="کشور را انتخاب کنید و هتل‌ها را بر اساس ستاره و امتیاز مهمان مقایسه کنید."
         eyebrow="اقامت در مقصد"
         title="هتل‌ها بر اساس کشور"
       />
