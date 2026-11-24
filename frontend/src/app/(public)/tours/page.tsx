@@ -1,3 +1,4 @@
+import { FooterNewsletter } from "@/components/layout/footer-newsletter";
 import { getDepartures, hotelImages } from "./departures/catalog";
 import type { Metadata } from "next";
 import Image from "next/image";
@@ -257,5 +258,7 @@ export default async function ToursPage({ searchParams }: { searchParams: Promis
         {pageCount > 1 ? <nav aria-label="صفحه‌بندی تورها" className="mt-8 flex flex-wrap justify-center gap-2">{Array.from({ length: pageCount }, (_, index) => index + 1).map((number) => <Link aria-current={number === page ? "page" : undefined} className={`grid size-11 place-items-center rounded-xl border text-sm font-black ${number === page ? "bg-brand text-white" : "text-brand"}`} href={hrefWith(current, { page: String(number) })} key={number}>{number.toLocaleString("fa-IR")}</Link>)}</nav> : null}
       </div>
     </div>
-  </Container></section>;
+  </Container>
+    <div className="mt-8"><FooterNewsletter /></div>
+  </section>;
 }

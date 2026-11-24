@@ -9,7 +9,7 @@ import { PhoneIcon } from "./site-icons";
 import styles from "./footer-newsletter.module.css";
 
 type Request = { phone: string; origin: string; destination: string; departure: string; returnDate: string; budget: string };
-export function FooterNewsletter({ backgroundImageUrl }: { backgroundImageUrl?: string }) {
+export function FooterNewsletter() {
   const [busy, setBusy] = useState(false);
   const [login, setLogin] = useState(false);
   const [message, setMessage] = useState("");
@@ -46,7 +46,7 @@ export function FooterNewsletter({ backgroundImageUrl }: { backgroundImageUrl?: 
     if (!pending.current.departure) { setError("تاریخ رفت را انتخاب کنید."); return; }
     void sendRequest();
   }
-  return <section className={styles.newsletter} aria-labelledby="footer-newsletter-title" data-custom-artwork={Boolean(backgroundImageUrl)}>
+  return <section className={styles.newsletter} aria-labelledby="footer-newsletter-title">
     <div className={styles.wrap}>
       <header><span className={styles.icon}><PhoneIcon /></span><div><h2 id="footer-newsletter-title">اعلان موجودی تور</h2><p>درخواستتان را ثبت کنید تا وقتی تور دلخواهتان موجود شد، باخبر شوید.</p></div></header>
       <form onSubmit={submit}>

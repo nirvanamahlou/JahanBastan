@@ -3,13 +3,11 @@ import styles from "./site-footer.module.css";
 
 import { Container } from "@/components/ui/container";
 import { siteConfig } from "@/config/site";
-import { PUBLIC_API_BASE_URL } from "@/lib/api/client";
 import { getPublicSettings } from "@/lib/api/public-settings";
 import { toPersianDigits } from "@/lib/persian-number";
 
 import { BrandLogo } from "./brand-logo";
 import { EnamadSeal } from "./enamad-seal";
-import { FooterNewsletter } from "./footer-newsletter";
 import {
   ClockIcon,
   InstagramIcon,
@@ -60,10 +58,6 @@ export async function SiteFooter() {
   const phone = settings?.phone ?? siteConfig.phoneDisplay;
   const address = settings?.address ?? siteConfig.address;
   const email = settings?.email?.trim() || "contact@example.com";
-  const footerAlertImageId = Number(values.footerAlertImageId);
-  const footerAlertImageUrl = Number.isInteger(footerAlertImageId) && footerAlertImageId > 0
-    ? `${PUBLIC_API_BASE_URL}/media/${footerAlertImageId}`
-    : "/images/hero/kusadasi-coast-hero.jpg";
   const savedWorkingHours = settings?.workingHours?.trim();
   const normalizedSavedWorkingHours = savedWorkingHours
     ? toPersianDigits(savedWorkingHours)
@@ -125,7 +119,6 @@ export async function SiteFooter() {
       className={`${styles.footer} site-footer mt-auto text-right`}
     >
       <div className={styles.layout}>
-        <FooterNewsletter backgroundImageUrl={footerAlertImageUrl} />
 
         <Container className={`${styles.main} grid grid-cols-1 gap-x-4 gap-y-2.5 md:grid-cols-2 lg:grid-cols-[1.15fr_1fr_1fr_1.15fr] xl:gap-x-5`}>
           <section aria-labelledby="footer-brand-title" className="min-w-0">

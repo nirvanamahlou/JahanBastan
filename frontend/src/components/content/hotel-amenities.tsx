@@ -7,7 +7,8 @@ type AmenityName =
   | "wifi"
   | "parking"
   | "fitness"
-  | "meeting";
+  | "meeting"
+  | "general";
 
 type Props = {
   region: string | null;
@@ -27,6 +28,7 @@ const labels: Record<AmenityName, string> = {
   parking: "پارکینگ",
   fitness: "باشگاه ورزشی",
   meeting: "سالن جلسات",
+  general: "امکانات",
 };
 
 const amenityPatterns: Array<{ name: AmenityName; pattern: RegExp }> = [
@@ -56,14 +58,24 @@ export function HotelAmenities({
     { name: "meal", label: serviceType || labels.meal },
     { name: "beach", label: region || labels.beach },
   ];
+  const detailItems = [...new Set(amenityText
+    .replace(/<(?:br|\/li|\/p|\/div)\b[^>]*>/gi, "\n")
+    .replace(/<[^>]*>/g, "")
+    .split(/\r?\n/)
+    .map((value) => value.trim())
+    .filter(Boolean))].map((label) => ({
+      name: amenityPatterns.find(({ pattern }) => pattern.test(label))?.name ?? "general" as const,
+      label,
+    }));
   const items = [
     ...detected,
     ...fallback.filter(
       (item) => !detected.some((detectedItem) => detectedItem.name === item.name),
     ),
-  ].slice(0, variant === "detail" ? 8 : 5);
+  ].slice(0, 5);
 
   if (variant === "detail") {
+    if (!detailItems.length) return null;
     return (
       <section className="rounded-3xl border border-border bg-surface p-5 shadow-sm sm:p-7">
         <header className="flex items-center justify-between gap-4">
@@ -75,11 +87,11 @@ export function HotelAmenities({
             <svg aria-hidden="true" className="size-6" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24"><path d="m12 3-1.5 5.5L5 10l5.5 1.5L12 17l1.5-5.5L19 10l-5.5-1.5L12 3Z" /><path d="m19 15-.7 2.3L16 18l2.3.7L19 21l.7-2.3L22 18l-2.3-.7L19 15Z" /></svg>
           </span>
         </header>
-        <ul className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3" aria-label="امکانات هتل">
-          {items.map((item) => (
-            <li className="flex min-h-20 min-w-0 items-center justify-between gap-3 rounded-2xl border border-[#dfe9f6] bg-[#f8fbff] px-4 py-3 text-sm font-black text-brand" key={`${item.name}-${item.label}`}>
-              <span className="min-w-0">{item.label}</span>
+        <ul className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3" aria-label="امکانات هتل">
+          {detailItems.map((item) => (
+            <li className="flex min-h-12 min-w-0 items-center gap-2 rounded-2xl border border-[#dfe9f6] bg-[#f8fbff] px-4 py-3 text-sm font-black text-brand" key={`${item.name}-${item.label}`}>
               <AmenityIcon name={item.name} variant="detail" />
+              <span className="min-w-0">{item.label}</span>
             </li>
           ))}
         </ul>
@@ -101,6 +113,7 @@ export function HotelAmenities({
 
 function AmenityIcon({ name, variant = "compact" }: { name: AmenityName; variant?: "compact" | "tour-card" | "detail" }) {
   const paths: Record<AmenityName, React.ReactNode> = {
+    general: <><circle cx="12" cy="12" r="9" /><path d="m8 12 3 3 5-6" /></>,
     bed: <><path d="M3 16v-5a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v5" /><path d="M3 16h18v4M6 8V5h4v3" /></>,
     meal: <><path d="M6 3v7M3 3v4a3 3 0 0 0 6 0V3M6 10v11M16 3v18M16 3c3 1 3 6 0 7" /></>,
     pool: <><path d="M3 18c2 2 4 2 6 0s4-2 6 0 4 2 6 0M3 13c2 2 4 2 6 0s4-2 6 0 4 2 6 0" /><path d="M7 12V6a3 3 0 0 1 6 0M7 8h6" /></>,

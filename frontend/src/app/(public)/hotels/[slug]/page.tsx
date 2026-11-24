@@ -1,3 +1,4 @@
+import catalogStyles from "@/components/content/catalog-layout.module.css";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -72,7 +73,6 @@ export default async function HotelDetailPage({ params }: Props) {
     ["معرفی هتل", hotel.description],
     ["موقعیت و دسترسی", hotel.locationDescription],
     ["اتاق‌ها و سوئیت‌ها", hotel.roomsDescription],
-    ["امکانات و تفریحات", hotel.amenitiesDescription],
     ["رستوران‌ها و پذیرایی", hotel.diningDescription],
     ["رزرو و اقامت", hotel.bookingDescription],
     ["قوانین عمومی هتل", hotel.policiesDescription],
@@ -81,33 +81,18 @@ export default async function HotelDetailPage({ params }: Props) {
 
   return (
     <>
-      <PageIntro
+      <PageIntro compact
         eyebrow={<span className="inline-flex items-center gap-2"><CountryFlag country={hotel.destination.country} imageId={countryFlagImageId} />{hotel.destination.country}<HotelStars rating={hotel.starRating} /></span>}
         title={hotel.name}
         description={hotel.summary}
       />
-      <Container className="py-10 sm:py-16">
+      <Container className={`${catalogStyles.catalogContainer} py-5 sm:py-8`}>
         {images.length ? (
           <HotelImageGallery hotelName={hotel.name} imageAltText={hotel.imageAltText} imageIds={images} />
         ) : null}
-        <div className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem]">
+        <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,16rem)]">
           <article className="space-y-6">
-            {sections.map(([title, content]) => {
-              if (!content) return null;
-              if (title === "امکانات و تفریحات") {
-                return (
-                  <HotelAmenities
-                    description={content}
-                    key={title}
-                    region={hotel.region}
-                    roomType={hotel.roomTypes[0]?.name ?? "اتاق منتخب"}
-                    serviceType="پذیرایی هتل"
-                    variant="detail"
-                  />
-                );
-              }
-              return <HotelSection content={content} key={title} title={title} />;
-            })}
+            {sections.map(([title, content]) => content ? <HotelSection content={content} key={title} title={title} /> : null)}
           </article>
           <aside className="h-fit self-start rounded-2xl border border-border bg-surface p-5">
             <h2 className="font-black text-brand">اطلاعات اقامت</h2>
@@ -126,6 +111,11 @@ export default async function HotelDetailPage({ params }: Props) {
             </Link>
           </aside>
         </div>
+        {hotel.amenitiesDescription?.trim() ? (
+          <div className="mt-5">
+            <HotelAmenities description={hotel.amenitiesDescription} region={null} roomType="" serviceType="" variant="detail" />
+          </div>
+        ) : null}
         <div className="mt-8">
           <HotelLocationMap
             address={hotel.address}
