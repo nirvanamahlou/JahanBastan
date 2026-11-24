@@ -7,12 +7,10 @@ import { useCallback, useEffect, useState } from "react";
 import { Container } from "@/components/ui/container";
 import { siteConfig } from "@/config/site";
 import { readCustomerSession } from "@/lib/customer-session";
-import { PUBLIC_API_BASE_URL } from "@/lib/api/client";
-import { CART_UPDATED_EVENT, readGuestCart } from "@/lib/guest-cart";
 
 import { BrandLogo } from "./brand-logo";
 import styles from "./site-header.module.css";
-import { CartIcon, ChevronDownIcon, CloseIcon, MenuIcon, MoonIcon, PhoneIcon, SunIcon } from "./site-icons";
+import { ChevronDownIcon, CloseIcon, MenuIcon, MoonIcon, PhoneIcon, SunIcon } from "./site-icons";
 
 // Keep theme behavior available while its public controls are disabled.
 const SHOW_THEME_CONTROLS = false;
@@ -22,19 +20,12 @@ function isCurrentRoute(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(href);
 }
 
-function CartCountBadge({ count }: { count: number }) {
-  if (count < 1) return null;
-  const label = count > 99 ? "۹۹+" : count.toLocaleString("fa-IR");
-  return <span aria-hidden="true" className="absolute -end-2 -top-2 z-10 grid min-w-5 place-items-center rounded-full border-2 border-surface bg-[var(--interaction-hover)] px-1 py-0.5 text-[10px] font-black leading-none text-white shadow-[0_4px_10px_rgba(199,33,105,0.35)]">{label}</span>;
-}
-
-export function SiteHeader({ onlineSalesEnabled }: { onlineSalesEnabled: boolean }) {
+export function SiteHeader() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isNight, setIsNight] = useState(false);
   const [customerName, setCustomerName] = useState<string | null>(null);
-  const [cartCount, setCartCount] = useState(0);
 
   const loadCustomer = useCallback(async () => {
     const response = await readCustomerSession().catch(() => null);
@@ -44,19 +35,6 @@ export function SiteHeader({ onlineSalesEnabled }: { onlineSalesEnabled: boolean
     }
     const payload = await response.json() as { user?: { fullName?: string } };
     setCustomerName(payload.user?.fullName ?? "کاربر");
-  }, []);
-
-  const loadCartCount = useCallback(async () => {
-    const response = await fetch(`${PUBLIC_API_BASE_URL}/account/cart`, {
-      credentials: "include",
-      cache: "no-store",
-    }).catch(() => null);
-    if (response?.ok) {
-      const items: unknown = await response.json().catch(() => []);
-      setCartCount(Array.isArray(items) ? items.length : 0);
-      return;
-    }
-    setCartCount(readGuestCart().length);
   }, []);
 
   const toggleTheme = () => {
@@ -79,7 +57,6 @@ export function SiteHeader({ onlineSalesEnabled }: { onlineSalesEnabled: boolean
   useEffect(() => {
     const refreshAccountState = () => {
       void loadCustomer();
-      void loadCartCount();
     };
     const timer = window.setTimeout(refreshAccountState, 0);
     window.addEventListener("customer-authenticated", refreshAccountState);
@@ -87,20 +64,7 @@ export function SiteHeader({ onlineSalesEnabled }: { onlineSalesEnabled: boolean
       window.clearTimeout(timer);
       window.removeEventListener("customer-authenticated", refreshAccountState);
     };
-  }, [loadCartCount, loadCustomer]);
-
-  useEffect(() => {
-    const refreshCartCount = () => { void loadCartCount(); };
-    const handleStorage = (event: StorageEvent) => {
-      if (event.storageArea === window.localStorage) refreshCartCount();
-    };
-    window.addEventListener(CART_UPDATED_EVENT, refreshCartCount);
-    window.addEventListener("storage", handleStorage);
-    return () => {
-      window.removeEventListener(CART_UPDATED_EVENT, refreshCartCount);
-      window.removeEventListener("storage", handleStorage);
-    };
-  }, [loadCartCount]);
+  }, [loadCustomer]);
 
   useEffect(() => {
     const updateHeader = () => setIsScrolled(window.scrollY > 12);
@@ -124,8 +88,6 @@ export function SiteHeader({ onlineSalesEnabled }: { onlineSalesEnabled: boolean
       document.body.style.overflow = "";
     };
   }, [menuOpen]);
-
-  const cartLabel = cartCount ? `سبد خرید، ${cartCount.toLocaleString("fa-IR")} مورد` : "سبد خرید";
 
   return (
     <header className={`site-header ${pathname === "/" ? styles.home : ""} relative z-50 w-full border-b border-white/45 bg-white/72 text-brand shadow-[0_10px_30px_rgba(1,37,105,0.12)] backdrop-blur-2xl transition-[background-color,box-shadow,border-color] duration-300 ${isScrolled ? "border-brand/15 shadow-[0_14px_34px_rgba(1,37,105,0.18)]" : ""}`}>
@@ -211,7 +173,7 @@ export function SiteHeader({ onlineSalesEnabled }: { onlineSalesEnabled: boolean
         </nav>
 
         <div className="flex shrink-0 items-center justify-self-end gap-2">
-          {onlineSalesEnabled ? <Link href="/cart/" aria-label={cartLabel} className="app-header-cart"><CartIcon className="size-5" /><span aria-hidden="true">سبد خرید</span><CartCountBadge count={cartCount} /></Link> : null}
+
           <a
             href={`tel:${siteConfig.phoneHref}`}
             aria-label={`تماس با شماره ${siteConfig.phoneDisplay}`}
@@ -221,14 +183,7 @@ export function SiteHeader({ onlineSalesEnabled }: { onlineSalesEnabled: boolean
             <PhoneIcon className="size-4 text-brand" />
             <strong className="whitespace-nowrap text-xs text-brand" dir="ltr">{siteConfig.phoneDisplay}</strong>
           </a>
-          {onlineSalesEnabled ? <Link
-            href="/cart/"
-            aria-label={cartLabel}
-            className="relative hidden min-h-10 items-center whitespace-nowrap rounded-xl border border-brand/20 bg-white/70 px-4 text-xs font-bold text-brand transition hover:-translate-y-0.5 hover:bg-white lg:inline-flex"
-          >
-            سبد خرید
-            <CartCountBadge count={cartCount} />
-          </Link> : null}
+
           <Link
             href="/account/"
             className="hidden min-h-10 items-center whitespace-nowrap rounded-xl border border-[var(--interaction-hover-strong)] bg-[var(--interaction-hover)] px-5 text-sm font-bold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_9px_20px_rgba(199,33,105,0.3)] transition hover:-translate-y-0.5 hover:bg-[var(--interaction-hover-strong)] focus-visible:ring-4 focus-visible:ring-[var(--interaction-hover)] lg:inline-flex"
@@ -326,15 +281,7 @@ export function SiteHeader({ onlineSalesEnabled }: { onlineSalesEnabled: boolean
                   <PhoneIcon className="size-4" />
                   <span className="whitespace-nowrap" dir="ltr">{siteConfig.phoneDisplay}</span>
                 </a>
-                {onlineSalesEnabled ? <Link
-                  href="/cart/"
-                  onClick={() => setMenuOpen(false)}
-                  aria-label={cartLabel}
-                  className="relative flex min-h-11 items-center justify-center rounded-xl border border-brand bg-surface px-4 font-bold text-brand"
-                >
-                  سبد خرید
-                  <CartCountBadge count={cartCount} />
-                </Link> : null}
+
                 <Link
                   href="/account/"
                   onClick={() => setMenuOpen(false)}

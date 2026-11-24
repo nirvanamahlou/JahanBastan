@@ -20,7 +20,7 @@ import { getPublicSettings } from "@/lib/api/public-settings";
 type Settings = { socialLinks: Record<string, string> };
 export default async function PublicLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const hasSessionCookie = (await cookies()).has(process.env.CUSTOMER_SESSION_COOKIE_NAME ?? "customer_session");
-  return <Suspense fallback={null}><AppAccessGate hasSessionCookie={hasSessionCookie}><Suspense fallback={<div className="public-shell"><SiteHeader onlineSalesEnabled={false} /><main id="main-content"><PublicPageSkeleton /></main><MobileBottomNav /></div>}>
+  return <Suspense fallback={null}><AppAccessGate hasSessionCookie={hasSessionCookie}><Suspense fallback={<div className="public-shell"><SiteHeader /><main id="main-content"><PublicPageSkeleton /></main><MobileBottomNav /></div>}>
     <PublicLayoutContent>{children}</PublicLayoutContent>
   </Suspense></AppAccessGate></Suspense>;
 }
@@ -39,7 +39,7 @@ async function PublicLayoutContent({ children }: Readonly<{ children: React.Reac
     >
       {autumnThemeEnabled ? <AutumnDecor /> : null}
       <a href="#main-content" className="fixed start-4 top-3 z-[100] -translate-y-24 rounded-lg bg-foreground px-4 py-2 text-background focus:translate-y-0">پرش به محتوای اصلی</a>
-      <SiteHeader onlineSalesEnabled={onlineSalesEnabled} />
+      <SiteHeader />
       <AppStatus />
       <ScrollRevealController />
       <main id="main-content" className="flex-1 outline-none" tabIndex={-1}>

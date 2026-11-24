@@ -27,10 +27,6 @@ export const siteConfig = {
         { label: "تماس با ما", href: "/contact/" },
       ],
     },
-    { label: "پرداخت آنلاین", href: "/payment/", children: [
-      { label: "پرداخت آنلاین", href: "/payment/" },
-      { label: "قوانین پرداخت و استرداد", href: "/payment-rules/" },
-    ] },
   ] satisfies ReadonlyArray<NavigationItem>,
   footerLinks: [
     { label: "تورهای گردشگری", href: "/tours/" },
@@ -41,7 +37,6 @@ export const siteConfig = {
     { label: "سوالات متداول", href: "/faq/" },
     { label: "تماس با ما", href: "/contact/" },
     { label: "خرید اقساطی", href: "/installments/" },
-    { label: "پرداخت آنلاین", href: "/payment/" },
   ],
   socialLinks: [
     {
