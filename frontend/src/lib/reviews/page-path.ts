@@ -3,7 +3,6 @@ const COMMENTABLE_SECTIONS = new Set([
   "destinations",
   "hotels",
   "services",
-  "tours",
 ]);
 
 export function normalizedPagePath(pathname: string) {
