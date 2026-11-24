@@ -104,9 +104,9 @@
   align-items: stretch;
   min-width: 0;
   overflow: hidden;
-  border: 1px solid #e1e8f3;
+  border: 1px solid #9db3ce;
   border-radius: .65rem;
-  background: #fff;
+  background: #edf2f9;
   color: #102747;
 }
 .dateRange:hover, .dateRange:focus-visible { border-color: #6586af; }
@@ -120,14 +120,12 @@
   padding: .5rem .22rem;
   text-align: center;
 }
-.datePoint:first-child { background: #edf2f9; }
-.datePoint:nth-child(3) { background: #fff; }
 .datePoint span { color: #415973; font-size: .59rem; }
 .datePoint :is(time, strong) { font-size: .71rem; line-height: 1.5; overflow-wrap: anywhere; }
 .datePoint time { font-weight: 650; }
 .dateArrow { align-self: center; color: #25466e; }
-.dateCardFooter { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: .25rem .65rem; padding: .42rem .65rem; background: #fff; border-top: 1px solid #e1e8f3; font-size: .68rem; }
-.dateNights { display: inline-flex; align-items: center; gap: .25rem; border-radius: .35rem; background: #e6eef9; padding-inline: .35rem; font-weight: 700; }
+.dateCardFooter { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: .25rem .65rem; padding: .42rem .65rem; border-top: 1px solid #cdd9e8; font-size: .68rem; }
+.dateNights { display: inline-flex; align-items: center; gap: .25rem; border-radius: .35rem; border: 1px solid #b7c9df; padding-inline: .35rem; font-weight: 700; }
 .dateLink { display: inline-flex; align-items: center; min-height: 44px; margin-top: .15rem; color: #25466e; font-size: .7rem; font-weight: 700; }
 @media (max-width: 1100px) { .dateRanges { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 940px) { .countryLayout { grid-template-columns: 220px minmax(0, 1fr); } .countryResult .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
