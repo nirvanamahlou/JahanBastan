@@ -2093,3 +2093,16 @@ html:not([data-theme="night"]) .public-shell main > section {
 html:not([data-theme="night"]) .public-shell .country-explorer-window::before {
   background: none;
 }
+
+.account-primary {
+  background: #102747;
+  color: #fff;
+}
+
+button.account-primary:not(:disabled):hover,
+.site-header a.account-primary:hover,
+.site-header nav a.account-primary:is(:hover, :focus-visible) {
+  background-color: #25466e !important;
+  border-color: #25466e !important;
+  box-shadow: 0 8px 18px rgb(16 39 71 / 22%) !important;
+}

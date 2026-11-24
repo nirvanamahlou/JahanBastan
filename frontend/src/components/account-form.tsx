@@ -368,7 +368,7 @@ export function AccountForm({ onAuthenticated, refreshAfterAuthentication = true
                 />
                 {error ? <Alert variant="error">{error}</Alert> : null}
                 {notice ? <Alert variant="success">{notice}</Alert> : null}
-                <Button className="w-full bg-pink-500 text-white hover:bg-pink-600 focus-visible:ring-pink-500" loading={submitting} size="lg" type="submit">
+                <Button className="account-primary w-full focus-visible:ring-[#25466e]" loading={submitting} size="lg" type="submit">
                   دریافت کد ورود
                 </Button>
               </form>
@@ -397,7 +397,7 @@ export function AccountForm({ onAuthenticated, refreshAfterAuthentication = true
                 />
                 {error ? <Alert variant="error">{error}</Alert> : null}
                 {notice ? <Alert variant="success">{notice}</Alert> : null}
-                <Button className="w-full bg-pink-500 text-white hover:bg-pink-600 focus-visible:ring-pink-500" disabled={smsSecondsLeft <= 0} loading={submitting} size="lg" type="submit">
+                <Button className="account-primary w-full focus-visible:ring-[#25466e]" disabled={smsSecondsLeft <= 0} loading={submitting} size="lg" type="submit">
                   تأیید کد و ورود
                 </Button>
                 <div className="grid gap-2 sm:grid-cols-2">
@@ -459,7 +459,7 @@ export function AccountForm({ onAuthenticated, refreshAfterAuthentication = true
                 <span><strong className="block">مرا به خاطر بسپار</strong><span className="mt-1 block text-xs font-normal leading-5 text-muted">فقط در این دستگاه؛ نشست ورود تا ۳۰ روز فعال می‌ماند.</span></span>
               </label>}
               {error ? <Alert variant="error">{error}</Alert> : null}
-              <Button className="w-full bg-pink-500 text-white hover:bg-pink-600 focus-visible:ring-pink-500" loading={submitting} size="lg" type="submit">{isAgencyLogin ? "ورود آژانس" : isLogin ? "ورود به حساب" : "ایجاد حساب کاربری"}</Button>
+              <Button className="account-primary w-full focus-visible:ring-[#25466e]" loading={submitting} size="lg" type="submit">{isAgencyLogin ? "ورود آژانس" : isLogin ? "ورود به حساب" : "ایجاد حساب کاربری"}</Button>
             </form>
           )}
 

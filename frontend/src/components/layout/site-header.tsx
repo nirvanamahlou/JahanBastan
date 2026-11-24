@@ -162,7 +162,7 @@ export function SiteHeader() {
             href="/account/"
             onClick={openAccount}
             aria-haspopup={customerName ? undefined : "dialog"}
-            className="hidden min-h-10 items-center whitespace-nowrap rounded-xl border border-[var(--interaction-hover-strong)] bg-[var(--interaction-hover)] px-5 text-sm font-bold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_9px_20px_rgba(199,33,105,0.3)] transition hover:-translate-y-0.5 hover:bg-[var(--interaction-hover-strong)] focus-visible:ring-4 focus-visible:ring-[var(--interaction-hover)] lg:inline-flex"
+            className="hidden min-h-10 items-center whitespace-nowrap rounded-xl border account-primary border-[#102747] px-5 text-sm font-bold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_9px_20px_rgba(16,39,71,0.18)] transition hover:-translate-y-0.5 focus-visible:ring-4 focus-visible:ring-[#25466e] lg:inline-flex"
           >
             {customerName ? "پنل کاربری" : "ورود / ثبت‌نام"}
           </Link>
@@ -251,7 +251,7 @@ export function SiteHeader() {
                   href="/account/"
                   onClick={openAccount}
                   aria-haspopup={customerName ? undefined : "dialog"}
-                  className="flex min-h-11 items-center justify-center rounded-xl border border-[var(--interaction-hover-strong)] bg-[var(--interaction-hover)] px-4 font-bold text-white shadow-sm transition hover:bg-[var(--interaction-hover-strong)] focus-visible:ring-4 focus-visible:ring-[var(--interaction-hover)]"
+                  className="flex min-h-11 items-center justify-center rounded-xl border account-primary border-[#102747] px-4 font-bold text-white shadow-sm transition focus-visible:ring-4 focus-visible:ring-[#25466e]"
                 >
                   {customerName ? "پنل کاربری" : "ورود / ثبت‌نام"}
                 </Link>
