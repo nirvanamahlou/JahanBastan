@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { DeparturePicker } from "@/components/content/departure-picker";
-import { formatPersianDate } from "@/lib/persian-date";
 import type { Departure } from "./catalog";
 
 export function AvinaDeparturePicker({ tours, selected }: { tours: Departure[]; selected: Departure }) {
@@ -21,11 +20,6 @@ export function AvinaDeparturePicker({ tours, selected }: { tours: Departure[]; 
   });
   const current = options[tours.findIndex(tour => tour.startsOn === selected.startsOn && tour.endsOn === selected.endsOn)];
   return <div className="space-y-3">
-    {current && <div className="flex flex-wrap justify-center gap-2 rounded-xl border border-border bg-white px-3 py-2 text-sm">
-      <span className="text-muted">پکیج انتخابی</span>
-      <strong>{formatPersianDate(current.departureDate)}</strong>
-      <span>· {current.nights.toLocaleString("fa-IR")} شب</span>
-    </div>}
     <aside className="rounded-2xl border border-border bg-white p-3 text-center">
       <h2 className="font-black text-brand">روزهای برگزاری تور</h2>
       <DeparturePicker plain options={options} selected={current} available={() => true}

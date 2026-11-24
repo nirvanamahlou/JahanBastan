@@ -17,7 +17,6 @@ import { CloseIcon, SearchIcon } from "@/components/layout/site-icons";
 import { PUBLIC_API_BASE_URL } from "@/lib/api/client";
 import { formatCurrency } from "@/lib/currency";
 import { toToman, type ExchangeRates } from "@/lib/currency-conversion";
-import { formatPersianDate } from "@/lib/persian-date";
 import { isFinalLocalTourPrice } from "@/lib/tour-price-currency";
 import { isTourDepartureBookable, type TourDepartureAvailability } from "@/lib/tour-departure-availability";
 
@@ -299,11 +298,6 @@ export function TourHotelFilter({
   return (
     <section className="scroll-mt-24 space-y-5" id="tour-booking">
       <div className="space-y-3">
-        <div className="flex flex-wrap items-center justify-center gap-2 rounded-xl border border-border bg-white px-3 py-2 text-sm">
-          <span className="text-muted">پکیج انتخابی</span>
-          <strong>{selectedDeparture?.departureDate ? formatPersianDate(selectedDeparture.departureDate) : selectedDeparture?.label}</strong>
-          {selectedDeparture?.nights ? <span>· {selectedDeparture.nights.toLocaleString("fa-IR")} شب</span> : null}
-        </div>
         <aside className="rounded-2xl border border-border bg-white p-3 text-center">
           <h2 className="font-black text-brand">روزهای برگزاری تور</h2>
           <DeparturePicker options={availableDates} selected={selectedDeparture} available={isTourDepartureBookable} onSelect={(id) => {
