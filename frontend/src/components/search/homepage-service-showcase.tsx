@@ -8,24 +8,24 @@ import { CountryFlag } from "@/components/content/country-flag";
 import styles from "./homepage-showcase-rev48.module.css";
 
 export type ShowcaseCard = { id: string; title: string; href: string; imageUrl: string | null; subtitle?: string | null; price?: string | null; country?: string; flagId?: number | null; international?: boolean; stars?: number };
-export type ShowcasePanel = { title: string; eyebrow: string; description: string; href: string; action: string; tiles: ShowcaseCard[]; recommendations: ShowcaseCard[]; recommendedCountries?: string[] };
+export type ShowcasePanel = { title: string; eyebrow: string; description: string; href: string; action: string; tiles: ShowcaseCard[]; recommendations: ShowcaseCard[] };
 function ShowcaseImage({ src, sizes }: { src: string | null; sizes: string }) {
   const [failed, setFailed] = useState(false);
   return src && !failed ? <Image src={src} alt="" fill sizes={sizes} onError={() => setFailed(true)} /> : <div className={styles.noImage} />;
 }
 export function HomepageServiceShowcase({ panels }: { panels: Record<string, ShowcasePanel> }) {
   const { serviceType } = useHomepageSearchService();
-  const [expanded, setExpanded] = useState(false);
+  const [expandedService, setExpandedService] = useState<string | null>(null);
+  const expanded = expandedService === serviceType;
   const panel = panels[serviceType];
   if (!panel) return null;
   const cards = panel.tiles;
   const isTour = serviceType === "tour";
-  const preview = cards.filter((card, index) => index < 6 || panel.recommendedCountries?.includes(card.id));
   return <section id={isTour ? "tour-countries" : undefined} data-service-showcase={serviceType} className={styles.section}><div className={styles.panel}>
     <header className={styles.heading}><span>{panel.eyebrow}</span><h2>{panel.title}</h2>{panel.description ? <p>{panel.description}</p> : null}</header>
-    <div className={styles.controls}><Link href={panel.href}>همه کشورها</Link></div>
-    {isTour ? <div className={styles.countryGrid}>
-      {(expanded ? cards : preview).map(country => <Link key={country.id} href={country.href} className={styles.countryCard}>
+    {!isTour ? <div className={styles.controls}><Link href={panel.href}>همه کشورها</Link></div> : null}
+    {isTour ? <div id="tour-country-grid" className={styles.countryGrid} data-expanded={expanded}>
+      {cards.map(country => <Link key={country.id} href={country.href} className={styles.countryCard}>
         <div className={styles.countryPhoto}><ShowcaseImage src={country.imageUrl} sizes="(max-width:760px) 36vw, 160px" /></div>
         <div className={styles.countryCopy}>
           <h3><CountryFlag country={country.title} imageId={country.flagId} />{country.title}</h3>
@@ -42,7 +42,17 @@ export function HomepageServiceShowcase({ panels }: { panels: Record<string, Sho
       </Link>)}
     </div>}
     {!cards.length ? <p className={styles.empty}>در حال حاضر گزینه‌ای برای این بخش منتشر نشده است.</p> : null}
-    {cards.length > preview.length ? <button type="button" className={styles.more} aria-expanded={expanded} onClick={() => setExpanded(!expanded)}>{expanded ? "نمایش کمتر" : "نمایش کشورهای بیشتر"}</button> : null}
+    {(isTour ? cards.length > 2 : cards.length > 6) ? (
+      <button
+        type="button"
+        className={isTour ? styles.countryMore : styles.more}
+        aria-controls={isTour ? "tour-country-grid" : undefined}
+        aria-expanded={expanded}
+        onClick={() => setExpandedService(expanded ? null : serviceType)}
+      >
+        {expanded ? "نمایش کمتر" : isTour ? "نمایش بیشتر" : "نمایش کشورهای بیشتر"}
+      </button>
+    ) : null}
   </div></section>;
 }
 

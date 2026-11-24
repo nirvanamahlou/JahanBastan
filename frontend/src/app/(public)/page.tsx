@@ -313,16 +313,12 @@ export default async function HomePage() {
     imageUrl: mediaUrl(item.imageId), subtitle: `${item.count.toLocaleString("fa-IR")} هتل`,
   }));
   const visaTiles = countryTilesFor(servicePayload.items.filter((service) => service.serviceType === "visa").map((service) => ({ id: service.id, country: service.country ?? "", imageUrl: mediaUrl(service.imageId), amount: service.basePrice, currency: service.currency })), "/services/?type=visa&showResults=1", "ویزای منتشرشده");
-  const recommendedCountries = [...new Set(tourPayload.items.filter(tour => tour.isHomeRecommended).flatMap(tour => {
-    const destinations = tour.routeDestinations?.length ? tour.routeDestinations : tour.destination ? [tour.destination] : [];
-    return destinations.map(destination => normalizeCountryName(destination.country));
-  }))];
   const countryRank = new Map(countryCards.map((country, index) => [normalizeCountryName(country.name), index]));
   const compareCountries = (a: { country?: string }, b: { country?: string }) => (countryRank.get(normalizeCountryName(a.country ?? "")) ?? Number.MAX_SAFE_INTEGER) - (countryRank.get(normalizeCountryName(b.country ?? "")) ?? Number.MAX_SAFE_INTEGER);
   countryTiles.sort(compareCountries);
   hotelCountriesTiles.sort(compareCountries);
   const showcasePanels: Record<string, ShowcasePanel> = {
-    tour: { recommendedCountries, title: "تور بر اساس کشور", eyebrow: "مقصد بعدی شما", description: "", href: "/tours/", action: "مشاهده تورها", tiles: countryTiles, recommendations: spotlightTours.map((tour) => tourCards.find((card) => card.id === `tour-${tour.id}`)!).filter(Boolean) },
+    tour: { title: "تور بر اساس کشور", eyebrow: "مقصد بعدی شما", description: "", href: "/tours/", action: "مشاهده تورها", tiles: countryTiles, recommendations: spotlightTours.map((tour) => tourCards.find((card) => card.id === `tour-${tour.id}`)!).filter(Boolean) },
     visa: { title: "ویزا بر اساس کشور", eyebrow: "خدمات ویزا", description: "", href: "/services/?type=visa&showResults=1", action: "مشاهده ویزا", tiles: visaTiles, recommendations: visaExplorerItems.map((visa) => ({ id: `visa-${visa.id}`, title: visa.title, href: visa.href, imageUrl: visa.imageUrl, subtitle: visa.country, price: visa.price })) },
     hotel: { title: "هتل بر اساس کشور", eyebrow: "اقامت بعدی شما", description: "", href: "/hotels/", action: "مشاهده هتل‌ها", tiles: hotelCountriesTiles, recommendations: hotelCards },
   };
