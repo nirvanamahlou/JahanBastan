@@ -280,14 +280,14 @@ export default async function ServicesPage({
 
   return (
     <>
-      <PageIntro
+      <PageIntro compact
         description={isTransport
           ? "مسیر، ساعت حرکت، شرکت حمل‌ونقل و ظرفیت را مقایسه کنید و بلیت مناسب را انتخاب کنید."
           : "خدمات منتشرشده را مستقیم از اطلاعات پنل مدیریت بررسی کنید."}
         title={isTransport ? `${transportLabel} ${params.country || "همه کشورها"}` : isVisa ? `ویزا ${params.country || "بر اساس کشور"}` : "خدمات سفر"}
       />
       <section className="py-10 sm:py-14">
-        <Container>
+        <Container className={catalogStyles.catalogContainer}>
           <nav aria-label="فیلتر نوع خدمت" className="mb-7 flex flex-wrap gap-2">
             {serviceTypes.map((item) => (
               <Link
@@ -484,14 +484,14 @@ export default async function ServicesPage({
             {payload.items.length ? (
             <div className="grid gap-5 sm:grid-cols-2">
               {payload.items.map((service) => (
-                <Card as="article" className="overflow-hidden p-0" key={service.id}>
+                <Card as="article" className={`${catalogStyles.catalogCard} overflow-hidden p-0`} key={service.id}>
                   <Link className="group block" href={`/services/${service.slug}/`}>
                     {service.imageId || service.isFeatured ? (
-                    <div className="relative aspect-square overflow-hidden bg-brand">{service.isFeatured ? <span className="absolute right-3 top-3 z-10 rounded-full bg-accent-strong px-3 py-1 text-xs font-black text-white">پرفروش</span> : null}
+                    <div className="relative aspect-[16/9] overflow-hidden bg-surface-muted">{service.isFeatured ? <span className="absolute right-3 top-3 z-10 rounded-full bg-accent-strong px-3 py-1 text-xs font-black text-white">پرفروش</span> : null}
                       {service.imageId ? <Image alt={service.title} className="object-cover transition duration-500 group-hover:scale-105" fill sizes="(max-width: 640px) 100vw, 33vw" src={`${PUBLIC_API_BASE_URL}/media/${service.imageId}`} /> : null}
                     </div>
                     ) : null}
-                    <div className="p-5">
+                    <div className="p-4">
                       <p className="inline-flex items-center gap-2 text-xs font-bold text-brand"><CountryFlag country={service.country ?? ""} imageId={service.country ? countryFlagImageIds.get(normalizeCountryName(service.country)) ?? null : null} />{serviceLabels[service.serviceType] ?? service.serviceType}{service.country ? ` · ${service.country}` : ""}</p>
                       <h2 className="mt-2 text-xl font-black text-brand">{service.title}</h2>
                       <p className="mt-3 line-clamp-2 text-sm leading-7 text-muted">{service.summary}</p>

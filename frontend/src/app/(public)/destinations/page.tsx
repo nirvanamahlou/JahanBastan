@@ -5,6 +5,7 @@ import Link from "next/link";
 import { CountryFlag } from "@/components/content/country-flag";
 import { PageIntro } from "@/components/layout/page-intro";
 import { Card } from "@/components/ui/card";
+import catalogStyles from "@/components/content/catalog-layout.module.css";
 import { Container } from "@/components/ui/container";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ResponsiveGrid } from "@/components/ui/responsive-grid";
@@ -56,8 +57,8 @@ export default async function DestinationsPage({
     return matchesCountry && matchesSearch;
   });
   const countryFlagImageIds = createCountryImageMap(countryFilters);
-  return <><PageIntro title="مقاصد گردشگری" description="مقصدهای منتشرشده را بررسی و راهنمای کامل هر شهر و کشور را مطالعه کنید." />
-    <section className="py-12 sm:py-16"><Container>
+  return <><PageIntro compact title="مقاصد گردشگری" description="مقصدهای منتشرشده را بررسی و راهنمای کامل هر شهر و کشور را مطالعه کنید." />
+    <section className="py-12 sm:py-16"><Container className={catalogStyles.catalogContainer}>
       <div className="mb-10">
         <div className="mb-4 flex items-center justify-between gap-4"><h2 className="text-2xl font-black">فیلتر بر اساس کشور</h2>{country ? <Link className="font-bold text-brand" href="/destinations/">نمایش همه</Link> : null}</div>
         <form action="/destinations/" className="mb-5 flex max-w-xl gap-2">
@@ -73,7 +74,7 @@ export default async function DestinationsPage({
       </div>
       {country ? <p className="mb-6 text-lg font-bold">مقاصد کشور {country}</p> : null}
       {visibleDestinations.length ? <ResponsiveGrid>{visibleDestinations.map((item) => <Card as="article" className="group overflow-hidden rounded-[1.75rem] border-white/80 bg-white/75 p-0 ring-1 ring-brand/5 backdrop-blur-xl transition duration-300 ease-out hover:-translate-y-2 hover:border-accent-strong/45 hover:shadow-[0_24px_58px_rgba(1,37,105,.17)] focus-within:ring-4 focus-within:ring-accent" key={item.id}>
-        <div className="relative aspect-square bg-brand">{item.imageId ? <Image alt={item.title} className="object-cover transition duration-700 ease-out group-hover:scale-110" fill sizes="(max-width:640px) 100vw, 33vw" src={`${PUBLIC_API_BASE_URL}/media/${item.imageId}`} /> : null}</div>
+        <div className="relative aspect-[16/9] bg-surface-muted">{item.imageId ? <Image alt={item.title} className="object-cover transition duration-700 ease-out group-hover:scale-110" fill sizes="(max-width:640px) 100vw, 33vw" src={`${PUBLIC_API_BASE_URL}/media/${item.imageId}`} /> : null}</div>
         <div className="p-5"><p className="inline-flex items-center gap-2 rounded-full border border-accent-strong/20 bg-accent/65 px-3 py-1.5 text-sm font-black text-brand shadow-sm transition group-hover:bg-accent"><CountryFlag country={item.country} imageId={countryFlagImageIds.get(normalizeCountryName(item.country)) ?? null} />{item.country}{item.city ? `، ${item.city}` : ""}</p><h2 className="mt-2 text-2xl font-black">{item.title}</h2><p className="mt-3 line-clamp-3 text-sm leading-7 text-muted">{item.summary}</p><Link className="mt-5 inline-flex min-h-10 items-center rounded-xl border border-brand/15 bg-white/70 px-4 font-black text-brand shadow-sm transition hover:-translate-y-0.5 hover:border-brand hover:bg-brand hover:text-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent" href={`/destinations/${item.slug}/`}>مشاهده مقصد ←</Link></div>
       </Card>)}</ResponsiveGrid> : <EmptyState title="هنوز مقصدی منتشر نشده است" description="مقصدهای منتشرشده در پنل مدیریت اینجا نمایش داده می‌شوند." />}
     </Container></section>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { PageIntro } from "@/components/layout/page-intro";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import catalogStyles from "@/components/content/catalog-layout.module.css";
 import { Container } from "@/components/ui/container";
 import { EmptyState } from "@/components/ui/empty-state";
 import { apiGet, PUBLIC_API_BASE_URL } from "@/lib/api/client";
@@ -45,13 +46,13 @@ export default async function ArticlesPage({
 
   return (
     <>
-      <PageIntro
+      <PageIntro compact
         eyebrow="راهنما، تجربه و الهام"
         title="مجله سفر"
         description="راهنمای مقصد، تجربه‌های واقعی و نکات کاربردی برای سفرهای بهتر."
       />
       <section className="py-10 sm:py-14">
-        <Container>
+        <Container className={catalogStyles.catalogContainer}>
           {categories.length ? (
             <nav
               aria-label="فیلتر دسته‌بندی مقالات"

@@ -20,16 +20,14 @@ export function TourResultRow({ title, slug, summary, imageUrl, destination, dat
       <div className={styles.price}><span className="text-xs font-normal text-muted">شروع قیمت از</span><strong>{price}</strong></div>
     </div>
   );
-  const image = imageUrl ? <Image unoptimized={/^https:\/\//.test(imageUrl)} src={imageUrl} alt="" fill sizes={countryLayout ? "(max-width: 600px) 90vw, 200px" : "(max-width: 540px) 100vw, 290px"} /> : null;
+  const image = imageUrl ? <Image unoptimized={/^https:\/\//.test(imageUrl)} src={imageUrl} alt="" fill sizes={dateRanges ? "(max-width: 600px) 95vw, 300px" : "(max-width: 540px) 100vw, 290px"} /> : null;
   const photo = dateRanges
     ? <div className={styles.photo}>{image}</div>
     : <Link className={styles.photo} href={href} aria-label={title}>{image}</Link>;
   const fallback = dateRanges?.departure ? { departureDate: dateRanges.departure, returnDate: dateRanges.returning, price: dateRanges.price } : null;
   if (dateRanges) {
-    const summaryContent = countryLayout
-      ? <div className={styles.countryResultMain}>{information}{photo}</div>
-      : <div className={styles.row} data-web-tour-row>{information}<div className={styles.rowMedia}>{photo}</div></div>;
-    return <article className={`${styles.tourCard} ${countryLayout ? styles.countryResult : ""}`} data-country-tour-row={countryLayout ? true : undefined}>
+    const summaryContent = <div className={styles.countryResultMain}>{information}{photo}</div>;
+    return <article className={`${styles.tourCard} ${styles.countryResult}`} data-tour-result data-country-tour-row={countryLayout ? true : undefined}>
       <TourResultDates href={href} slug={dateRanges.native ? slug : null} fallback={fallback} summaryContent={summaryContent} />
     </article>;
   }

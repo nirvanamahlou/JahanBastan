@@ -34,7 +34,6 @@
 @media(max-width:1100px){.layout{grid-template-columns:250px minmax(0,1fr);gap:18px}.row{grid-template-columns:minmax(0,1fr) 220px;gap:16px}.facts{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:800px){.layout{grid-template-columns:minmax(0,1fr)}.sidebar{position:static;padding:16px}.row{grid-template-columns:minmax(0,1fr) 220px}.heading h1{font-size:24px}}
 @media(max-width:540px){.row{grid-template-columns:minmax(0,1fr)}.rowMedia{grid-row:1}.facts{margin-top:14px}.heading h1{font-size:22px}.sort form{width:100%;flex-wrap:wrap}}
-.tourContainer.tourContainer{max-width:100rem;width:100%;padding-inline:clamp(1rem,2.5vw,3rem);box-sizing:border-box}
 
 /* Give flight controls room without changing other service sidebars. */
 .flightLayout{grid-template-columns:320px minmax(0,1fr)}
@@ -43,7 +42,7 @@
 
 /* The country view keeps the same filters with a more compact card layout. */
 .countryPage { padding: 1.15rem 0 2.4rem; background: #f6f8fc; }
-.countryContainer.countryContainer { width: calc(100% - 48px); max-width: 1200px; padding: 0; }
+.catalogContainer.catalogContainer { width: calc(100% - 48px); max-width: 1200px; padding: 0; }
 .countryHero {
   position: relative;
   isolation: isolate;
@@ -66,6 +65,8 @@
 .countryHeroCopy p { color: #e0e9f5; font-size: .7rem; }
 .countryLayout { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: .9rem; align-items: start; }
 .countryResults { display: grid; gap: .65rem; margin-top: .65rem; }
+
+.catalogCard { border: 1px solid #d9e3f2; border-radius: .9rem; background: #fff; box-shadow: 0 6px 18px #1027470a; }
 .tourCard {
   min-width: 0;
   border: 1px solid #d9e3f2;
@@ -75,7 +76,6 @@
   box-shadow: 0 6px 18px #1027470a;
 }
 .tourCard:has(.dateDisclosure[open]) { border-color: #d997b7; }
-.tourCard .row { padding-inline: .75rem; border-bottom: 0; }
 .tourCard .facts > div { border-radius: .55rem; background: #ffffffb3; padding: .28rem .35rem; }
 .countryResultMain { display: grid; grid-template-columns: minmax(0, 1fr) minmax(140px, 25%); gap: .8rem; align-items: center; padding: .75rem; }
 .countryResultMain .photo { min-height: 124px; aspect-ratio: 1.5; }
@@ -130,7 +130,7 @@
 @media (max-width: 940px) { .countryLayout { grid-template-columns: 220px minmax(0, 1fr); } .countryResult .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 800px) { .countryLayout { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 600px) {
-  .countryContainer.countryContainer { width: calc(100% - 28px); }
+  .catalogContainer.catalogContainer { width: calc(100% - 28px); }
   .countryHero { min-height: 145px; }
   .countryHeroPhoto { width: 74%; }
   .countryResultMain { grid-template-columns: minmax(0, 1fr); gap: .45rem; }
@@ -140,7 +140,7 @@
   margin-block-end: 1.15rem;
   padding: .85rem;
   border: 1px solid #e1e8f3;
-  border-block-start: 3px solid #d23b76;
+  border-block-start: 3px solid #102747;
   border-radius: 1rem;
   background: #f8faff;
   box-shadow: 0 10px 24px #1027470b;

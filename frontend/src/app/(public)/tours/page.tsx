@@ -188,7 +188,7 @@ export default async function ToursPage({ searchParams }: { searchParams: Promis
   const destinationLabel = options.destinations.find((option) => option.value === destination)?.label;
   const heading = destinationLabel ? `تورهای ${destinationLabel}` : country ? `تورهای ${country}` : "تورهای داخلی و خارجی";
   const countryPhoto = country ? destinations.items.find(item => normalizeCountryName(item.country) === country && item.imageId)?.imageId : null;
-  return <section className={country ? styles.countryPage : "bg-white pt-2 pb-8 sm:pt-3 sm:pb-12"}><Container className={country ? styles.countryContainer : styles.tourContainer}>
+  return <section className={styles.countryPage}><Container className={styles.catalogContainer}>
     {country ? <header className={styles.countryHero}>
       {countryPhoto && <div className={styles.countryHeroPhoto}><Image src={`${PUBLIC_API_BASE_URL}/media/${countryPhoto}`} alt="" fill sizes="(max-width:640px) 95vw, 520px" /></div>}
       <div className={styles.countryHeroCopy}>
@@ -197,7 +197,7 @@ export default async function ToursPage({ searchParams }: { searchParams: Promis
         <p>{payload.total.toLocaleString("fa-IR")} تور برای این انتخاب</p>
       </div>
     </header> : <>
-      <header className={styles.heading}><div><h1>{heading}</h1><p>{payload.total.toLocaleString("fa-IR")} تور منتشرشده</p></div><Link className="ms-auto shrink-0 text-sm font-bold text-brand" href="/#tour-countries">← همه کشورها</Link></header>
+      <header className={`${styles.heading} flex-wrap`}><div><h1>{heading}</h1><p>{payload.total.toLocaleString("fa-IR")} تور منتشرشده</p></div><Link className="ms-auto shrink-0 text-sm font-bold text-brand" href="/#tour-countries">← همه کشورها</Link></header>
       <Link href="/tours/departures/" className="mb-4 inline-flex rounded-xl bg-brand px-4 py-3 font-bold text-white">تورهای تاریخ‌دار</Link>
     </>}
     <div>
@@ -235,7 +235,7 @@ export default async function ToursPage({ searchParams }: { searchParams: Promis
             href: hrefWith(current, { sort: option.value }),
           }))} />
         </div>
-        <section className={country ? styles.countryResults : styles.results} aria-label="فهرست تورها">
+        <section className={styles.countryResults} aria-label="فهرست تورها">
           {payload.items.length ? payload.items.map((tour) => {
             const price = tour.displayPrice ?? (tour.priceAmount ? formatCurrency(tour.priceAmount, tour.currency) : null);
             return <TourResultRow

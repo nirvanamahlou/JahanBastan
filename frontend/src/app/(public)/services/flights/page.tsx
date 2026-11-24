@@ -430,12 +430,12 @@ export default async function FlightsPage({ searchParams }: { searchParams: Prom
 
   return (
     <>
-      <PageIntro
+      <PageIntro compact
         eyebrow="خدمات سفر / پرواز"
         title={country ? `پروازهای ${country}` : "پرواز بر اساس کشور"}
       />
       <section className="py-8 sm:py-12">
-        <Container>
+        <Container className={catalogStyles.catalogContainer}>
           <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: "خدمات سفر", href: "/services/" }, { label: "پرواز" }]} />
 
           {shouldShowResults ? (

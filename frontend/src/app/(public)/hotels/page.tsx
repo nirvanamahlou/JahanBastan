@@ -5,6 +5,7 @@ import {
   type CatalogHotel,
 } from "@/components/content/hotel-catalog";
 import { PageIntro } from "@/components/layout/page-intro";
+import catalogStyles from "@/components/content/catalog-layout.module.css";
 import { Container } from "@/components/ui/container";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Pagination } from "@/components/ui/pagination";
@@ -48,13 +49,13 @@ export default async function HotelsPage({
 
   return (
     <>
-      <PageIntro
+      <PageIntro compact
         description="کشور را انتخاب کنید و هتل‌ها را بر اساس ستاره و امتیاز مهمان مقایسه کنید."
         eyebrow="اقامت در مقصد"
         title="هتل‌ها بر اساس کشور"
       />
       <section className="py-10 sm:py-16">
-        <Container>
+        <Container className={catalogStyles.catalogContainer}>
           {destinationPayload.items.length ? (
             <HotelCatalog
               countries={countryPayload.items}
