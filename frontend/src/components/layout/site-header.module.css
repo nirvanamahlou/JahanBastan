@@ -5,54 +5,42 @@
   backdrop-filter: none;
 }
 
-@media (min-width: 64rem) {
-  .home > :global(.site-container) {
-    --container-max: 120rem;
-    min-height: 6.5rem;
-    padding-inline: clamp(2rem, 5vw, 7rem);
-  }
-  .home > :global(.site-container) > a:first-child img { width: 5.5rem; height: 5.5rem; }
-  .home nav[aria-label="منوی اصلی"] > ul { gap: 1rem; }
-  .home nav[aria-label="منوی اصلی"] > ul > li > a { font-size: 1rem; }
-  .home a[href="/account/"] { min-height: 3.25rem; border-radius: 1rem; padding-inline: 1.5rem; }
-  .home a[href^="tel:"] { min-height: 3.25rem; border-radius: 2rem; }
-}
-
-.home nav[aria-label="منوی اصلی"] > ul {
-  background: transparent;
-  box-shadow: none;
-  backdrop-filter: none;
-}
-
-.home nav[aria-label="منوی اصلی"] > ul > li > a {
+:global(.public-shell .site-header) > .bar:global(.site-container) {
   position: relative;
-  border-radius: 0.5rem;
-  background: transparent;
-  color: var(--brand);
-  box-shadow: none;
+  display: flex;
+  min-height: 3.5rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
 }
+.bar :global(.app-brand-copy) { display: none; }
 
-.home nav[aria-label="منوی اصلی"] > ul > li > a:hover {
-  background: var(--surface-muted);
+.backdrop {
+  position: fixed;
+  z-index: 40;
+  inset: 0;
+  width: 100%;
+  height: 100dvh;
+  background: #10274724;
+  cursor: default;
 }
-
-.home nav[aria-label="منوی اصلی"] > ul > li > a[aria-current="page"]::after {
-  inset-inline: 0.75rem;
-  bottom: 0;
-  height: 2px;
-  background: var(--interaction-hover);
+.bar > div { position: relative; z-index: 41; }
+.menu {
+  position: absolute;
+  z-index: 50;
+  inset-block-start: 100%;
+  inset-inline-start: 0;
+  width: min(24rem, 100%);
+  max-height: calc(100dvh - 4.5rem - env(safe-area-inset-top, 0px));
+  padding: .7rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--border);
+  border-radius: 0 0 1rem 1rem;
+  background: var(--surface);
+  box-shadow: 0 14px 38px #10274726;
 }
-
-/* rev48 homepage chrome; navigation destinations and dropdowns stay functional. */
-@media(min-width:64rem) {
- .home > :global(.site-container) { width:calc(100% - 5rem); max-width:90rem; min-height:104px; padding-inline:0; }
- .home > :global(.site-container) > a:first-child img { width:78px; height:88px; }
- .home nav[aria-label="منوی اصلی"] > ul { gap:1rem; padding:0; }
- .home nav[aria-label="منوی اصلی"] > ul > li > a { min-height:2.75rem; padding-inline:.4rem; font-size:.8rem; }
- .home a[href="/account/"] { min-height:2.75rem; padding-inline:1rem; border:1px solid #e3e7ed; border-radius:.65rem; background:#fff!important; color:#102747!important; box-shadow:none; font-size:.75rem; }
- .home a[href^="tel:"] { min-height:2.75rem; gap:.6rem; border:1px solid #f23c7e; border-radius:.75rem; background:#fff4f8; padding:.35rem .65rem; box-shadow:0 6px 16px #f23c7e12; }
- .home a[href^="tel:"] svg { width:30px; height:30px; padding:7px; border-radius:.5rem; background:#102747; color:#fff; }
- .home a[href^="tel:"] strong { font-size:.7rem; }
+@media (min-width: 64rem) {
+  :global(.public-shell .site-header) > .bar:global(.site-container) { min-height: 3.75rem; }
+  .home > .bar { width: calc(100% - 5rem); max-width: 90rem; padding-inline: 0; }
 }
-@media(min-width:64rem) and (max-width:1150px) { .home > :global(.site-container) { width:calc(100% - 3rem); }.home nav[aria-label="منوی اصلی"] > ul { gap:.3rem; } }
-@media(max-width:63.99rem) { .home > :global(.site-container) { min-height:83px; }.home :global(.app-brand-copy) { display:none; }.home > :global(.site-container) > a:first-child img { width:54px; height:64px; } }

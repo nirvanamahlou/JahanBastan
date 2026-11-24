@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { type MouseEvent, Suspense, useCallback, useEffect, useState } from "react";
+import { type MouseEvent, Suspense, useCallback, useEffect, useRef, useState } from "react";
 
 import { AccountForm } from "@/components/account-form";
 import { Dialog } from "@/components/ui/dialog";
@@ -12,7 +12,7 @@ import { readCustomerSession } from "@/lib/customer-session";
 
 import { BrandLogo } from "./brand-logo";
 import styles from "./site-header.module.css";
-import { ChevronDownIcon, CloseIcon, MenuIcon, MoonIcon, PhoneIcon, SunIcon } from "./site-icons";
+import { CloseIcon, MenuIcon, MoonIcon, PhoneIcon, SunIcon } from "./site-icons";
 
 // Keep theme behavior available while its public controls are disabled.
 const SHOW_THEME_CONTROLS = false;
@@ -25,6 +25,7 @@ function isCurrentRoute(pathname: string, href: string) {
 export function SiteHeader() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuButton = useRef<HTMLButtonElement>(null);
   const [accountOpen, setAccountOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isNight, setIsNight] = useState(false);
@@ -87,15 +88,18 @@ export function SiteHeader() {
     if (!menuOpen) return;
 
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setMenuOpen(false);
+      if (event.key !== "Escape") return;
+      setMenuOpen(false);
+      menuButton.current?.focus();
     };
 
     document.addEventListener("keydown", closeOnEscape);
+    const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
     return () => {
       document.removeEventListener("keydown", closeOnEscape);
-      document.body.style.overflow = "";
+      document.body.style.overflow = previousOverflow;
     };
   }, [menuOpen]);
 
@@ -112,77 +116,37 @@ export function SiteHeader() {
           </div>
         </Container>
       </div>
-      <Container className="relative flex min-h-16 items-center justify-between gap-4 lg:grid lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:gap-5 lg:min-h-20 xl:[--container-max:96rem]">
-        <Link
-          href="/"
-          aria-label="صفحه اصلی جهان باستان"
-          className="group flex shrink-0 items-center gap-3 rounded-xl"
-        >
-          <BrandLogo
-            decorative
-            priority
-            className="h-14 w-14 object-contain transition-transform group-hover:-translate-y-0.5 lg:h-16 lg:w-16"
-          />
-          <span className="sr-only">{siteConfig.name} — {siteConfig.description}</span>
-          <span className="app-brand-copy" aria-hidden="true"><strong>جهان باستان</strong><small>همراه سفرهای تو</small></span>
-        </Link>
+      <Container className={styles.bar}>
+        <div className="flex min-w-0 items-center gap-2">
+          <button
+            type="button"
+            aria-label={menuOpen ? "بستن منو" : "بازکردن منو"}
+            aria-expanded={menuOpen}
+            ref={menuButton}
+            aria-controls="mobile-navigation"
+            onClick={() => setMenuOpen((open) => !open)}
+            className="grid size-10 place-items-center rounded-xl border border-white/70 bg-white/55 text-brand shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_7px_18px_rgba(1,37,105,0.08)] backdrop-blur-md transition-colors hover:bg-white"
+          >
+            {menuOpen ? <CloseIcon className="size-6" /> : <MenuIcon className="size-6" />}
+          </button>
+          <Link
+            href="/"
+            onClick={() => setMenuOpen(false)}
+            aria-label="صفحه اصلی جهان باستان"
+            className="group flex shrink-0 items-center gap-3 rounded-xl"
+          >
+            <BrandLogo
+              decorative
+              priority
+              className="h-11 w-11 object-contain transition-transform group-hover:-translate-y-0.5 lg:h-12 lg:w-12"
+            />
+            <span className="sr-only">{siteConfig.name} — {siteConfig.description}</span>
+            <span className="app-brand-copy" aria-hidden="true"><strong>جهان باستان</strong><small>همراه سفرهای تو</small></span>
+          </Link>
+        </div>
 
-        <nav aria-label="منوی اصلی" className="hidden min-w-0 justify-self-center lg:block">
-          <ul className="flex flex-nowrap items-center justify-center gap-0.5 overflow-visible whitespace-nowrap rounded-2xl bg-white/35 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_8px_20px_rgba(1,37,105,0.06)] backdrop-blur-md">
-            {siteConfig.navigation.map((item) => {
-              const active = isCurrentRoute(pathname, item.href);
 
-              return (
-                <li key={item.href} className="group/nav relative shrink-0">
-                  <Link
-                    href={item.href}
-                    aria-current={active ? "page" : undefined}
-                    className={`flex min-h-12 items-center gap-1.5 whitespace-nowrap rounded-xl px-2.5 text-sm font-bold transition-all duration-200 xl:px-3 2xl:px-4 ${
-                      active
-                        ? "relative bg-brand text-white shadow-[0_6px_14px_rgba(1,37,105,0.18)] ring-1 ring-white/25 after:absolute after:inset-x-3 after:bottom-1.5 after:h-0.5 after:rounded-full after:bg-white/90"
-                        : "text-brand hover:bg-accent/35 hover:text-brand hover:shadow-[0_4px_12px_rgba(185,32,104,0.12)]"
-                    }`}
-                  >
-                    {item.label}
-                    {item.children ? <ChevronDownIcon className="size-4" /> : null}
-                  </Link>
-
-                  {item.children ? (
-                    <div className="invisible absolute start-0 top-full w-60 translate-y-2 pt-3 opacity-0 transition-all group-hover/nav:visible group-hover/nav:translate-y-0 group-hover/nav:opacity-100 group-focus-within/nav:visible group-focus-within/nav:translate-y-0 group-focus-within/nav:opacity-100">
-                      <ul className="rounded-2xl border border-border bg-surface p-2 shadow-[0_20px_45px_rgba(1,37,105,0.14)]">
-                        {item.children.map((child) => (
-                          <li key={child.href}>
-                            <Link
-                              href={child.href}
-                              className={"block whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-medium transition-colors " + (child.href === "/installments/" ? "bg-accent-strong text-white shadow-[0_6px_16px_rgba(235,93,159,0.25)] hover:bg-[#d94687]" : "text-muted hover:bg-surface-muted hover:text-brand")}
-                            >
-                              {child.label}
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ) : null}
-                </li>
-              );
-            })}
-            {SHOW_THEME_CONTROLS ? <li className="shrink-0">
-              <button
-                type="button"
-                onClick={toggleTheme}
-                aria-label={isNight ? "تغییر به حالت روز" : "تغییر به حالت شب"}
-                aria-pressed={isNight}
-                title={isNight ? "فعال‌کردن حالت روشن" : "فعال‌کردن حالت تاریک"}
-                className={"theme-toggle grid size-10 shrink-0 place-items-center rounded-xl border border-brand/20 bg-white/70 text-brand transition-all duration-200 hover:-translate-y-0.5 hover:bg-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/25 " + (isNight ? "relative bg-brand text-white shadow-[0_6px_14px_rgba(1,37,105,0.18)] ring-1 ring-white/25 after:absolute after:inset-x-3 after:bottom-1.5 after:h-0.5 after:rounded-full after:bg-white/90" : "")}
-              >
-                {isNight ? <SunIcon className="size-5 text-[#ffd166]" strokeWidth={2.4} /> : <MoonIcon className="size-5" strokeWidth={2.4} />}
-                <span className="sr-only">{isNight ? "حالت روشن" : "حالت تاریک"}</span>
-              </button>
-            </li> : null}
-          </ul>
-        </nav>
-
-        <div className="flex shrink-0 items-center justify-self-end gap-2">
+        <div className="flex shrink-0 items-center gap-2">
 
           <a
             href={`tel:${siteConfig.phoneHref}`}
@@ -202,34 +166,23 @@ export function SiteHeader() {
           >
             {customerName ? "پنل کاربری" : "ورود / ثبت‌نام"}
           </Link>
-          <button
-            type="button"
-            aria-label={menuOpen ? "بستن منو" : "بازکردن منو"}
-            aria-expanded={menuOpen}
-            aria-controls="mobile-navigation"
-            onClick={() => setMenuOpen((open) => !open)}
-            className="grid size-10 place-items-center rounded-xl border border-white/70 bg-white/55 text-brand shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_7px_18px_rgba(1,37,105,0.08)] backdrop-blur-md transition-colors hover:bg-white lg:hidden"
-          >
-            {menuOpen ? <CloseIcon className="size-6" /> : <MenuIcon className="size-6" />}
-          </button>
         </div>
-      </Container>
-
       {menuOpen ? (
         <>
           <button
             type="button"
-            aria-label="بستن منوی موبایل"
-            className="fixed inset-0 top-16 z-40 cursor-default bg-brand/20 backdrop-blur-sm sm:top-20 lg:hidden"
+            aria-label="بستن منو از بیرون"
+            tabIndex={-1}
+            className={styles.backdrop}
             onClick={() => setMenuOpen(false)}
           />
           <nav
             id="mobile-navigation"
-            aria-label="منوی موبایل"
-            className="absolute inset-x-0 top-full z-50 max-h-[calc(100dvh-4rem)] overscroll-contain overflow-y-auto border-t border-border bg-surface p-3 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-2xl sm:max-h-[calc(100dvh-5rem)] sm:p-4 lg:hidden"
+            aria-label="منوی اصلی"
+            className={styles.menu}
           >
             <Container className="px-0">
-              <ul className="grid grid-cols-1 gap-2 md:grid-cols-2">
+              <ul className="grid grid-cols-1 gap-1.5">
                 <li className="rounded-xl border border-border bg-background p-1.5"><Link href="/install/" onClick={() => setMenuOpen(false)} className="block min-h-11 rounded-xl px-3 py-2.5 font-bold text-brand">نصب وب‌اپ جهان باستان</Link></li>
                 {siteConfig.navigation.map((item) => {
                   const active = isCurrentRoute(pathname, item.href);
@@ -307,6 +260,7 @@ export function SiteHeader() {
           </nav>
         </>
       ) : null}
+      </Container>
       <Dialog open={accountOpen} title="ورود و ثبت‌نام" compact onClose={() => setAccountOpen(false)}>
         {accountOpen && <Suspense fallback={null}><AccountForm compact onAuthenticated={() => setAccountOpen(false)} /></Suspense>}
       </Dialog>
