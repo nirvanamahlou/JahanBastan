@@ -52,20 +52,21 @@ export function HomepageHero({
   const visibleImage = failedImages.has(activeImage)
     ? FALLBACK_HERO_IMAGE
     : activeImage;
+  const isServicePanorama = visibleImage === homepageHeroAssets[serviceType];
 
   return (
     <section data-homepage-hero className={styles.hero} aria-label="جستجوی خدمات سفر">
       <Container className={styles.layout}>
-        <div className={styles.visual} data-tour-panorama={serviceType === "tour" && visibleImage === homepageHeroAssets.tour ? "" : undefined}>
+        <div className={styles.visual} data-service-panorama={isServicePanorama ? "" : undefined}>
           <div className={styles.imageFrame}>
             <picture>
-              <source media="(max-width: 760px)" srcSet={activeImage === homepageHeroAssets[serviceType] && !failedImages.has(activeImage) ? homepageMobileHeroAssets[serviceType] : visibleImage} />
+              <source media="(max-width: 760px)" srcSet={isServicePanorama ? homepageMobileHeroAssets[serviceType] : visibleImage} />
               <Image key={`${serviceType}-${visibleImage}`} src={visibleImage}
                 alt={`تصویر خدمات ${activeTab?.label ?? "سفر"} جهان باستان`} fill loading="eager"
                 fetchPriority={serviceType === "tour" ? "high" : "auto"}
                 sizes="(max-width: 767px) 100vw, (max-width: 1664px) 96vw, 1440px"
                 className={styles.image}
-                style={{ objectPosition: activeImage === homepageHeroAssets[serviceType] ? "center" : heroFocus[serviceType] }}
+                style={{ objectPosition: isServicePanorama ? "center" : heroFocus[serviceType] }}
                 onError={() => { if (visibleImage === FALLBACK_HERO_IMAGE) return; setFailedImages(current => new Set([...current, activeImage])); }} />
             </picture>
           </div>

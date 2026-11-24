@@ -10,7 +10,7 @@
 .slideControls button:hover { background:#ffffff30; }
 .slideControls button:focus-visible { outline:3px solid #f23c7e; }
 .slideControls span { font-size:.65rem; }
-@media (width > 760px) { .visual[data-tour-panorama] { aspect-ratio:2172 / 255; } }
+@media (width > 760px) { .visual[data-service-panorama] { aspect-ratio:2172 / 255; } }
 @media(max-width:1150px) { .content { width:calc(100% - 48px); } }
 @media(max-width:760px) {
  .hero { padding-top:.4rem; }
