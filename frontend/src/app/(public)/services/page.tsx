@@ -281,6 +281,7 @@ export default async function ServicesPage({
   return (
     <>
       <PageIntro compact
+        bannerSrc={isVisa ? "/images/service-banners/visa.webp" : selectedType === "train" ? "/images/service-banners/train.webp" : undefined}
         description={isTransport
           ? "مسیر، ساعت حرکت، شرکت حمل‌ونقل و ظرفیت را مقایسه کنید و بلیت مناسب را انتخاب کنید."
           : "خدمات منتشرشده را مستقیم از اطلاعات پنل مدیریت بررسی کنید."}

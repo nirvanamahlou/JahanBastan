@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { ReactNode } from "react";
 import catalogStyles from "@/components/content/catalog-layout.module.css";
 import { Container } from "@/components/ui/container";
@@ -7,9 +8,10 @@ type PageIntroProps = {
   title: string;
   description?: string;
   compact?: boolean;
+  bannerSrc?: string;
 };
 
-export function PageIntro({ eyebrow, title, description, compact = false }: PageIntroProps) {
+export function PageIntro({ eyebrow, title, description, compact = false, bannerSrc }: PageIntroProps) {
   return (
     <section data-scroll-reveal className={`border-b border-border bg-surface-muted ${compact ? "py-7 sm:py-9" : "py-12 sm:py-16"}`}>
       <Container className={compact ? catalogStyles.catalogContainer : undefined}>
@@ -24,6 +26,11 @@ export function PageIntro({ eyebrow, title, description, compact = false }: Page
             {description}
           </p>
         ) : null}
+        {bannerSrc && (
+          <div className="relative mt-4 h-32 overflow-hidden rounded-2xl bg-surface sm:h-[clamp(9rem,20vw,13rem)]">
+            <Image src={bannerSrc} alt="" fill sizes="(max-width: 1248px) 96vw, 1200px" className="object-cover" loading="eager" />
+          </div>
+        )}
       </Container>
     </section>
   );
