@@ -674,3 +674,70 @@
 :global(html[data-theme="night"]) .factCard,
 :global(html[data-theme="night"]) .departureItem,
 :global(html[data-theme="night"]) .legacyHotelItem { background: rgb(9 31 60 / 84%); }
+
+.flightTicket {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(5.5rem, 29%);
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: .7rem;
+  background: var(--surface);
+  color: var(--brand);
+}
+.ticketRoute { min-width: 0; padding: .65rem; }
+.ticketRoute h3 { display: flex; align-items: center; flex-wrap: wrap; gap: .35rem; font-size: .86rem; font-weight: 850; }
+.ticketRoute h3 bdi { overflow-wrap: anywhere; }
+.ticketAirline { display: flex; align-items: center; gap: .35rem; margin-top: .18rem; color: var(--muted); font-size: .67rem; }
+.ticketAirline img { width: 1.65rem; height: 1rem; object-fit: contain; }
+.ticketFacts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .3rem .5rem; margin-top: .45rem; padding-top: .4rem; border-top: 1px solid var(--border); font-size: .67rem; line-height: 1.55; }
+.ticketStub {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: .38rem;
+  padding: .55rem;
+  border-inline-start: 1px dashed #8aa2bf;
+  border-start-end-radius: .65rem;
+  border-end-end-radius: .65rem;
+  background: var(--surface-muted);
+  font-size: .67rem;
+}
+.ticketStub::before, .ticketStub::after {
+  position: absolute;
+  inset-inline-start: -.28rem;
+  width: .55rem;
+  height: .55rem;
+  border-radius: 50%;
+  background: var(--surface);
+  content: "";
+}
+.ticketStub::before { inset-block-start: -.28rem; }
+.ticketStub::after { inset-block-end: -.28rem; }
+.ticketStub time { font-weight: 800; }
+.ticketDirection { border-radius: .3rem; background: #102747; color: #fff; padding: .12rem .3rem; font-weight: 800; }
+
+.compactOverview, .compactDetails {
+  width: min(100%, 48rem);
+  margin-inline: auto;
+}
+.compactOverview.overviewCard { padding: .85rem; border-radius: .85rem; }
+.compactOverview .overviewHeader { gap: .5rem; padding-bottom: .45rem; }
+.compactOverview .overviewIcon { width: 1.8rem; height: 1.8rem; border-radius: .5rem; font-size: 1rem; }
+.compactOverview .overviewHeader p { display: none; }
+.compactOverview .overviewHeader h2 { font-size: .95rem; }
+.overviewCopy { margin-top: .55rem; color: var(--muted); font-size: .75rem; line-height: 1.85; }
+.compactDetails .contentStack, .compactDetails.serviceGrid { gap: .55rem; }
+.compactDetails :is(.routeSection, .infoCard, .serviceCard) { padding: .65rem; border-radius: .75rem; background: var(--surface); box-shadow: none; }
+.compactDetails :is(.routeSectionHeader, .infoHeader, .serviceHeader) { gap: .45rem; padding: 0 0 .45rem; }
+.compactDetails :is(.routeSectionHeader, .infoHeader, .serviceHeader) h2 { font-size: .92rem; }
+.compactDetails :is(.routeSectionHeader, .infoHeader, .serviceHeader) p { font-size: .62rem; }
+.compactDetails :is(.routeHeadingIcon, .infoIcon, .serviceIcon) { width: 1.8rem; height: 1.8rem; border-radius: .5rem; font-size: .9rem; box-shadow: none; }
+.compactDetails :is(.routeHeadingIcon, .infoIcon) svg { width: 1rem; height: 1rem; }
+.compactDetails :is(.routeList, .serviceList) { gap: .38rem; margin-top: .45rem; }
+.compactDetails :is(.routeHeader, .routePath, .facts, .place, .serviceList li, .documentList li) { padding: .4rem .5rem; }
+.compactDetails :is(.routeCard, .place) { border-radius: .7rem; box-shadow: none; }
+.compactDetails .infoBody { padding-top: .4rem; }
+.compactDetails :is(.infoRichText, .itineraryDescription, .serviceList li, .documentList li) { font-size: .73rem; line-height: 1.75; }

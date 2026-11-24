@@ -519,21 +519,21 @@ export default async function TourPage({ params, searchParams }: Props) {
         <div className="tour-tab-layout mt-8">
           <main className="space-y-6">
             <div className="tour-tab-panel" data-tour-section="overview">
-              <article className={tourStyles.overviewCard} id="tour-overview">
+              <article className={`${tourStyles.overviewCard} ${tourStyles.compactOverview}`} id="tour-overview">
                 <header className={tourStyles.overviewHeader}>
                   <span aria-hidden="true" className={tourStyles.overviewIcon}>✦</span>
                   <div><p>شروع یک تجربه تازه</p><h2>معرفی تور</h2></div>
                 </header>
-                <RichText className="mt-4 leading-8 text-muted" content={item.description || item.summary || ""} />
+                <RichText className={tourStyles.overviewCopy} content={item.description || item.summary || ""} />
               </article>
             </div>
             {hasDocuments ? (
-              <div className="tour-tab-panel" data-tour-section="documents" id="tour-documents">
+              <div className={`tour-tab-panel ${tourStyles.compactDetails}`} data-tour-section="documents" id="tour-documents">
                 <StructuredTourContent item={item} showDepartures={false} showHotelPackages={false} />
               </div>
             ) : null}
             {(included.length || excluded.length) ? (
-              <div className={`tour-tab-grid tour-tab-panel grid sm:grid-cols-2 ${tourStyles.serviceGrid}`} data-tour-section="documents">
+              <div className={`tour-tab-grid tour-tab-panel grid sm:grid-cols-2 ${tourStyles.serviceGrid} ${tourStyles.compactDetails}`} data-tour-section="documents">
                 <section className={tourStyles.serviceCard}>
                   <header className={tourStyles.serviceHeader}>
                     <span aria-hidden="true" className={tourStyles.serviceIcon}>✓</span>
@@ -647,51 +647,37 @@ function TourFlightTickets({
         const time = [flight.departureTime?.slice(0, 5), flight.arrivalTime?.slice(0, 5)]
           .filter(Boolean)
           .join(" تا ");
-        const airlineDetails = [
-          flight.airline,
-          flight.number ? `شماره پرواز ${flight.number}` : null,
-        ].filter(Boolean).join(" · ");
-
         return (
-          <article className="grid min-w-0 content-start gap-2 overflow-hidden rounded-xl border border-border bg-white" dir="rtl" key={flight.key}>
-            <div className="flex min-w-0 flex-wrap items-start justify-between gap-2 bg-brand px-3 py-2 text-white">
-              <div>
-                <p className="text-sm font-bold">تاریخ پرواز</p>
-                {flight.date ? (
-                  <time className="mt-0.5 block text-base font-black leading-snug" dateTime={flight.date}>{formatPersianDate(flight.date)}</time>
-                ) : (
-                  <p className="mt-0.5 text-sm font-black">اعلام نشده</p>
-                )}
-              </div>
-              <div className="min-w-0">
-                {flight.airlineLogoImageId ? (
-                  <Image
-                    alt={`لوگوی ${flight.airline ?? "ایرلاین"}`}
-                    className="mb-1 h-8 w-12 rounded-md bg-white object-contain p-1"
-                    height={48}
-                    src={`${PUBLIC_API_BASE_URL}/media/${flight.airlineLogoImageId}`}
-                    width={80}
-                  />
-                ) : null}
-                <div className="flex flex-wrap gap-2">
-                  <span className="inline-flex rounded-md bg-white/15 px-2 py-0.5 text-xs font-bold text-white">{flight.title}</span>
+          <article className={tourStyles.flightTicket} dir="rtl" key={flight.key}>
+            <div className={tourStyles.ticketRoute}>
+              <h3 aria-label={`از ${flight.originCity || "مبدأ"} به ${flight.destinationCity || "مقصد"}`}>
+                <bdi>{flight.originCity || "مبدأ"}</bdi>
+                <span aria-hidden="true">←</span>
+                <bdi>{flight.destinationCity || "مقصد"}</bdi>
+              </h3>
+              {flight.airline || flight.airlineLogoImageId ? (
+                <div className={tourStyles.ticketAirline}>
+                  {flight.airlineLogoImageId ? (
+                    <Image alt={flight.airline ? "" : "لوگوی ایرلاین"} height={40} width={64}
+                      src={`${PUBLIC_API_BASE_URL}/media/${flight.airlineLogoImageId}`} />
+                  ) : null}
+                  {flight.airline && <span>{flight.airline}</span>}
                 </div>
-                <h3 className="mt-1 flex flex-wrap items-center gap-1.5 text-sm font-black" dir="rtl" aria-label={`از ${flight.originCity || "مبدأ"} به ${flight.destinationCity || "مقصد"}`}>
-                  <bdi>{flight.originCity}</bdi>
-                  {flight.originCity && flight.destinationCity ? <span aria-hidden="true">←</span> : null}
-                  <bdi>{flight.destinationCity}</bdi>
-                </h3>
-                {airlineDetails ? <p className="mt-0.5 text-xs text-white/80">{airlineDetails}</p> : null}
-              </div>
-            </div>
-            <dl className="grid grid-cols-2 gap-1.5 px-2 pb-2 text-xs">
+              ) : null}
+              <dl className={tourStyles.ticketFacts}>
               {time ? <Fact label="ساعت" value={time} /> : null}
               {flight.originAirport || flight.originAirportCode ? <Fact label="فرودگاه مبدأ" value={airportLabel(flight.originAirport, flight.originAirportCode)} /> : null}
               {flight.destinationAirport || flight.destinationAirportCode ? <Fact label="فرودگاه مقصد" value={airportLabel(flight.destinationAirport, flight.destinationAirportCode)} /> : null}
               {flight.baggageAllowanceKg != null ? <Fact label="بار مجاز" value={`${flight.baggageAllowanceKg.toLocaleString("fa-IR")} کیلوگرم`} /> : null}
               {flight.aircraftName ? <Fact label="هواپیما" value={flight.aircraftName} /> : null}
               {flight.travelClass ? <Fact label="کلاس پرواز" value={flight.travelClass} /> : null}
-            </dl>
+              </dl>
+            </div>
+            <div className={tourStyles.ticketStub}>
+              <span className={tourStyles.ticketDirection}>{flight.title}</span>
+              {flight.date ? <time dateTime={flight.date}>{formatPersianDate(flight.date)}</time> : <span>تاریخ اعلام نشده</span>}
+              {flight.number && <span>شماره پرواز <bdi>{flight.number}</bdi></span>}
+            </div>
           </article>
         );
       })}
@@ -699,7 +685,7 @@ function TourFlightTickets({
   );
 }
 function Fact({ label, value }: { label: string; value: string }) {
-  return <div className="min-w-0 rounded-md bg-surface-muted px-2 py-1.5"><dt className="text-xs text-muted">{label}</dt><dd className="mt-0.5 break-words font-bold text-brand">{value}</dd></div>;
+  return <div className="min-w-0"><dt className="text-muted">{label}</dt><dd className="break-words font-bold text-brand">{value}</dd></div>;
 }
 
 function lines(value: string | null) {
