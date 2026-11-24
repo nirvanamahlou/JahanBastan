@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import { CalendarIcon, ClockIcon, LocationIcon, PlaneTakeoffIcon } from "@/components/layout/site-icons";
+import { CalendarIcon, ClockIcon, LocationIcon } from "@/components/layout/site-icons";
+import { TravelSearchIcon } from "@/components/search/travel-search-icon";
 import { TourResultDates } from "./tour-result-dates";
 import styles from "./catalog-layout.module.css";
 
@@ -12,7 +13,7 @@ export function TourResultRow({ title, slug, summary, imageUrl, destination, dat
     { label: "تاریخ حرکت", value: date, Icon: CalendarIcon },
     { label: "مقصد", value: destination, Icon: LocationIcon },
     { label: "مدت سفر", value: duration ? `${duration.toLocaleString("fa-IR")} روز` : "با استعلام", Icon: ClockIcon },
-    { label: "ایرلاین", value: airline, Icon: PlaneTakeoffIcon },
+    { label: "ایرلاین", value: airline, Icon: () => <TravelSearchIcon icon="flight" strokeWidth={2} /> },
   ];
   const information = (
     <div className={styles.tourInformation}><h2>{dateRanges ? title : <Link href={href}>{title}</Link>}</h2>{summary && <p className="mt-2 line-clamp-2">{summary}</p>}
