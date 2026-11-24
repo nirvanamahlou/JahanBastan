@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useHomepageSearchService } from "./homepage-search-guide";
 import { CountryFlag } from "@/components/content/country-flag";
 import styles from "./homepage-showcase-rev48.module.css";
@@ -13,6 +13,73 @@ function ShowcaseImage({ src, sizes }: { src: string | null; sizes: string }) {
   const [failed, setFailed] = useState(false);
   return src && !failed ? <Image src={src} alt="" fill sizes={sizes} onError={() => setFailed(true)} /> : <div className={styles.noImage} />;
 }
+function CountryCard({ country }: { country: ShowcaseCard }) {
+  return (
+    <Link href={country.href} className={styles.countryCard}>
+      <div className={styles.countryPhoto}><ShowcaseImage src={country.imageUrl} sizes="(max-width:760px) 36vw, 160px" /></div>
+      <div className={styles.countryCopy}>
+        <h3><CountryFlag country={country.title} imageId={country.flagId} />{country.title}</h3>
+        <div className={styles.countryFoot}>
+          <p>{country.subtitle}</p>
+          <span className={styles.countryArrow} aria-hidden="true">←</span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+function HotelCountryStrip({ cards }: { cards: ShowcaseCard[] }) {
+  const id = useId();
+  const strip = useRef<HTMLDivElement>(null);
+  const [edges, setEdges] = useState({ previous: false, next: false });
+
+  useEffect(() => {
+    const viewport = strip.current;
+    if (!viewport) return;
+    function update() {
+      if (!viewport) return;
+      const distance = -viewport.scrollLeft;
+      const limit = viewport.scrollWidth - viewport.clientWidth;
+      const previous = distance > 1;
+      const next = distance < limit - 1;
+      setEdges(current => current.previous === previous && current.next === next ? current : { previous, next });
+    }
+    update();
+    const resize = new ResizeObserver(update);
+    resize.observe(viewport);
+    viewport.addEventListener("scroll", update, { passive: true });
+    return () => {
+      resize.disconnect();
+      viewport.removeEventListener("scroll", update);
+    };
+  }, [cards.length]);
+
+  function move(direction: -1 | 1) {
+    const viewport = strip.current;
+    const firstCard = viewport?.firstElementChild;
+    if (!viewport || !firstCard) return;
+    const gap = parseFloat(getComputedStyle(viewport).columnGap) || 0;
+    viewport.scrollBy({
+      left: -direction * (firstCard.getBoundingClientRect().width + gap),
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+    });
+  }
+
+  return (
+    <>
+      <div id={id} ref={strip} dir="rtl" className={styles.hotelStrip} role="region" aria-label="کشورهای هتل">
+        {cards.map(country => <CountryCard key={country.id} country={country} />)}
+      </div>
+      {edges.previous || edges.next ? (
+        <div className={styles.stripControls}>
+          <button type="button" aria-label="کشور قبلی" aria-controls={id} disabled={!edges.previous} onClick={() => move(-1)}><span dir="ltr" aria-hidden="true">→</span></button>
+          <button type="button" aria-label="کشور بعدی" aria-controls={id} disabled={!edges.next} onClick={() => move(1)}><span dir="ltr" aria-hidden="true">←</span></button>
+        </div>
+      ) : null}
+    </>
+  );
+}
+
 export function HomepageServiceShowcase({ panels }: { panels: Record<string, ShowcasePanel> }) {
   const { serviceType } = useHomepageSearchService();
   const [expandedService, setExpandedService] = useState<string | null>(null);
@@ -25,24 +92,15 @@ export function HomepageServiceShowcase({ panels }: { panels: Record<string, Sho
     <header className={styles.heading}><span>{panel.eyebrow}</span><h2>{panel.title}</h2>{panel.description ? <p>{panel.description}</p> : null}</header>
     {!isTour ? <div className={styles.controls}><Link href={panel.href}>همه کشورها</Link></div> : null}
     {isTour ? <div id="tour-country-grid" className={styles.countryGrid} data-expanded={expanded}>
-      {cards.map(country => <Link key={country.id} href={country.href} className={styles.countryCard}>
-        <div className={styles.countryPhoto}><ShowcaseImage src={country.imageUrl} sizes="(max-width:760px) 36vw, 160px" /></div>
-        <div className={styles.countryCopy}>
-          <h3><CountryFlag country={country.title} imageId={country.flagId} />{country.title}</h3>
-          <div className={styles.countryFoot}>
-            <p>{country.subtitle}</p>
-            <span className={styles.countryArrow} aria-hidden="true">←</span>
-          </div>
-        </div>
-      </Link>)}
-    </div> : <div className={styles.tiles}>
+      {cards.map(country => <CountryCard key={country.id} country={country} />)}
+    </div> : serviceType === "hotel" ? <HotelCountryStrip cards={cards} /> : <div className={styles.tiles}>
       {cards.slice(0, expanded ? undefined : 6).map((card) => <Link href={card.href} key={card.id} className={styles.tile}>
         <ShowcaseImage src={card.imageUrl} sizes="(max-width:760px) 45vw, 30vw" />
         <div className={styles.overlay}><h3>{card.title}</h3>{card.subtitle ? <p>{card.subtitle}</p> : null}<span className={styles.tileAction}>←</span></div>
       </Link>)}
     </div>}
     {!cards.length ? <p className={styles.empty}>در حال حاضر گزینه‌ای برای این بخش منتشر نشده است.</p> : null}
-    {(isTour ? cards.length > 2 : cards.length > 6) ? (
+    {(isTour ? cards.length > 2 : serviceType !== "hotel" && cards.length > 6) ? (
       <button
         type="button"
         className={isTour ? styles.countryMore : styles.more}
