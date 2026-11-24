@@ -91,17 +91,17 @@
   min-width: 0;
   padding: .36rem;
   border: 1px solid var(--border);
-  border-radius: .48rem;
-  background: var(--surface-muted);
+  border-radius: .65rem;
+  background: color-mix(in srgb, #b8d0ed 12%, var(--surface));
   color: var(--brand);
   text-align: center;
 }
 .rateTile[data-active="true"] { border-color: #7ba0c9; background: color-mix(in srgb, #4278b5 12%, var(--surface)); }
-.rateTile[data-primary="true"]:not([data-active="true"]) { border-color: #b8cee7; background: color-mix(in srgb, #4278b5 6%, var(--surface)); }
+.rateTile[data-primary="true"]:not([data-active="true"]) { border-color: #b8cee7; background: color-mix(in srgb, #84afe5 18%, var(--surface)); }
 .rateTile[data-unavailable="true"] { border-style: dashed; }
-.rateLabel { color: var(--muted); font-size: .62rem; font-weight: 700; line-height: 1.55; overflow-wrap: anywhere; }
-.ratePrice { display: grid; align-content: center; min-height: 2.2rem; font-size: .68rem; line-height: 1.5; overflow-wrap: anywhere; }
-.ratePrice :is(strong, b) { font-size: .7rem; }
+.rateLabel { color: var(--muted); font-size: .64rem; font-weight: 500; line-height: 1.55; overflow-wrap: anywhere; }
+.ratePrice { display: grid; align-content: center; min-height: 2.2rem; font-size: .72rem; font-weight: 750; line-height: 1.5; overflow-wrap: anywhere; }
+.ratePrice :is(strong, b) { font-size: .72rem; }
 .rateMeta { margin-top: .2rem; color: var(--muted); font-size: .56rem; }
 .rateControl {
   display: flex;
@@ -175,4 +175,18 @@
   .rateGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .prices .rateTile:last-child:nth-child(odd) { grid-column: 1 / -1; }
   .rateControl button { min-height: 44px; }
+}
+
+.hotelCardAccent { position: relative; }
+.hotelCardAccent::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset-block-start: 0;
+  inset-inline-start: calc(50% - 37px);
+  inline-size: 74px;
+  block-size: 5px;
+  border-radius: 0 0 6px 6px;
+  background: linear-gradient(90deg, #f665a1, #c51c68);
+  pointer-events: none;
 }

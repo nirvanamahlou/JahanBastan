@@ -370,17 +370,13 @@ export function TourHotelFilter({
               return total + (roomAmount * passengerFactor + flightAmount * passengerFactor) * selection[room.key];
             }, 0);
             return (
-              <article className="min-w-0 overflow-hidden rounded-2xl border border-border bg-surface shadow-[0_8px_24px_rgba(16,39,71,.08)]" key={offer.id}>
+              <article className={`${hotelStyles.hotelCardAccent} min-w-0 overflow-hidden rounded-2xl border border-border bg-surface shadow-[0_8px_24px_rgba(16,39,71,.08)]`} key={offer.id}>
                 <TourHotelPresentation name={offer.hotel.name} href={`/hotels/${offer.hotel.slug}/?tour=${encodeURIComponent(tourSlug)}`}
                   images={[...new Set([offer.hotel.imageId,...(offer.hotel.galleryImageIds ?? [])])].filter(Boolean).map(id => `${PUBLIC_API_BASE_URL}/media/${id}`)}
                   location={[offer.hotel.region,destination,country].filter(Boolean).join("، ")}
                   locationMap={<HotelLocationMap address={offer.hotel.address} compact country={country} destination={destination} name={offer.hotel.name} region={offer.hotel.region} />}
                   stars={offer.hotel.starRating} summary={offer.hotel.summary} facilities={offer.hotel.amenitiesDescription}
-                  amenities={<HotelAmenities description={offer.hotel.amenitiesDescription} region={offer.hotel.region} roomType={offer.roomType} serviceType={offer.serviceType} variant="tour-card" />} badges={<><span className="inline-flex min-h-9 items-center rounded-xl border border-[#e3edf9] bg-[#f8fbff] px-3 text-xs font-bold text-brand">تاریخ برگزاری: {offer.departure.departureDate ? formatPersianDate(offer.departure.departureDate) : offer.departure.label}</span>
-                        {offer.isBasePackage ? <span className="inline-flex min-h-9 items-center rounded-xl bg-brand px-3 text-xs font-black text-white">{"\u0647\u062a\u0644 \u067e\u0627\u06cc\u0647 \u067e\u06a9\u06cc\u062c"}</span> : null}
-                        <span className={`inline-flex min-h-9 items-center rounded-xl px-3 text-xs font-black ${offer.isAvailable && (offer.capacityRemaining === null || offer.capacityRemaining > 0) ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"}`}>
-                          {!offer.isAvailable || offer.capacityRemaining === 0 ? "تکمیل ظرفیت" : offer.capacityRemaining === null ? "ظرفیت موجود" : `${offer.capacityRemaining.toLocaleString("fa-IR")} اتاق باقی‌مانده`}
-                        </span></>}
+                  amenities={<HotelAmenities description={offer.hotel.amenitiesDescription} region={offer.hotel.region} roomType={offer.roomType} serviceType={offer.serviceType} variant="tour-card" />} badges={offer.isBasePackage ? <span className="inline-flex items-center rounded-lg bg-brand-soft px-2 py-1 text-xs font-bold text-brand">هتل پایه پکیج</span> : null}
                   rates={<div className={hotelStyles.rateGrid} aria-label="نرخ‌های اتاق و مسافر">
                     {showRooms.map((room) => {
                       const available = availableRooms.includes(room);
