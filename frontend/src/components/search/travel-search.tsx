@@ -380,7 +380,7 @@ export function TravelSearch({
           <div className={styles.submit}>
             <Button type="submit" loading={searching} className="search-action w-full">
               <SearchIcon className="size-4 shrink-0" />
-              <span>{serviceType === "tour" ? "جستجو" : `جستجوی ${serviceTabs.find(tab => tab.key === serviceType)?.label}`}</span>
+              <span>جستجو</span>
             </Button>
           </div>
         </form>
