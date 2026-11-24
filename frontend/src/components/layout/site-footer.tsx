@@ -13,7 +13,6 @@ import { FooterNewsletter } from "./footer-newsletter";
 import {
   ClockIcon,
   InstagramIcon,
-  LinkedinIcon,
   LocationIcon,
   MailIcon,
   PhoneIcon,
@@ -22,13 +21,12 @@ import {
 } from "./site-icons";
 
 const socialIcons = {
-  linkedin: LinkedinIcon,
   instagram: InstagramIcon,
   telegram: TelegramIcon,
   whatsapp: WhatsappIcon,
 } as const;
 
-const socialOrder = ["linkedin", "instagram", "telegram", "whatsapp"] as const;
+const socialOrder = ["instagram", "telegram", "whatsapp"] as const;
 const defaultServiceLinks =
   siteConfig.navigation.find((item) => item.href === "/services/")?.children ?? [
     { label: "تور", href: "/tours/" }, { label: "هتل", href: "/hotels/" },
@@ -76,9 +74,6 @@ export async function SiteFooter() {
       : normalizedSavedWorkingHours || siteConfig.businessHours,
   );
   const footerBrandTitle = values.footerBrandTitle?.trim() || siteName;
-  const footerDescription =
-    values.footerDescription?.trim() ||
-    "پکیج‌های گردشگری، راهنمای مقصد و خدمات سفر برای برنامه‌ریزی یک تجربه مطمئن و آگاهانه.";
   const footerServicesTitle = values.footerServicesTitle?.trim() || "خدمات سفر";
   const footerQuickTitle = values.footerQuickTitle?.trim() || "دسترسی سریع";
   const footerOfficeTitle =
@@ -153,9 +148,6 @@ export async function SiteFooter() {
                 </span>
               </span>
             </Link>
-            <p className="mt-1 max-w-sm text-xs text-white/70">
-              {footerDescription}
-            </p>
             <div className="mt-2 grid max-w-64 grid-cols-4 gap-1.5" aria-label="پیوندهای سازمان‌های هواپیمایی و اینماد">
               <EnamadSeal compact />
               {[
