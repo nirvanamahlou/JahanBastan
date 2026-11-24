@@ -2114,3 +2114,11 @@ button.account-primary:not(:disabled):hover,
   border-color: #25466e !important;
   box-shadow: 0 8px 18px rgb(16 39 71 / 22%) !important;
 }
+
+.account-sms-verify #customer-sms-code:focus {
+  background-color: var(--surface) !important;
+  border-color: var(--brand) !important;
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  box-shadow: none !important;
+}

@@ -62,7 +62,6 @@ export function AccountForm({ onAuthenticated, refreshAfterAuthentication = true
   const [method, setMethod] = useState<Method>(compact ? "sms" : "email");
   const [accountType, setAccountType] = useState<AccountType>("customer");
   const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [smsStep, setSmsStep] = useState<"request" | "verify">("request");
   const [smsPhone, setSmsPhone] = useState("");
@@ -82,7 +81,6 @@ export function AccountForm({ onAuthenticated, refreshAfterAuthentication = true
   async function submitEmail(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
-    setNotice("");
     setSubmitting(true);
 
     const form = new FormData(event.currentTarget);
@@ -172,7 +170,6 @@ export function AccountForm({ onAuthenticated, refreshAfterAuthentication = true
   }
   async function requestSmsCode(phone: string) {
     setError("");
-    setNotice("");
     setSubmitting(true);
     const response = await fetch(`${PUBLIC_API_BASE_URL}/account/sms/request`, {
       method: "POST",
@@ -193,7 +190,6 @@ export function AccountForm({ onAuthenticated, refreshAfterAuthentication = true
     setSmsSecondsLeft(expiresIn);
     setSmsDeadline(Date.now() + expiresIn * 1000);
     setSmsStep("verify");
-    setNotice("کد ورود ارسال شد. کد شش‌رقمی را وارد کنید.");
   }
 
   async function requestSms(event: FormEvent<HTMLFormElement>) {
@@ -205,7 +201,6 @@ export function AccountForm({ onAuthenticated, refreshAfterAuthentication = true
   async function verifySms(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
-    setNotice("");
     if (smsSecondsLeft <= 0) {
       setError("زمان اعتبار کد تمام شده است؛ کد جدید دریافت کنید.");
       return;
@@ -259,7 +254,6 @@ export function AccountForm({ onAuthenticated, refreshAfterAuthentication = true
     setSmsDeadline(null);
     setSmsSecondsLeft(0);
     setError("");
-    setNotice("");
   }
 
   const isLogin = mode === "login";
@@ -337,7 +331,6 @@ export function AccountForm({ onAuthenticated, refreshAfterAuthentication = true
                   setSmsStep("request");
                   setSmsPhone("");
                   setError("");
-                  setNotice("");
                 }}
                 type="button"
               >
@@ -346,7 +339,7 @@ export function AccountForm({ onAuthenticated, refreshAfterAuthentication = true
               <button
                 aria-pressed={method === "email"}
                 className={`min-h-10 rounded-xl px-3 text-sm font-bold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${method === "email" ? "bg-brand text-white shadow-sm" : "text-brand hover:bg-brand-soft"}`}
-                onClick={() => { setMethod("email"); setError(""); setNotice(""); }}
+                onClick={() => { setMethod("email"); setError(""); }}
                 type="button"
               >
                 ورود با رمز عبور
@@ -367,57 +360,56 @@ export function AccountForm({ onAuthenticated, refreshAfterAuthentication = true
                   required
                 />
                 {error ? <Alert variant="error">{error}</Alert> : null}
-                {notice ? <Alert variant="success">{notice}</Alert> : null}
                 <Button className="account-primary w-full focus-visible:ring-[#25466e]" loading={submitting} size="lg" type="submit">
                   دریافت کد ورود
                 </Button>
               </form>
             ) : (
-              <form className="mt-5 space-y-4" onSubmit={verifySms}>
-                <div className="rounded-xl border border-brand/15 bg-brand-soft/55 px-4 py-3 text-sm font-bold text-brand">
-                  کد به شمارهٔ {smsPhone} ارسال شد.
-                  <span aria-live="polite" className={`mt-2 block text-xs ${smsSecondsLeft > 0 ? "text-muted" : "text-red-600"}`} role="timer">
-                    {smsSecondsLeft > 0 ? `زمان باقی‌مانده: ${String(Math.floor(smsSecondsLeft / 60)).padStart(2, "0")}:${String(smsSecondsLeft % 60).padStart(2, "0")}` : "زمان اعتبار کد تمام شده است."}
-                  </span>
+              <form className="account-sms-verify grid gap-3" onSubmit={verifySms}>
+                <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs text-muted">
+                  <p aria-live="polite">کد ارسال شد به <bdi className="font-bold text-brand" dir="ltr">{smsPhone}</bdi></p>
+                  {smsSecondsLeft > 0 ? (
+                    <span className="rounded-md bg-surface-muted px-2 py-1 font-bold tabular-nums text-brand" dir="ltr" role="timer" aria-label="زمان باقی‌مانده">
+                      {String(Math.floor(smsSecondsLeft / 60)).padStart(2, "0")}:{String(smsSecondsLeft % 60).padStart(2, "0")}
+                    </span>
+                  ) : <span role="status" className="text-danger">اعتبار کد تمام شد.</span>}
                 </div>
                 <Input
                   id="customer-sms-code"
                   name="code"
                   label="کد شش‌رقمی ورود"
-                  placeholder="مثلاً ۱۲۳۴۵۶"
+                  placeholder="••••••"
                   type="text"
                   inputMode="numeric"
                   autoComplete="one-time-code"
                   dir="ltr"
                   maxLength={6}
                   pattern="[0-9۰-۹٠-٩]{6}"
-                  className="text-center text-xl font-black tracking-[0.45em]"
+                  className="text-center text-lg font-bold tracking-[0.35em] placeholder:font-normal"
                   required
                   autoFocus
                 />
                 {error ? <Alert variant="error">{error}</Alert> : null}
-                {notice ? <Alert variant="success">{notice}</Alert> : null}
-                <Button className="account-primary w-full focus-visible:ring-[#25466e]" disabled={smsSecondsLeft <= 0} loading={submitting} size="lg" type="submit">
+                <Button className="account-primary w-full focus-visible:ring-[#25466e]" disabled={smsSecondsLeft <= 0} loading={submitting} size="md" type="submit">
                   تأیید کد و ورود
                 </Button>
-                <div className="grid gap-2 sm:grid-cols-2">
+                <div className="flex flex-wrap items-center justify-between gap-x-3">
                   <button
-                    className="min-h-11 rounded-xl border border-brand bg-white px-4 text-sm font-black text-brand transition enabled:hover:bg-brand-soft disabled:cursor-not-allowed disabled:opacity-55"
+                    className="min-h-9 rounded-md px-1 text-xs font-bold text-brand underline-offset-4 enabled:hover:underline disabled:cursor-not-allowed disabled:opacity-60"
                     disabled={submitting || smsSecondsLeft > 0}
                     onClick={() => void requestSmsCode(smsPhone)}
                     type="button"
                   >
-                    {smsSecondsLeft > 0 ? "ارسال مجدد پس از پایان زمان" : "ارسال مجدد کد"}
+                    ارسال مجدد کد
                   </button>
                   <button
-                    className="min-h-11 rounded-xl border border-brand bg-white px-4 text-sm font-black text-brand transition hover:bg-brand-soft"
+                    className="min-h-9 rounded-md px-1 text-xs font-bold text-brand underline-offset-4 enabled:hover:underline"
                     disabled={submitting}
                     onClick={() => {
                       setSmsStep("request");
                       setSmsDeadline(null);
                       setSmsSecondsLeft(0);
                       setError("");
-                      setNotice("");
                     }}
                     type="button"
                   >
