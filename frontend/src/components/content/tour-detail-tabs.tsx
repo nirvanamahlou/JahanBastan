@@ -28,14 +28,15 @@ export function TourDetailTabs({ sections }: { sections: TourSection[] }) {
     ? "hotels"
     : (visibleItems[0]?.id ?? "overview");
   const [active, setActive] = useState<TourSection>(defaultSection);
+  const [showHotelsUnderDates, setShowHotelsUnderDates] = useState(false);
 
   useEffect(() => {
     const syncWithHash = () =>
       setActive(sectionFromHash(window.location.hash, visibleItems) ?? defaultSection);
     const selectDeparture = (event: Event) => {
       const showHotels = (event as CustomEvent<{ showHotels?: boolean }>).detail?.showHotels;
-      if (showHotels && sections.includes("hotels")) setActive("hotels");
-      else if (sections.includes("dates")) setActive("dates");
+      setShowHotelsUnderDates(Boolean(showHotels));
+      if (sections.includes("dates")) setActive("dates");
     };
     syncWithHash();
     window.addEventListener("hashchange", syncWithHash);
@@ -72,6 +73,7 @@ export function TourDetailTabs({ sections }: { sections: TourSection[] }) {
         .tour-tab-panel { display: none; }
         .tour-tab-panel[data-tour-section="${active}"] { display: block !important; }
         .tour-tab-grid[data-tour-section="${active}"] { display: grid !important; }
+        ${active === "dates" && showHotelsUnderDates ? '.tour-tab-panel[data-tour-section="hotels"] { display: block !important; }' : ""}
         ${active !== "hotels" ? `@media (min-width: 1024px) { .tour-tab-layout { grid-template-columns: minmax(0, 1fr); } }` : ""}
       `}</style>
     </>

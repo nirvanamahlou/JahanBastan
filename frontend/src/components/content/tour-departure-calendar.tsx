@@ -44,12 +44,13 @@ export function TourDepartureCalendar({
     return () => window.removeEventListener("tour-hotels-duration-selected", sync);
   }, []);
 
-  function selectDeparture(departureId: number, showHotels = false) {
-    if (!bookableDates.some((departure) => departure.id === departureId)) return;
+  function selectDeparture(departureId: number) {
+    const departure = bookableDates.find((date) => date.id === departureId);
+    if (!departure) return;
     setSelectedDepartureId(departureId);
-    window.history.replaceState(null, "", showHotels ? "#tour-booking" : "#tour-dates");
+    window.history.replaceState(null, "", "#tour-dates");
     window.dispatchEvent(
-      new CustomEvent("tour-departure-selected", { detail: { departureId, showHotels } }),
+      new CustomEvent("tour-departure-selected", { detail: { departureId, showHotels: Boolean(departure.canBook) } }),
     );
   }
 
@@ -107,11 +108,6 @@ export function TourDepartureCalendar({
       {selectedDeparture ? (
         <div className="mt-6 space-y-4 border-t border-border pt-6" id="selected-departure-flights" role="region" aria-label={`پروازهای ${selectedDeparture.departureDate ? formatPersianDate(selectedDeparture.departureDate) : selectedDeparture.label}`}>
           {selectedDeparture.flightDetails ?? <p className="rounded-2xl bg-surface-muted p-4 text-sm text-muted">اطلاعات پرواز برای این نوبت هنوز ثبت نشده است.</p>}
-          {selectedDeparture.canBook && isTourDepartureBookable(selectedDeparture) ? (
-            <button className="w-full rounded-xl bg-brand px-5 py-3 text-sm font-black text-white transition hover:bg-brand-strong focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand/20 sm:w-auto" onClick={() => selectDeparture(selectedDeparture.id, true)} type="button">
-              مشاهده هتل‌ها و قیمت‌های این تاریخ
-            </button>
-          ) : null}
         </div>
       ) : null}
     </section>

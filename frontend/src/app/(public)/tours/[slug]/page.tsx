@@ -494,6 +494,12 @@ export default async function TourPage({ params, searchParams }: Props) {
           </div>
         ) : null}
 
+        {hasHotels ? (
+          <div className="tour-tab-panel mt-4" data-tour-section="hotels">
+            <DatedCombinedPackages key={initialDepartureId} initialDepartureId={initialDepartureId} departures={item.departures} exchangeRates={{ usdToIrt: settings.socialLinks.exchangeRateUsdIrt, eurToIrt: settings.socialLinks.exchangeRateEurIrt }} packages={item.combinedPackages ?? []} standaloneHotels={hasStandaloneHotels} tourId={item.id} />
+            {hasStandaloneHotels ? <TourHotelFilter key={initialDepartureId} initialDepartureId={initialDepartureId} country={item.destination?.country} departures={item.departures as TourBookingDeparture[]} destination={item.destination?.title} exchangeRates={{ usdToIrt: settings.socialLinks.exchangeRateUsdIrt, eurToIrt: settings.socialLinks.exchangeRateEurIrt }} faqs={faqPayload.items} isInstallmentAvailable={item.isInstallmentAvailable} packages={[]} tourId={item.id} tourSlug={item.slug} /> : null}
+          </div>
+        ) : null}
         {images.length > 1 ? (
           <section aria-label="گالری تصاویر تور" className="tour-tab-grid tour-tab-panel mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4" data-tour-section="overview">
             {images.slice(1, 7).map((id, index) => (
@@ -524,12 +530,6 @@ export default async function TourPage({ params, searchParams }: Props) {
             {hasDocuments ? (
               <div className="tour-tab-panel" data-tour-section="documents" id="tour-documents">
                 <StructuredTourContent item={item} showDepartures={false} showHotelPackages={false} />
-              </div>
-            ) : null}
-            {hasHotels ? (
-              <div className="tour-tab-panel" data-tour-section="hotels">
-                <DatedCombinedPackages key={initialDepartureId} initialDepartureId={initialDepartureId} departures={item.departures} exchangeRates={{ usdToIrt: settings.socialLinks.exchangeRateUsdIrt, eurToIrt: settings.socialLinks.exchangeRateEurIrt }} packages={item.combinedPackages ?? []} standaloneHotels={hasStandaloneHotels} tourId={item.id} />
-                {hasStandaloneHotels ? <TourHotelFilter key={initialDepartureId} initialDepartureId={initialDepartureId} country={item.destination?.country} departures={item.departures as TourBookingDeparture[]} destination={item.destination?.title} exchangeRates={{ usdToIrt: settings.socialLinks.exchangeRateUsdIrt, eurToIrt: settings.socialLinks.exchangeRateEurIrt }} faqs={faqPayload.items} isInstallmentAvailable={item.isInstallmentAvailable} packages={[]} tourId={item.id} tourSlug={item.slug} /> : null}
               </div>
             ) : null}
             {(included.length || excluded.length) ? (
