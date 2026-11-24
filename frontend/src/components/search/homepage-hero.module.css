@@ -1,14 +1,14 @@
 .hero { position:relative; isolation:isolate; z-index:20; padding:1rem 0 0; background:#fff; color:#102747; }
 .layout { --container-max:none; display:flex; flex-direction:column; padding-inline:0; width:100%; }
 .content { position:relative; z-index:2; width:calc(100% - 80px); max-width:var(--home-content-max, 90rem); min-width:0; margin:0 auto; }
-.tourBanner {
+.serviceBanner {
   position: relative;
   width: calc(100% - 28px);
   max-width: var(--home-content-max, 90rem);
-  aspect-ratio: 7 / 1;
+  aspect-ratio: 6 / 1;
   margin: 0 auto .6rem;
 }
-.tourBanner img { object-fit: cover; object-position: center; }
+.serviceBanner img { object-fit: cover; object-position: center 55%; }
 .search { position:relative; min-width:0; scroll-margin-top:6rem; }
 @media(max-width:1150px) { .content { width:calc(100% - 48px); } }
 @media(max-width:760px) {

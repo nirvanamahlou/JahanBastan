@@ -3,12 +3,22 @@
 import Image from "next/image";
 
 import {
+  type ServiceType,
   type TransportSearchOptions,
   TravelSearch,
 } from "@/components/search/travel-search";
 import { useHomepageSearchService } from "@/components/search/homepage-search-guide";
 import { Container } from "@/components/ui/container";
 import styles from "./homepage-hero.module.css";
+
+const serviceBanners: Record<ServiceType, string> = {
+  tour: "/images/hero/tour-mediterranean-panorama.webp",
+  hotel: "/images/hero/hotel-line-panorama.webp",
+  flight: "/images/hero/flight-line-panorama.webp",
+  bus: "/images/hero/bus-line-panorama.webp",
+  train: "/images/hero/train-line-panorama.webp",
+  visa: "/images/hero/visa-line-panorama.webp",
+};
 
 type Option = { label: string; value: string };
 
@@ -34,11 +44,9 @@ export function HomepageHero({
   return (
     <section data-homepage-hero className={styles.hero} aria-label="جستجوی خدمات سفر">
       <Container className={styles.layout}>
-        {serviceType === "tour" && (
-          <div className={styles.tourBanner}>
-            <Image src="/images/hero/tour-mediterranean-panorama.webp" alt="" fill unoptimized loading="eager" />
-          </div>
-        )}
+        <div className={styles.serviceBanner}>
+          <Image src={serviceBanners[serviceType]} alt="" fill unoptimized loading="eager" />
+        </div>
         <div className={styles.content}>
           <div id="trip-search" tabIndex={-1} data-home-search="true" className={styles.search}>
             <TravelSearch key={serviceType} hotelCountries={hotelCountries} visaCountries={visaCountries}

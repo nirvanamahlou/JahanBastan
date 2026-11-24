@@ -15,17 +15,17 @@
 }
 .logoMark {
   position: relative;
-  flex: 0 0 44px;
-  width: 44px;
-  height: 38px;
+  flex: 0 0 50px;
+  width: 50px;
+  height: 43px;
   overflow: hidden;
 }
 .bar.bar > .logoMark.logoMark > :global(img.brand-logo) {
   position: absolute;
-  top: -6px;
-  left: -25px;
-  width: 76px;
-  height: 76px;
+  top: -7px;
+  left: -28px;
+  width: 86px;
+  height: 86px;
   max-width: none;
 }
 .compactMenu { min-width: 0; }
