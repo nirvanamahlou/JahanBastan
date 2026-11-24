@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { type MouseEvent, Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { type MouseEvent, Suspense, useCallback, useEffect, useState } from "react";
 
 import { AccountForm } from "@/components/account-form";
 import { Dialog } from "@/components/ui/dialog";
@@ -12,27 +12,28 @@ import { readCustomerSession } from "@/lib/customer-session";
 
 import { BrandLogo } from "./brand-logo";
 import styles from "./site-header.module.css";
-import { CloseIcon, MenuIcon, MoonIcon, PhoneIcon, SunIcon } from "./site-icons";
-
-// Keep theme behavior available while its public controls are disabled.
-const SHOW_THEME_CONTROLS = false;
+import { PhoneIcon } from "./site-icons";
 
 function isCurrentRoute(pathname: string, href: string) {
   if (href === "/") return pathname === "/";
   return pathname === href || pathname.startsWith(href);
 }
 
+const headerLinks = [
+  ...siteConfig.navigation.flatMap(({ label, href, children }) => [
+    { label, href },
+    ...(children?.filter((child) => child.href !== href) ?? []),
+  ]),
+  { label: "نصب وب‌اپ", href: "/install/" },
+];
+
 export function SiteHeader() {
   const pathname = usePathname();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuButton = useRef<HTMLButtonElement>(null);
   const [accountOpen, setAccountOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isNight, setIsNight] = useState(false);
   const [customerName, setCustomerName] = useState<string | null>(null);
 
   function openAccount(event: MouseEvent<HTMLAnchorElement>) {
-    setMenuOpen(false);
     if (customerName || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
     event.preventDefault();
     setAccountOpen(true);
@@ -48,21 +49,11 @@ export function SiteHeader() {
     setCustomerName(payload.user?.fullName ?? "کاربر");
   }, []);
 
-  const toggleTheme = () => {
-    const nextTheme = isNight ? "day" : "night";
-    document.documentElement.dataset.theme = nextTheme;
-    setIsNight(nextTheme === "night");
-  };
-
   useEffect(() => {
     // Every fresh page load starts in light mode. Dark mode remains an explicit,
     // session-only choice and never inherits a stale mobile/browser preference.
     localStorage.removeItem("jahan-bastan-theme");
     document.documentElement.dataset.theme = "day";
-    const frame = window.requestAnimationFrame(() => setIsNight(false));
-    return () => {
-      window.cancelAnimationFrame(frame);
-    };
   }, []);
 
   useEffect(() => {
@@ -84,74 +75,28 @@ export function SiteHeader() {
     return () => window.removeEventListener("scroll", updateHeader);
   }, []);
 
-  useEffect(() => {
-    if (!menuOpen) return;
-
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      setMenuOpen(false);
-      menuButton.current?.focus();
-    };
-
-    document.addEventListener("keydown", closeOnEscape);
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.removeEventListener("keydown", closeOnEscape);
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [menuOpen]);
-
   return (
     <header className={`site-header ${pathname === "/" ? styles.home : ""} relative z-50 w-full border-b border-white/45 bg-white/72 text-brand shadow-[0_10px_30px_rgba(1,37,105,0.12)] backdrop-blur-2xl transition-[background-color,box-shadow,border-color] duration-300 ${isScrolled ? "border-brand/15 shadow-[0_14px_34px_rgba(1,37,105,0.18)]" : ""}`}>
-      <div className="hidden">
-        <Container className="flex min-h-9 items-center justify-between gap-5 text-xs">
-          <p>مجری مستقیم تورهای منتخب و خدمات کامل سفر</p>
-          <div className="flex items-center gap-5 text-white/80">
-            <Link href="/faq/" className="hover:text-white">سوالات متداول</Link>
-            <a href={`tel:${siteConfig.phoneHref}`} dir="ltr" className="font-bold text-white">
-              {siteConfig.phoneDisplay}
-            </a>
-          </div>
-        </Container>
-      </div>
       <Container className={styles.bar}>
-        <div className="flex min-w-0 items-center gap-2">
-          <button
-            type="button"
-            aria-label={menuOpen ? "بستن منو" : "بازکردن منو"}
-            aria-expanded={menuOpen}
-            ref={menuButton}
-            aria-controls="mobile-navigation"
-            onClick={() => setMenuOpen((open) => !open)}
-            className="grid size-10 place-items-center rounded-xl border border-white/70 bg-white/55 text-brand shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_7px_18px_rgba(1,37,105,0.08)] backdrop-blur-md transition-colors hover:bg-white"
-          >
-            {menuOpen ? <CloseIcon className="size-6" /> : <MenuIcon className="size-6" />}
-          </button>
-          <Link
-            href="/"
-            onClick={() => setMenuOpen(false)}
-            aria-label="صفحه اصلی جهان باستان"
-            className="group flex shrink-0 items-center gap-3 rounded-xl"
-          >
-            <BrandLogo
-              decorative
-              priority
-              className="h-11 w-11 object-contain transition-transform group-hover:-translate-y-0.5 lg:h-12 lg:w-12"
-            />
-            <span className="sr-only">{siteConfig.name} — {siteConfig.description}</span>
-            <span className="app-brand-copy" aria-hidden="true"><strong>جهان باستان</strong><small>همراه سفرهای تو</small></span>
-          </Link>
-        </div>
-
-
-        <div className="flex shrink-0 items-center gap-2">
-
+        <Link href="/" aria-label={siteConfig.name} className={styles.logoMark}>
+          <BrandLogo decorative priority />
+        </Link>
+        <nav aria-label="منوی اصلی" className={styles.compactMenu}>
+          <ul>
+            {headerLinks.map((item) => (
+              <li key={item.href}>
+                <Link href={item.href} aria-current={isCurrentRoute(pathname, item.href) ? "page" : undefined}>
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+        <div className={styles.actions}>
           <a
             href={`tel:${siteConfig.phoneHref}`}
             aria-label={`تماس با شماره ${siteConfig.phoneDisplay}`}
-            className="phone-chip-motion hidden min-h-10 shrink-0 items-center gap-2 whitespace-nowrap rounded-xl border border-white/70 bg-white/52 px-3 text-brand shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_7px_18px_rgba(1,37,105,0.08)] backdrop-blur-md lg:inline-flex"
+            className="phone-chip-motion inline-flex min-h-10 shrink-0 items-center gap-2 whitespace-nowrap rounded-xl border border-white/70 bg-white/52 px-3 text-brand shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_7px_18px_rgba(1,37,105,0.08)] backdrop-blur-md"
             dir="rtl"
           >
             <PhoneIcon className="size-4 text-brand" />
@@ -162,104 +107,11 @@ export function SiteHeader() {
             href="/account/"
             onClick={openAccount}
             aria-haspopup={customerName ? undefined : "dialog"}
-            className="hidden min-h-10 items-center whitespace-nowrap rounded-xl border account-primary border-[#102747] px-5 text-sm font-bold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_9px_20px_rgba(16,39,71,0.18)] transition hover:-translate-y-0.5 focus-visible:ring-4 focus-visible:ring-[#25466e] lg:inline-flex"
+            className="inline-flex min-h-10 items-center whitespace-nowrap rounded-xl border account-primary border-[#102747] px-5 text-sm font-bold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_9px_20px_rgba(16,39,71,0.18)] transition hover:-translate-y-0.5 focus-visible:ring-4 focus-visible:ring-[#25466e]"
           >
             {customerName ? "پنل کاربری" : "ورود / ثبت‌نام"}
           </Link>
         </div>
-      {menuOpen ? (
-        <>
-          <button
-            type="button"
-            data-menu-backdrop aria-label="بستن منو از بیرون"
-            tabIndex={-1}
-            className={styles.backdrop}
-            onClick={() => setMenuOpen(false)}
-          />
-          <nav
-            id="mobile-navigation"
-            aria-label="منوی اصلی"
-            className={styles.menu}
-          >
-            <Container className="px-0">
-              <ul className="grid grid-cols-1 gap-1.5">
-                <li className="rounded-xl border border-border bg-background p-1.5"><Link href="/install/" onClick={() => setMenuOpen(false)} className="block min-h-11 rounded-xl px-3 py-2.5 font-bold text-brand">نصب وب‌اپ جهان باستان</Link></li>
-                {siteConfig.navigation.map((item) => {
-                  const active = isCurrentRoute(pathname, item.href);
-
-                  return (
-                    <li
-                      key={item.href}
-                      className="rounded-xl border border-border bg-background p-1.5 sm:rounded-2xl sm:p-2"
-                    >
-                      <Link
-                        href={item.href}
-                        onClick={() => setMenuOpen(false)}
-                        aria-current={active ? "page" : undefined}
-                        className={`block rounded-xl px-3 py-2.5 font-bold ${
-                          active ? "bg-brand text-white shadow-sm ring-1 ring-brand/20" : "text-foreground"
-                        }`}
-                      >
-                        {item.label}
-                      </Link>
-                      {item.children ? (
-                        <ul className="mt-1 border-r border-border pr-3 text-sm text-muted">
-                          {item.children.map((child) => (
-                            <li key={child.href}>
-                              <Link
-                                href={child.href}
-                                onClick={() => setMenuOpen(false)}
-                                className={"block rounded-lg px-3 py-2 transition-colors " + (child.href === "/installments/" ? "bg-accent-strong font-bold text-white hover:bg-[#d94687]" : "hover:bg-surface-muted hover:text-brand")}
-                              >
-                                {child.label}
-                              </Link>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : null}
-                    </li>
-                  );
-                })}
-              </ul>
-
-              <div className="mt-3 grid grid-cols-1 gap-2 rounded-2xl bg-surface-muted p-3 md:grid-cols-2 md:gap-3 md:p-4">
-                {SHOW_THEME_CONTROLS ? <><div className="flex items-center justify-between gap-3 px-1 pb-1 md:col-span-2">
-                  <strong className="text-sm text-brand">تنظیمات نمایش</strong>
-                  <span className="rounded-full bg-surface px-3 py-1 text-xs font-bold text-muted">حالت فعلی: {isNight ? "تاریک" : "روشن"}</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={toggleTheme}
-                  aria-label={isNight ? "تغییر به حالت روز" : "تغییر به حالت شب"}
-                  aria-pressed={isNight}
-                  className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-border bg-surface px-4 font-bold text-brand"
-                >
-                  {isNight ? <SunIcon className="size-5 text-[#ffd166]" /> : <MoonIcon className="size-5" />}
-                  فعال‌کردن حالت {isNight ? "روشن" : "تاریک"}
-                </button>
-                </> : null}
-                <a
-                  href={`tel:${siteConfig.phoneHref}`}
-                  className="flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-brand bg-surface px-4 font-bold text-brand"
-                  dir="rtl"
-                >
-                  <PhoneIcon className="size-4" />
-                  <span className="whitespace-nowrap" dir="ltr">{siteConfig.phoneDisplay}</span>
-                </a>
-
-                <Link
-                  href="/account/"
-                  onClick={openAccount}
-                  aria-haspopup={customerName ? undefined : "dialog"}
-                  className="flex min-h-11 items-center justify-center rounded-xl border account-primary border-[#102747] px-4 font-bold text-white shadow-sm transition focus-visible:ring-4 focus-visible:ring-[#25466e]"
-                >
-                  {customerName ? "پنل کاربری" : "ورود / ثبت‌نام"}
-                </Link>
-              </div>
-            </Container>
-          </nav>
-        </>
-      ) : null}
       </Container>
       <Dialog open={accountOpen} title="ورود و ثبت‌نام" compact onClose={() => setAccountOpen(false)}>
         {accountOpen && <Suspense fallback={null}><AccountForm compact onAuthenticated={() => setAccountOpen(false)} /></Suspense>}
