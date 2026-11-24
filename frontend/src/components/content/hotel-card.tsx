@@ -5,9 +5,11 @@ import { hotelMapSearchUrl } from "@/components/content/hotel-location-map";
 import { HotelStars } from "@/components/content/hotel-stars";
 import { CountryFlag } from "@/components/content/country-flag";
 import { CompareToggle, type ComparisonItem } from "@/components/content/comparison-provider";
+import styles from "./catalog-layout.module.css";
 import { HotelIcon, LocationIcon } from "@/components/layout/site-icons";
 
 type HotelCardProps = {
+  listLayout?: boolean;
   slug: string;
   name: string;
   destination: string;
@@ -53,6 +55,7 @@ function localizePlaceName(value: string) {
 }
 
 export function HotelCard({
+  listLayout = false,
   slug,
   name,
   destination,
@@ -96,7 +99,8 @@ export function HotelCard({
   };
   return (
     <article
-      className="catalog-card group border border-border bg-white shadow-[0_12px_32px_rgba(1,37,105,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_42px_rgba(1,37,105,0.14)]"
+      className={`catalog-card group border border-border bg-white shadow-[0_12px_32px_rgba(1,37,105,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_18px_42px_rgba(1,37,105,0.14)] ${listLayout ? styles.hotelListCard : ""}`}
+      data-hotel-list-card={listLayout || undefined}
       data-scroll-reveal
     >
       <Link
@@ -109,7 +113,7 @@ export function HotelCard({
             alt={name}
             className="object-cover transition duration-500 group-hover:scale-105"
             fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1100px) 50vw, 33vw"
+            sizes={listLayout ? "(max-width: 640px) 30vw, 260px" : "(max-width: 640px) 100vw, (max-width: 1100px) 50vw, 33vw"}
             src={mainImage}
           />
         ) : (

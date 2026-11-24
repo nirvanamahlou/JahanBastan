@@ -177,7 +177,7 @@ export function HotelCatalog({ hotels, destinations, selectedDestinationSlug, co
           </div>
         </div>
         {visibleHotels.length ? (
-          <div className="grid gap-5 md:grid-cols-2">
+          <div className="grid gap-3">
             {visibleHotels.map((hotel) => (
               <HotelCard
                 address={hotel.address}
@@ -192,6 +192,7 @@ export function HotelCatalog({ hotels, destinations, selectedDestinationSlug, co
                     : null
                 }
                 key={hotel.id}
+                listLayout
                 name={hotel.name}
                 slug={hotel.slug}
                 starRating={hotel.starRating}
