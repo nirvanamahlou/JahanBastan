@@ -120,8 +120,8 @@
 .countryResult .facts svg { width: .8rem; height: .8rem; color: #102747; }
 .countryResult .price { gap: .35rem; margin-top: .5rem; font-size: .8rem; }
 .dateDisclosure > summary { display: block; cursor: pointer; list-style: none; }
-.dateToggle { display: flex; justify-content: space-between; align-items: center; min-height: 44px; padding: .35rem .75rem; border-top: 1px solid #e3e8f4; border-radius: 0 0 .9rem .9rem; background: #e4ecf7; color: #102747; font-size: .72rem; font-weight: 700; }
-.dateDisclosure[open] .dateToggle { border-radius: 0; background: #102747; color: #fff; }
+.dateToggle { display: flex; justify-content: space-between; align-items: center; min-height: 44px; padding: .3rem .75rem; border-top: 1px solid #e5e9ef; border-radius: 0 0 .9rem .9rem; background: #fff; color: #102747; font-size: .7rem; font-weight: 650; }
+.dateDisclosure[open] .dateToggle { border-radius: 0; border-bottom: 1px solid #e5e9ef; }
 .dateDisclosure summary::-webkit-details-marker { display: none; }
 .dateToggle::after { content: ""; width: .38rem; height: .38rem; border: solid currentColor; border-width: 0 1.5px 1.5px 0; transform: rotate(45deg); margin-inline-end: .18rem; }
 .dateDisclosure[open] .dateToggle::after { transform: rotate(225deg); }
@@ -137,9 +137,9 @@
   align-items: stretch;
   min-width: 0;
   overflow: hidden;
-  border: 1px solid #9db3ce;
-  border-radius: .65rem;
-  background: #edf2f9;
+  border: 1px solid #dce4ed;
+  border-radius: .52rem;
+  background: #fff;
   color: #102747;
 }
 .dateRange:hover, .dateRange:focus-visible { border-color: #6586af; }
@@ -149,16 +149,17 @@
   justify-items: center;
   align-content: center;
   min-width: 0;
-  gap: .17rem;
-  padding: .5rem .22rem;
+  gap: .1rem;
+  padding: .4rem .2rem;
   text-align: center;
 }
 .datePoint span { color: #415973; font-size: .59rem; }
 .datePoint :is(time, strong) { font-size: .71rem; line-height: 1.5; overflow-wrap: anywhere; }
 .datePoint time { font-weight: 650; }
-.dateArrow { align-self: center; color: #25466e; }
-.dateCardFooter { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: .25rem .65rem; padding: .42rem .65rem; border-top: 1px solid #cdd9e8; font-size: .68rem; }
-.dateNights { display: inline-flex; align-items: center; gap: .25rem; border-radius: .35rem; border: 1px solid #b7c9df; padding-inline: .35rem; font-weight: 700; }
+.dateArrow { align-self: center; color: #526581; font-size: .82rem; }
+.dateCardFooter { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .2rem .6rem; padding: .34rem .58rem; border-top: 1px solid #e5e9ef; color: #526581; font-size: .65rem; }
+.dateCardFooter strong { color: #102747; font-weight: 700; }
+.dateNights { display: inline-flex; align-items: center; gap: .22rem; }
 .dateLink { display: inline-flex; align-items: center; min-height: 44px; margin-top: .15rem; color: #25466e; font-size: .7rem; font-weight: 700; }
 @media (max-width: 1100px) { .dateRanges { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 940px) { .countryLayout { grid-template-columns: 220px minmax(0, 1fr); } .countryResult .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

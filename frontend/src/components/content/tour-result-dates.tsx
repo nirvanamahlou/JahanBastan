@@ -108,7 +108,7 @@ export function TourResultDates({
                     </div>
                     <div className={styles.dateCardFooter}>
                       {nights !== null && <span className={styles.dateNights}><CalendarIcon aria-hidden="true" className="size-3.5" />{nights.toLocaleString("fa-IR")} شب</span>}
-                      <span>شروع قیمت <strong>{range.price ?? "استعلام قیمت"}</strong></span>
+                      <span>{range.price ? <>شروع قیمت <strong>{range.price}</strong></> : <strong>استعلام قیمت</strong>}</span>
                     </div>
                   </Link>
                 </li>
