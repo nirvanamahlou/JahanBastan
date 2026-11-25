@@ -77,7 +77,10 @@ export async function SiteFooter() {
       label: values[`footerQuick${item.settingsSlot}Label`]?.trim() || item.label,
       href: safeInternalHref(values[`footerQuick${item.settingsSlot}Url`], item.href),
     }))
-    .filter((item) => item.href !== siteConfig.contactHref && !isCommerceLink(item.href) && !isTravelServiceLink(item.href))
+    .map((item) => /^\/(?:about|contact)\/?(?:[?#]|$)/.test(item.href)
+      ? { ...item, ...siteConfig.aboutContactLink }
+      : item)
+    .filter((item) => !isCommerceLink(item.href) && !isTravelServiceLink(item.href))
     .filter((item) => !/^\/faq\/?(?:[?#]|$)/.test(item.href))
     .filter((item, index, items) =>
       items.findIndex(

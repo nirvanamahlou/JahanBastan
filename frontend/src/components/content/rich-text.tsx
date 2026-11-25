@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 
 import { PUBLIC_API_BASE_URL } from "@/lib/api/client";
 
-type Props = { content: string; className?: string };
+type Props = { content: string; className?: string; allowImages?: boolean };
 
 function inline(text: string): ReactNode[] {
   const pattern = /(\*\*[^*]+\*\*|\*[^*]+\*|\[[^\]]+\]\((?:https?:\/\/|\/)[^)]+\))/g;
@@ -16,7 +16,7 @@ function inline(text: string): ReactNode[] {
   });
 }
 
-export function RichText({ content, className = "" }: Props) {
+export function RichText({ content, className = "", allowImages = true }: Props) {
   const lines = content.replace(/\r\n/g, "\n").split("\n");
   const blocks: ReactNode[] = [];
   let index = 0;
@@ -25,7 +25,7 @@ export function RichText({ content, className = "" }: Props) {
     if (!line) { index += 1; continue; }
     const image = line.match(/^!\[([^\]]*)\]\(media:(\d+)\)$/);
     if (image) {
-      blocks.push(<figure className="relative my-6 aspect-square w-full overflow-hidden rounded-2xl bg-surface-muted" key={index}><Image alt={image[1]} className="object-cover" fill sizes="(max-width: 768px) 100vw, 800px" src={`${PUBLIC_API_BASE_URL}/media/${image[2]}`} /></figure>);
+      if (allowImages) blocks.push(<figure className="relative my-6 aspect-square w-full overflow-hidden rounded-2xl bg-surface-muted" key={index}><Image alt={image[1]} className="object-cover" fill sizes="(max-width: 768px) 100vw, 800px" src={`${PUBLIC_API_BASE_URL}/media/${image[2]}`} /></figure>);
       index += 1; continue;
     }
     if (line.startsWith("### ")) { blocks.push(<h3 className="mt-7 text-xl font-black" key={index}>{inline(line.slice(4))}</h3>); index += 1; continue; }

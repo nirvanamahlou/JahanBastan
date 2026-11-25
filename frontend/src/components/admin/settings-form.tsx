@@ -38,7 +38,7 @@ function parseMediaId(value: string | undefined): number | null {
   return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
 }
 
-const settingsSections = [{"key": "general", "label": "اطلاعات پایه", "description": "مشخصات مجموعه، ارتباط با مشتری و وضعیت فروش"}, {"key": "home", "label": "صفحه اصلی", "description": "تصاویر خدمات، بنر تبلیغاتی و ظاهر سایت"}, {"key": "guides", "label": "راهنمای خدمات", "description": "متن راهنمای جست‌وجو و صفحات بلیت"}, {"key": "about", "label": "درباره ما", "description": "معرفی مجموعه، داستان، ارزش‌ها و تصویر صفحه"}, {"key": "footer", "label": "فوتر و پیوندها", "description": "محتوای پایین سایت و لینک‌های دسترسی"}, {"key": "policies", "label": "قوانین و اعتماد", "description": "شرایط پرداخت و نشان‌های قابل استعلام"}] as const;
+const settingsSections = [{"key": "general", "label": "اطلاعات پایه", "description": "مشخصات مجموعه، ارتباط با مشتری و وضعیت فروش"}, {"key": "home", "label": "صفحه اصلی", "description": "تصاویر خدمات، بنر تبلیغاتی و ظاهر سایت"}, {"key": "guides", "label": "راهنمای خدمات", "description": "متن راهنمای جست‌وجو و صفحات بلیت"}, {"key": "about", "label": "درباره ما", "description": "معرفی مجموعه، داستان و ارزش‌ها"}, {"key": "footer", "label": "فوتر و پیوندها", "description": "محتوای پایین سایت و لینک‌های دسترسی"}, {"key": "policies", "label": "قوانین و اعتماد", "description": "شرایط پرداخت و نشان‌های قابل استعلام"}] as const;
 
 export function SettingsForm({ initialSettings }: { initialSettings: ManagedSiteSettings }) {
   const [activeSection, setActiveSection] = useState<string>("general");
@@ -49,9 +49,6 @@ export function SettingsForm({ initialSettings }: { initialSettings: ManagedSite
   );
   const [heroImageId, setHeroImageId] = useState<number | null>(() =>
     parseMediaId(initialSettings.socialLinks.heroBannerImageId),
-  );
-  const [aboutImageId, setAboutImageId] = useState<number | null>(() =>
-    parseMediaId(initialSettings.socialLinks.aboutImageId),
   );
   const [homePromoImageId, setHomePromoImageId] = useState<number | null>(() =>
     parseMediaId(initialSettings.socialLinks.homePromoImageId),
@@ -116,7 +113,6 @@ export function SettingsForm({ initialSettings }: { initialSettings: ManagedSite
           aboutTrustBody: form.get("aboutTrustBody") || "",
           aboutCtaLabel: form.get("aboutCtaLabel") || "",
           aboutCtaHref: form.get("aboutCtaHref") || "",
-          aboutImageId: aboutImageId ? String(aboutImageId) : "",
           heroBannerImageId: heroImageId ? String(heroImageId) : "",
           homePromoImageId: homePromoImageId ? String(homePromoImageId) : "",
           homePromoTitle: form.get("homePromoTitle") || "",
@@ -364,11 +360,11 @@ export function SettingsForm({ initialSettings }: { initialSettings: ManagedSite
       </fieldset>
           </section>
           <section id="settings-about" data-settings-group="about" hidden={activeSection !== "about"} className={styles.group} aria-labelledby="settings-about-title">
-            <header className={styles.groupHeading}><h2 id="settings-about-title">درباره ما</h2><p>معرفی مجموعه، داستان، ارزش‌ها و تصویر صفحه</p></header>
+            <header className={styles.groupHeading}><h2 id="settings-about-title">درباره ما</h2><p>معرفی مجموعه، داستان و ارزش‌ها</p></header>
       <fieldset className="space-y-5 rounded-2xl border border-border bg-surface p-5 lg:col-span-2">
-        <legend className="px-2 text-xl font-black">محتوای صفحه درباره ما</legend>
+        <legend className="px-2 text-xl font-black">بخش معرفی در صفحه درباره و تماس</legend>
         <p className="text-sm leading-7 text-muted">
-          تمام متن‌ها و تصویر این بخش مستقیماً در صفحه عمومی درباره ما نمایش داده می‌شوند.
+          این متن‌ها در بخش معرفی صفحه عمومی درباره و تماس نمایش داده می‌شوند.
         </p>
         <div className="grid gap-4 sm:grid-cols-2">
           <Input
@@ -444,13 +440,6 @@ export function SettingsForm({ initialSettings }: { initialSettings: ManagedSite
           <Input id="settings-about-cta-label" name="aboutCtaLabel" label="متن دکمه اقدام" defaultValue={initialSettings.socialLinks.aboutCtaLabel ?? "مشاهده تورها"} maxLength={60} />
           <Input id="settings-about-cta-href" name="aboutCtaHref" label="مسیر داخلی دکمه" dir="ltr" defaultValue={initialSettings.socialLinks.aboutCtaHref ?? "/tours/"} pattern="/[a-zA-Z0-9/_-]*" />
         </div>
-        <MediaUpload
-          currentId={aboutImageId}
-          label="تصویر صفحه درباره ما"
-          aspect="wide"
-          onRemoved={() => setAboutImageId(null)}
-          onUploaded={setAboutImageId}
-        />
       </fieldset>
           </section>
           <section id="settings-footer" data-settings-group="footer" hidden={activeSection !== "footer"} className={styles.group} aria-labelledby="settings-footer-title">

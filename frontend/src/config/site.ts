@@ -4,7 +4,17 @@ export type NavigationItem = {
   children?: ReadonlyArray<{ label: string; href: string }>;
 };
 
+const aboutContactLink = { label: "درباره و تماس", href: "/contact/" } as const;
+
+const navigation: readonly NavigationItem[] = [
+  { label: "خانه", href: "/" },
+  { label: "مقاصد", href: "/destinations/" },
+  { label: "مجله", href: "/articles/" },
+  aboutContactLink,
+];
+
 export const siteConfig = {
+  aboutContactLink,
   name: "جهان باستان",
   description: "تور و خدمات سفر",
   phoneDisplay: "",
@@ -12,29 +22,16 @@ export const siteConfig = {
   address:
     "",
   businessHours: "شنبه تا چهارشنبه، ۹ تا ۱۹",
-  contactHref: "/contact/",
+  contactHref: aboutContactLink.href,
   accountHref: "/account/",
-  navigation: [
-    { label: "خانه", href: "/" },
-    { label: "مقاصد", href: "/destinations/" },
-    { label: "مجله", href: "/articles/" },
-    {
-      label: "درباره ما",
-      href: "/about/",
-      children: [
-        { label: "درباره جهان باستان", href: "/about/" },
-        { label: "تماس با ما", href: "/contact/" },
-      ],
-    },
-  ] satisfies ReadonlyArray<NavigationItem>,
+  navigation,
   // These numbers match the saved footerQuick settings.
   footerLinks: [
     { settingsSlot: 1, label: "تورهای گردشگری", href: "/tours/" },
     { settingsSlot: 2, label: "مقاصد", href: "/destinations/" },
     { settingsSlot: 3, label: "هتل‌ها", href: "/hotels/" },
     { settingsSlot: 4, label: "مجله گردشگری", href: "/articles/" },
-    { settingsSlot: 5, label: "درباره ما", href: "/about/" },
-    { settingsSlot: 7, label: "تماس با ما", href: "/contact/" },
+    { settingsSlot: 5, ...aboutContactLink },
     { settingsSlot: 8, label: "خرید اقساطی", href: "/installments/" },
   ],
   socialLinks: [
