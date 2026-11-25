@@ -1,4 +1,4 @@
-import { FlightPreview, FlightPreviewLink, currentFlightPreview } from "./flight-preview";
+import { redirect } from "next/navigation";
 import { ResponsiveFilterPanel } from "@/components/content/responsive-filter-panel";
 import { CountryDirectory } from "@/components/content/country-directory";
 import { CountryCityFields } from "@/components/content/country-city-fields";
@@ -161,7 +161,7 @@ function PublishedFlightRoutes({ flights }: { flights: ErpFlightRate[] }) {
 
 export default async function FlightsPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const raw = await searchParams;
-  if (raw.preview === "AV9030" && currentFlightPreview()) return <FlightPreview />;
+  if (raw.preview === "AV9030") redirect(encodeURI("/services/flights/?showResults=1&flightNumber=AV9030"));
   const country = getValue(raw.country);
   const origin = getValue(raw.origin);
   const originAirport = getValue(raw.originAirport);
@@ -448,7 +448,6 @@ export default async function FlightsPage({ searchParams }: { searchParams: Prom
       <section className={shouldShowResults ? "pt-2 pb-5 sm:pt-3" : "py-8 sm:py-12"}>
         <Container className={shouldShowResults ? `${catalogStyles.catalogContainer} ${catalogStyles.flightResultsContainer}` : catalogStyles.catalogContainer}>
           <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: "خدمات سفر", href: "/services/" }, { label: "پرواز" }]} />
-          {!shouldShowResults && <FlightPreviewLink />}
 
           {shouldShowResults ? (
           <div className={`${catalogStyles.layout} ${catalogStyles.flightLayout}`}>
