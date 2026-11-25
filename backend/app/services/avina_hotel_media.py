@@ -62,13 +62,19 @@ async def prepare_flag(flag: str | None) -> PreparedImage | None:
 async def prepare_hotel_images(
     main: str | None, gallery: str | None
 ) -> tuple[PreparedImage | None, list[PreparedImage]]:
-    items = list(
-        dict.fromkeys(
-            item.strip() for item in (gallery or "").split("|") if item.strip()
-        )
+    return await prepare_profile_images(
+        main,
+        (gallery or "").split("|"),
+        subject="هتل",
     )
+
+
+async def prepare_profile_images(
+    main: str | None, gallery: list[str], *, subject: str
+) -> tuple[PreparedImage | None, list[PreparedImage]]:
+    items = list(dict.fromkeys(item.strip() for item in gallery if item.strip()))
     if len(items) > 6:
-        raise HTTPException(422, "گالری هتل حداکثر شش تصویر می‌پذیرد.")
+        raise HTTPException(422, f"گالری {subject} حداکثر شش تصویر می‌پذیرد.")
     hosts = {
         "avinaofficial.ir",
         "niyayeshseir.com",

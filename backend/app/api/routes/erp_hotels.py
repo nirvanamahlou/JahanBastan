@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, ValidationError
 
 from app.api.dependencies.auth import DatabaseSession
-from app.repositories.avina_hotels import publish, publish_geography
+from app.repositories.avina_hotels import publish, publish_geography, withdraw_profile
 from app.services.avina_hotel_media import prepare_flag, prepare_hotel_images
 from app.services.rubi_catalog import valid_signature
 
@@ -50,6 +50,22 @@ class GeographyProfile(BaseModel):
     name: str = Field(min_length=1, max_length=100)
     countryName: str | None = Field(default=None, max_length=100)
     flag: str | None = Field(default=None, max_length=500000)
+
+
+class ProfileWithdrawal(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    site: Literal["jahan-bastan"]
+    action: Literal["inspect", "withdraw"]
+    kind: Literal["hotels", "countries", "cities", "visa-services"]
+    id: Annotated[
+        str,
+        StringConstraints(
+            pattern=r"^[a-fA-F0-9]{8}(?:-[a-fA-F0-9]{4}){3}-[a-fA-F0-9]{12}$"
+        ),
+    ]
+    name: Name
+    countryName: Name | None = None
+    identificationCode: str | None = Field(default=None, max_length=64)
 
 
 async def signed_body(request: Request) -> bytes:
@@ -102,3 +118,15 @@ async def geography_profile(
     except ValueError as exc:
         raise HTTPException(409, str(exc)) from exc
     return {"slug": slug}
+
+
+@router.post("/profile-withdrawal")
+async def profile_withdrawal(request: Request, session: DatabaseSession):
+    body = await signed_body(request)
+    try:
+        profile = ProfileWithdrawal.model_validate_json(body)
+        return await withdraw_profile(session, profile)
+    except ValidationError as exc:
+        raise HTTPException(422, "اطلاعات پروفایل معتبر نیست.") from exc
+    except ValueError as exc:
+        raise HTTPException(409, str(exc)) from exc

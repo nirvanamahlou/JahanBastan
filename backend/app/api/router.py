@@ -28,6 +28,7 @@ from app.api.routes.editorial_management import router as editorial_management_r
 from app.api.routes.erp_catalog import router as erp_catalog_router
 from app.api.routes.erp_checkout import router as erp_checkout_router
 from app.api.routes.erp_hotels import router as erp_hotels_router
+from app.api.routes.erp_visas import router as erp_visas_router
 from app.api.routes.health import router as health_router
 from app.api.routes.operations import (
     admin_router as admin_operations_router,
@@ -49,6 +50,7 @@ router = APIRouter()
 router.include_router(erp_catalog_router, prefix=get_settings().API_V1_PREFIX)
 router.include_router(erp_checkout_router, prefix=get_settings().API_V1_PREFIX)
 router.include_router(erp_hotels_router, prefix=get_settings().API_V1_PREFIX)
+router.include_router(erp_visas_router, prefix=get_settings().API_V1_PREFIX)
 router.include_router(nora_router, prefix=get_settings().API_V1_PREFIX)
 router.include_router(health_router)
 router.include_router(public_operations_router, prefix=get_settings().API_V1_PREFIX)

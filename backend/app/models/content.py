@@ -6,6 +6,7 @@ import enum
 from datetime import date, datetime, time
 from decimal import Decimal
 from typing import TYPE_CHECKING, Any
+from uuid import UUID
 
 from sqlalchemy import (
     JSON,
@@ -18,12 +19,14 @@ from sqlalchemy import (
     ForeignKey,
     Identity,
     Index,
+    Integer,
     Numeric,
     SmallInteger,
     String,
     Text,
     Time,
     UniqueConstraint,
+    Uuid,
     text,
 )
 from sqlalchemy.dialects.postgresql import JSONB
@@ -2520,8 +2523,12 @@ class TravelService(TimestampMixin, Base):
     visa_type: Mapped[str | None] = mapped_column(String(24))
     visa_processing_time: Mapped[str | None] = mapped_column(String(120))
     visa_form_url: Mapped[str | None] = mapped_column(String(500))
+    avina_visa_service_id: Mapped[UUID | None] = mapped_column(Uuid, unique=True)
+    avina_visa_profile: Mapped[dict[str, Any] | None] = mapped_column(
+        JSON().with_variant(JSONB, "postgresql")
+    )
     image_id: Mapped[int | None] = mapped_column(BigInteger)
-    display_order: Mapped[int] = mapped_column(SmallInteger, server_default=text("0"))
+    display_order: Mapped[int] = mapped_column(Integer, server_default=text("0"))
     status: Mapped[PublicationStatus] = mapped_column(
         publication_status_enum, server_default=text("'draft'")
     )
