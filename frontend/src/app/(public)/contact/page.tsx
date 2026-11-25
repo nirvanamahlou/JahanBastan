@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 
 import { RichText } from "@/components/content/rich-text";
 import { LocationIcon } from "@/components/layout/site-icons";
-import { PageIntro } from "@/components/layout/page-intro";
 import { ButtonLink } from "@/components/ui/button-link";
 import { Card } from "@/components/ui/card";
 import { Container } from "@/components/ui/container";
@@ -117,103 +116,103 @@ export default async function ContactPage() {
     : defaultOfficeMapLinkUrl;
 
   return (
-    <>
-      <PageIntro title={`درباره و تماس با ${item?.siteName ?? "جهان باستان"}`} compact />
-      <Container className="grid gap-10 py-8 sm:gap-12 sm:py-12">
-        <section id="about" className="scroll-mt-24" aria-labelledby="about-title">
-          <p className="text-sm font-bold text-brand">
-            {readValue(values, "aboutEyebrow", fallback.eyebrow)}
-          </p>
-          <h2 id="about-title" className="mt-2 max-w-3xl text-2xl font-black text-brand sm:text-3xl">
-            {readValue(values, "aboutTitle", fallback.title)}
-          </h2>
-          <p className="mt-3 max-w-3xl leading-8 text-muted">
-            {readValue(values, "aboutIntro", fallback.intro)}
-          </p>
-          <div className="mt-5 flex flex-wrap items-center gap-4">
-            <ButtonLink href={readValue(values, "aboutCtaHref", fallback.ctaHref)}>
-              {readValue(values, "aboutCtaLabel", fallback.ctaLabel)}
-            </ButtonLink>
-            <a className="font-bold text-brand underline underline-offset-4" href="#contact-details">
-              راه‌های تماس
-            </a>
-          </div>
+    <Container className="grid gap-6 py-5 [--container-max:58rem] sm:gap-8 sm:py-7">
+      <h1 className="text-xl font-black leading-tight text-brand sm:text-2xl">
+        درباره و تماس با {item?.siteName ?? "جهان باستان"}
+      </h1>
+      <section id="about" className="scroll-mt-24" aria-labelledby="about-title">
+        <p className="text-sm font-bold text-brand">
+          {readValue(values, "aboutEyebrow", fallback.eyebrow)}
+        </p>
+        <h2 id="about-title" className="mt-1 max-w-3xl text-lg font-black text-brand sm:text-xl">
+          {readValue(values, "aboutTitle", fallback.title)}
+        </h2>
+        <p className="mt-1 max-w-3xl text-sm leading-6 text-muted">
+          {readValue(values, "aboutIntro", fallback.intro)}
+        </p>
+        <div className="mt-3 flex flex-wrap items-center gap-3">
+          <ButtonLink href={readValue(values, "aboutCtaHref", fallback.ctaHref)} size="sm">
+            {readValue(values, "aboutCtaLabel", fallback.ctaLabel)}
+          </ButtonLink>
+          <a className="text-sm font-bold text-brand underline underline-offset-4" href="#contact-details">
+            راه‌های تماس
+          </a>
+        </div>
 
-          <div className="mt-7 grid gap-5 md:grid-cols-3">
-            {sections.map((section) => (
-              <Card className="h-full p-6" key={section.id}>
-                <h3 className="text-xl font-black text-brand">{section.title}</h3>
-                <RichText
-                  allowImages={false}
-                  className="text-sm text-muted"
-                  content={section.body}
-                />
-              </Card>
-            ))}
-          </div>
-        </section>
-
-        <section id="contact-details" className="scroll-mt-24" aria-labelledby="contact-title">
-          <h2 id="contact-title" className="mb-5 text-2xl font-black text-brand sm:text-3xl">تماس با ما</h2>
-          <div className="grid gap-5 md:grid-cols-2">
-            <Card>
-              <h3 className="text-lg font-black">تلفن و ایمیل</h3>
-              {item?.phone ? (
-                <a className="mt-4 block font-bold text-brand" dir="ltr" href={`tel:${item.phone}`}>{item.phone}</a>
-              ) : null}
-              {item?.email ? (
-                <a className="mt-3 block text-brand" dir="ltr" href={`mailto:${item.email}`}>{item.email}</a>
-              ) : null}
-            </Card>
-            <Card>
-              <h3 className="text-lg font-black">آدرس دفتر</h3>
-              <p className="mt-4 whitespace-pre-line leading-8 text-muted">{address || "آدرسی ثبت نشده است."}</p>
-            </Card>
-            <Card>
-              <h3 className="text-lg font-black">ساعات کاری</h3>
-              <p className="mt-4 text-muted">{item?.workingHours ? toPersianDigits(item.workingHours) : "ساعات کاری ثبت نشده است."}</p>
-            </Card>
-            <Card>
-              <h3 className="text-lg font-black">شبکه‌های اجتماعی</h3>
-              <div className="mt-4 flex flex-wrap gap-3">
-                {Object.entries(socialLabels).map(([name, label]) => {
-                  const href = values[name];
-                  return href ? (
-                    <a className="rounded-xl border border-border px-4 py-2 font-bold text-brand" href={href} key={name} rel="noreferrer" target="_blank">{label}</a>
-                  ) : null;
-                })}
-              </div>
-            </Card>
-          </div>
-          {mapEmbedUrl ? (
-            <section className="mt-6 overflow-hidden rounded-[2rem] border border-border bg-surface shadow-[0_18px_50px_rgba(1,37,105,.1)]" aria-labelledby="contact-map-title">
-              <div className="flex flex-col gap-4 border-b border-border p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-                <div>
-                  <p className="inline-flex items-center gap-2 text-sm font-bold text-brand">
-                    <LocationIcon className="size-5" />
-                    موقعیت روی نقشه
-                  </p>
-                  <h3 id="contact-map-title" className="mt-2 text-xl font-black sm:text-2xl">{mapTitle}</h3>
-                  {address ? <p className="mt-2 max-w-3xl text-sm leading-7 text-muted">{address}</p> : null}
-                </div>
-                {mapLinkUrl ? (
-                  <ButtonLink href={mapLinkUrl} target="_blank" rel="noreferrer" variant="accent" className="w-full shrink-0 !text-white hover:!text-white sm:w-auto">
-                    بازکردن نقشه و مسیریابی
-                  </ButtonLink>
-                ) : null}
-              </div>
-              <iframe
-                title={mapTitle}
-                src={mapEmbedUrl}
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                allowFullScreen
-                className="h-72 w-full border-0 sm:h-96"
+        <div className="mt-4 grid gap-3 md:grid-cols-3">
+          {sections.map((section) => (
+            <Card className="h-full" key={section.id}>
+              <h3 className="text-base font-black text-brand">{section.title}</h3>
+              <RichText
+                allowImages={false}
+                className="text-sm text-muted [&_p]:my-2 [&_p]:leading-6"
+                content={section.body}
               />
-            </section>
-          ) : null}
-        </section>
-      </Container>
-    </>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      <section id="contact-details" className="scroll-mt-24" aria-labelledby="contact-title">
+        <h2 id="contact-title" className="mb-3 text-lg font-black text-brand sm:text-xl">تماس با ما</h2>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <h3 className="text-base font-black">تلفن و ایمیل</h3>
+            {item?.phone ? (
+              <a className="mt-2 block text-right text-sm font-bold text-brand" dir="ltr" href={`tel:${item.phone}`}>{item.phone}</a>
+            ) : null}
+            {item?.email ? (
+              <a className="mt-1 block text-right text-sm text-brand [overflow-wrap:anywhere]" dir="ltr" href={`mailto:${item.email}`}>{item.email}</a>
+            ) : null}
+          </Card>
+          <Card>
+            <h3 className="text-base font-black">آدرس دفتر</h3>
+            <p className="mt-2 whitespace-pre-line text-sm leading-6 text-muted">{address || "آدرسی ثبت نشده است."}</p>
+          </Card>
+          <Card>
+            <h3 className="text-base font-black">ساعات کاری</h3>
+            <p className="mt-2 text-sm leading-6 text-muted">{item?.workingHours ? toPersianDigits(item.workingHours) : "ساعات کاری ثبت نشده است."}</p>
+          </Card>
+          <Card>
+            <h3 className="text-base font-black">شبکه‌های اجتماعی</h3>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {Object.entries(socialLabels).map(([name, label]) => {
+                const href = values[name];
+                return href ? (
+                  <a className="inline-flex min-h-9 items-center rounded-lg border border-border px-2.5 text-sm font-bold text-brand" href={href} key={name} rel="noreferrer" target="_blank">{label}</a>
+                ) : null;
+              })}
+            </div>
+          </Card>
+        </div>
+        {mapEmbedUrl ? (
+          <section className="mt-4 overflow-hidden rounded-xl border border-border bg-surface" aria-labelledby="contact-map-title">
+            <div className="flex flex-col gap-3 border-b border-border p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
+              <div>
+                <p className="inline-flex items-center gap-2 text-sm font-bold text-brand">
+                  <LocationIcon className="size-5" />
+                  موقعیت روی نقشه
+                </p>
+                <h3 id="contact-map-title" className="mt-1 text-base font-black">{mapTitle}</h3>
+                {address ? <p className="mt-1 max-w-3xl text-sm leading-6 text-muted">{address}</p> : null}
+              </div>
+              {mapLinkUrl ? (
+                <ButtonLink href={mapLinkUrl} target="_blank" rel="noreferrer" variant="accent" size="sm" className="w-full shrink-0 !text-white hover:!text-white sm:w-auto">
+                  بازکردن نقشه و مسیریابی
+                </ButtonLink>
+              ) : null}
+            </div>
+            <iframe
+              title={mapTitle}
+              src={mapEmbedUrl}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              allowFullScreen
+              className="h-44 w-full border-0 sm:h-56"
+            />
+          </section>
+        ) : null}
+      </section>
+    </Container>
   );
 }
