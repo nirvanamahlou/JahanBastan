@@ -1,0 +1,16 @@
+{
+  "number": "AV9030",
+  "origin": "تهران",
+  "destination": "دبی",
+  "originCode": "IKA",
+  "destinationCode": "DXB",
+  "carrier": "ماهان ایر",
+  "depart": "2026-11-30T06:30:00+00:00",
+  "arrive": "2026-11-30T08:30:00+00:00",
+  "baggage": 20.0,
+  "seats": 6,
+  "adult": 1000000,
+  "child": 750000,
+  "infant": 100000,
+  "currency": "IRR"
+}
