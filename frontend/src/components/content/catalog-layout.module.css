@@ -6,13 +6,17 @@
 .sidebar form{display:grid;gap:18px;margin-top:20px}
 .sidebar label,.field{display:grid;gap:8px;font-size:13px;font-weight:700}
 .sidebar button[type=submit]{width:100%;min-height:44px;border-radius:10px;background:var(--brand);color:#fff;font-weight:800}
-.sidebar.flightSidebar{padding:10px;background:var(--surface)}
-.flightSidebar summary{padding:4px 2px 8px}
-.flightSidebar .flightFilters{grid-template-columns:minmax(0,1fr);gap:8px;margin-top:4px}
-.flightFilterGroup{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;min-width:0;border:1px solid var(--border);border-radius:12px;padding:6px 8px 8px;background:color-mix(in srgb,var(--surface-muted) 64%,var(--surface))}
-.flightFilterGroup legend{padding-inline:6px;font-size:13px;font-weight:800}
-.flightFilterGroup > [data-date-range]{height:auto;grid-column:1/-1}
-.flightFilters .flightCheckbox{display:flex;align-items:center;gap:8px}
+.sidebar.flightSidebar { padding: 10px; border-radius: 12px; background: var(--surface); }
+.flightSidebar summary { padding: 2px 0 7px; font-size: 14px; }
+.flightSidebar .flightFilters { grid-template-columns: minmax(0, 1fr); gap: 8px; margin-top: 0; }
+.flightFilterGroup { display: grid; grid-template-columns: minmax(0, 1fr); gap: 5px; min-width: 0; }
+.flightFilters fieldset + fieldset { border-block-start: 1px solid var(--border); padding-block-start: 5px; }
+.flightFilters fieldset legend { padding-inline-end: 5px; font-size: 12px; line-height: 1.4; font-weight: 750; }
+.flightFilterGroup > div:not([data-date-range]) { gap: 3px; font-size: 12px; }
+.flightFilterGroup > [data-date-range] { height: auto; grid-column: 1/-1; }
+.flightFilters .flightCheckbox { display: flex; align-items: center; gap: 6px; font-weight: 650; }
+.flightReset { justify-self: start; padding-block: 3px; color: var(--muted); font-size: 12px; text-decoration: underline; text-underline-offset: 3px; }
+.flightReset:hover { color: var(--brand); }
 .content{min-width:0}
 .heading{display:flex;align-items:center;gap:12px;margin-bottom:24px;min-width:0}
 .heading h1{font-size:28px;font-weight:900;overflow-wrap:anywhere}
@@ -36,10 +40,34 @@
 @media(max-width:540px){.row{grid-template-columns:minmax(0,1fr)}.rowMedia{grid-row:1}.facts{margin-top:14px}.heading h1{font-size:22px}.sort form{width:100%;flex-wrap:wrap}}
 
 .catalogContainer.catalogContainer.flightResultsContainer{max-width:1040px}
-.flightLayout{grid-template-columns:240px minmax(0,1fr);gap:18px}
-.flightSidebar .flightFilters :is(label,fieldset legend){font-size:12px}
-.flightSidebar .flightFilters :is(button[aria-expanded],select,input[type=search],[data-date-range] button){min-height:36px;font-size:12px}
-.flightSidebar .flightFilters > fieldset{padding:8px}
+.flightLayout { grid-template-columns: 218px minmax(0, 1fr); gap: 14px; }
+.flightSidebar .flightFilters label { gap: 3px; font-size: 12px; }
+.flightSidebar .flightFilters :is(button[role=combobox], select, input[type=search]) {
+  min-height: 38px;
+  padding-inline: 7px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--surface);
+  font-size: 12px;
+}
+.flightSidebar .flightFilters :is(button[role=combobox], select, input[type=search]):not(:focus-visible) { box-shadow: none; }
+.flightSidebar .flightFilters [data-date-controls] { gap: 4px; }
+.flightSidebar .flightFilters :is([data-trip-type], [data-date-values]) {
+  min-height: 38px;
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  box-shadow: none;
+}
+.flightSidebar .flightFilters [data-trip-type] { grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 2px; }
+.flightSidebar .flightFilters [data-trip-type] button {
+  min-height: 32px;
+  padding-inline: 2px;
+  border-radius: 5px;
+  font-size: 11px;
+}
+.flightSidebar .flightFilters [data-trip-type] button[aria-pressed=true] { box-shadow: none; }
+.flightSidebar .flightFilters [data-date-values] button { min-height: 36px; padding-inline: 7px; font-size: 12px; }
 @media(max-width:800px){.flightLayout{grid-template-columns:minmax(0,1fr)}}
 
 /* The country view keeps the same filters with a more compact card layout. */

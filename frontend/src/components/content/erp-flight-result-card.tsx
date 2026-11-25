@@ -379,12 +379,9 @@ export function ErpFlightResultCard({
   const soldOut = seats !== null && seats < 1 && !result?.retryable;
   return (
     <article id={selectionAnchor} className="scroll-mt-28 target:ring-2 target:ring-brand overflow-hidden rounded-xl border border-slate-300 bg-white">
-      <div className="grid lg:grid-cols-[minmax(0,1fr)_12rem]">
-        <div className="min-w-0 p-4">
-          <p className="text-xs font-semibold text-slate-600">
-            {flight.return_leg ? "رفت‌وبرگشت" : "یک‌طرفه"}
-          </p>
-          <div className="mt-2 divide-y divide-slate-200">
+      <div className="grid lg:grid-cols-[minmax(0,1fr)_10.5rem]">
+        <div className="min-w-0 px-3 py-2 sm:px-4">
+          <div className="space-y-2">
             {legs.map((leg, index) => (
               <FlightTimeline key={leg.product_id} leg={leg} label={index === 0 ? "رفت" : "برگشت"} />
             ))}
@@ -412,14 +409,14 @@ export function ErpFlightResultCard({
             </div>
           ) : null}
         </div>
-        <aside className="flex flex-col justify-center border-t border-brand/10 bg-slate-50 p-4 lg:border-s lg:border-t-0">
-          <span className="text-center text-xs text-muted">{flight.return_leg ? "نرخ رفت‌وبرگشت یک بزرگسال" : "نرخ یک بزرگسال"}</span>
-          <strong className="mt-1 block text-center text-lg text-brand">
-            {formatCurrency(flight.amount, flight.currency)}
-          </strong>
-          {seats !== null ? <span className="mt-2 text-xs font-bold text-muted">{number.format(seats)} صندلی باقی‌مانده</span> : null}
+        <aside className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-t border-brand/10 bg-slate-50 px-3 py-2 lg:flex lg:flex-col lg:justify-center lg:border-s lg:border-t-0">
+          <div className="min-w-0 lg:text-center">
+            <span className="block text-xs leading-snug text-muted">{flight.return_leg ? "نرخ رفت‌وبرگشت یک بزرگسال" : "نرخ یک بزرگسال · یک‌طرفه"}</span>
+            <strong className="block text-base leading-tight text-brand">{formatCurrency(flight.amount, flight.currency)}</strong>
+            {seats !== null ? <span className="block text-xs leading-snug text-muted">{number.format(seats)} صندلی باقی‌مانده</span> : null}
+          </div>
           <button
-            className="mt-4 min-h-11 w-full rounded-md bg-brand px-4 text-sm font-black text-white disabled:opacity-60"
+            className="min-h-10 rounded-md bg-brand px-3 text-xs lg:w-full lg:text-sm font-black text-white disabled:opacity-60"
             disabled={soldOut || busy || checkingSelection || authOpen || modalOpen || Boolean(review) || result?.state === "draft"}
             onClick={() =>
               result?.retryable ? void checkout() : void choose()

@@ -449,7 +449,7 @@ export default async function FlightsPage({ searchParams }: { searchParams: Prom
 
           {shouldShowResults ? (
           <div className={`${catalogStyles.layout} ${catalogStyles.flightLayout}`}>
-            <aside data-mobile-filter-panel className={`${catalogStyles.sidebar} ${catalogStyles.flightSidebar} depth-box`}>
+            <aside data-mobile-filter-panel className={`${catalogStyles.sidebar} ${catalogStyles.flightSidebar}`}>
               <ResponsiveFilterPanel title="فیلترهای پرواز">
               <LiveFlightForm className={catalogStyles.flightFilters}>
                 <input name="showResults" type="hidden" value="1" />
@@ -473,7 +473,7 @@ export default async function FlightsPage({ searchParams }: { searchParams: Prom
                   </select>
                 </label> : null}
                 <label className={catalogStyles.flightCheckbox}><input defaultChecked={featured} name="featured" type="checkbox" value="true" /> فقط پرفروش</label>
-                {hasFilters ? <Link className="text-center text-sm font-bold text-brand underline underline-offset-4" href="/services/flights/">پاک کردن فیلترها</Link> : null}
+                {hasFilters ? <Link className={catalogStyles.flightReset} href="/services/flights/">پاک کردن فیلترها</Link> : null}
               </LiveFlightForm>
               </ResponsiveFilterPanel>
             </aside>

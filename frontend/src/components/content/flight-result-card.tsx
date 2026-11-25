@@ -8,11 +8,7 @@ import {
   type TicketDirection,
   useTicketSelection,
 } from "@/components/content/ticket-selection-provider";
-import {
-  ClockIcon,
-  PlaneTakeoffIcon,
-  SuitcaseIcon,
-} from "@/components/layout/site-icons";
+import { ClockIcon } from "@/components/layout/site-icons";
 import { formatBaggageAllowance } from "@/lib/baggage";
 import { formatCurrency } from "@/lib/currency";
 import { formatTravelDuration } from "@/lib/travel-duration";
@@ -102,16 +98,8 @@ export function FlightResultCard(props: FlightResultCardProps) {
       id={`ticket-card-${ticketKey}`}
       className={`flight-interactive-panel content-card-motion relative overflow-hidden rounded-2xl border-2 bg-white/90 shadow-[0_10px_28px_rgba(1,37,105,0.07)] ${selected ? "border-emerald-500 ring-2 ring-emerald-100" : "border-brand/20"}`}
     >
-      {props.isFeatured ? (
-        <span className="absolute left-4 top-4 z-10 rounded-full bg-accent-strong px-3 py-1 text-xs font-black text-white">
-          پرفروش
-        </span>
-      ) : null}
       <div className="grid lg:grid-cols-[minmax(0,1fr)_10rem]">
-        <div className="px-4 py-3 sm:px-6 sm:py-4">
-          <p className="mb-3 inline-flex items-center gap-2 text-xs font-black text-brand">
-            <PlaneTakeoffIcon className="size-4" /> {directionLabel}
-          </p>
+        <div className="px-3 py-2 sm:px-4">
           <FlightRouteCard
             label={directionLabel} carrier={props.provider || ""}
             flightNumber={flightNumber} duration={travelDuration || undefined}
@@ -120,15 +108,15 @@ export function FlightResultCard(props: FlightResultCardProps) {
             origin={{ city: usesReturnLeg ? props.destination || baseDestination : props.origin || baseOrigin, code: usesReturnLeg ? props.destinationAirportCode : props.originAirportCode, time: shownTime(departureTime) }}
             destination={{ city: usesReturnLeg ? props.origin || baseOrigin : props.destination || baseDestination, code: usesReturnLeg ? props.originAirportCode : props.destinationAirportCode, time: shownTime(arrivalTime) }}
           />
-          <div className="mt-3 grid grid-cols-2 gap-2 text-xs xl:grid-cols-4">
-            <span className="rounded-lg bg-surface-muted px-2.5 py-1.5 text-foreground">{props.provider || "\u0634\u0631\u06a9\u062a \u0647\u0648\u0627\u067e\u06cc\u0645\u0627\u06cc\u06cc \u0627\u0639\u0644\u0627\u0645 \u0645\u06cc\u200c\u0634\u0648\u062f"}</span>
-            {flightNumber ? <span className="rounded-lg bg-surface-muted px-2.5 py-1.5 text-foreground">{"\u0634\u0645\u0627\u0631\u0647 \u067e\u0631\u0648\u0627\u0632"} <bdi className="font-mono font-bold" dir="ltr">{flightNumber}</bdi></span> : null}
-            {travelDuration ? <span className="rounded-lg bg-brand/10 px-2.5 py-1.5 font-bold text-brand">{"\u0645\u062f\u062a \u0633\u0641\u0631"} {travelDuration}</span> : null}
-            {props.aircraftModel ? <span className="rounded-lg bg-surface-muted px-2.5 py-1.5 text-foreground">هواپیما: {props.aircraftModel}</span> : null}
-            {props.serviceCategory ? <span className="rounded-lg bg-brand/10 px-2.5 py-1.5 font-bold text-brand">{categoryLabels[props.serviceCategory] ?? props.serviceCategory}</span> : null}
-            {props.availableSeats !== null ? <span className="rounded-lg bg-emerald-50 px-2.5 py-1.5 font-bold text-emerald-700">{props.availableSeats.toLocaleString("fa-IR")} {"\u0635\u0646\u062f\u0644\u06cc \u0628\u0627\u0642\u06cc\u200c\u0645\u0627\u0646\u062f\u0647"}</span> : null}
-          </div>          {props.summary ? <p className="mt-2 line-clamp-2 text-xs leading-6 text-muted">{props.summary}</p> : null}
-          <div className="mt-3 flex flex-col gap-2 border-t border-brand/10 pt-3 sm:flex-row">
+          {(props.isFeatured || props.aircraftModel || props.availableSeats !== null) && (
+            <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted">
+              {props.isFeatured && <span className="text-accent-strong">پرفروش</span>}
+              {props.aircraftModel && <span>{props.aircraftModel}</span>}
+              {props.availableSeats !== null && <span>{props.availableSeats.toLocaleString("fa-IR")} صندلی باقی‌مانده</span>}
+            </div>
+          )}
+          {props.summary ? <p className="mt-1 line-clamp-2 text-xs leading-snug text-muted">{props.summary}</p> : null}
+          <div className="mt-2 flex flex-wrap gap-2 border-t border-brand/10 pt-2">
             <CartAddButton className="min-w-0 flex-1" buttonClassName="!min-h-10 text-xs sm:text-sm" itemType="flight" travelServiceId={props.id} />
           <button
             aria-pressed={selected}
@@ -140,20 +128,14 @@ export function FlightResultCard(props: FlightResultCardProps) {
           </button>
           </div>
         </div>
-        <div className="flex flex-col justify-start gap-3 border-t-2 border-brand/15 bg-surface-muted/85 p-4 lg:border-r-2 lg:border-t-0">
-          <div className="grid grid-cols-2 gap-2 text-xs text-muted lg:grid-cols-1">
-            <span className="inline-flex items-center gap-2">
-              <ClockIcon className="size-4 text-brand" />
-              {props.stopsCount ? `${props.stopsCount.toLocaleString("fa-IR")} توقف` : "بدون توقف"}
-            </span>
-            <span className="inline-flex items-center gap-2">
-              <SuitcaseIcon className="size-4 text-brand" />
-              {formatBaggageAllowance(props.baggage)}
-            </span>
-          </div>
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-brand/15 bg-surface-muted/85 px-3 py-2 lg:flex-col lg:items-start lg:justify-center lg:border-s lg:border-t-0">
+          <span className="inline-flex items-center gap-1.5 text-xs text-muted">
+            <ClockIcon className="size-4 text-brand" />
+            {props.stopsCount ? `${props.stopsCount.toLocaleString("fa-IR")} توقف` : "بدون توقف"}
+          </span>
           <div>
             <span className="text-xs text-muted">قیمت هر مسافر</span>
-            <strong className="mt-1 block text-lg text-brand">
+            <strong className="block text-base text-brand">
               {price}
             </strong>
           </div>
