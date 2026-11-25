@@ -147,9 +147,9 @@ export function SettingsForm({ initialSettings }: { initialSettings: ManagedSite
             ]),
           ),
           ...Object.fromEntries(
-            footerQuickLinks.flatMap((_, index) => [
-              [`footerQuick${index + 1}Label`, form.get(`footerQuick${index + 1}Label`) || ""],
-              [`footerQuick${index + 1}Url`, form.get(`footerQuick${index + 1}Url`) || ""],
+            footerQuickLinks.flatMap(({ settingsSlot }) => [
+              [`footerQuick${settingsSlot}Label`, form.get(`footerQuick${settingsSlot}Label`) || ""],
+              [`footerQuick${settingsSlot}Url`, form.get(`footerQuick${settingsSlot}Url`) || ""],
             ]),
           ),
         },
@@ -487,10 +487,10 @@ export function SettingsForm({ initialSettings }: { initialSettings: ManagedSite
       </fieldset>
       <fieldset className="space-y-4 rounded-2xl border border-border bg-surface p-5">
         <legend className="px-2 text-xl font-black">لینک‌های دسترسی سریع</legend>
-        {footerQuickLinks.map((item, index) => (
+        {footerQuickLinks.map((item) => (
           <div className="grid gap-3 sm:grid-cols-2" key={item.href}>
-            <Input id={`settings-footer-quick-${index + 1}-label`} name={`footerQuick${index + 1}Label`} label={`عنوان لینک ${(index + 1).toLocaleString("fa-IR")}`} defaultValue={initialSettings.socialLinks[`footerQuick${index + 1}Label`] ?? item.label} />
-            <Input id={`settings-footer-quick-${index + 1}-url`} name={`footerQuick${index + 1}Url`} label="مسیر داخلی" dir="ltr" defaultValue={initialSettings.socialLinks[`footerQuick${index + 1}Url`] ?? item.href} />
+            <Input id={`settings-footer-quick-${item.settingsSlot}-label`} name={`footerQuick${item.settingsSlot}Label`} label={`عنوان لینک ${item.settingsSlot.toLocaleString("fa-IR")}`} defaultValue={initialSettings.socialLinks[`footerQuick${item.settingsSlot}Label`] ?? item.label} />
+            <Input id={`settings-footer-quick-${item.settingsSlot}-url`} name={`footerQuick${item.settingsSlot}Url`} label="مسیر داخلی" dir="ltr" defaultValue={initialSettings.socialLinks[`footerQuick${item.settingsSlot}Url`] ?? item.href} />
           </div>
         ))}
       </fieldset>

@@ -27,14 +27,15 @@ export const siteConfig = {
       ],
     },
   ] satisfies ReadonlyArray<NavigationItem>,
+  // These numbers match the saved footerQuick settings.
   footerLinks: [
-    { label: "تورهای گردشگری", href: "/tours/" },
-    { label: "مقاصد", href: "/destinations/" },
-    { label: "هتل‌ها", href: "/hotels/" },
-    { label: "مجله گردشگری", href: "/articles/" },
-    { label: "درباره ما", href: "/about/" },
-    { label: "تماس با ما", href: "/contact/" },
-    { label: "خرید اقساطی", href: "/installments/" },
+    { settingsSlot: 1, label: "تورهای گردشگری", href: "/tours/" },
+    { settingsSlot: 2, label: "مقاصد", href: "/destinations/" },
+    { settingsSlot: 3, label: "هتل‌ها", href: "/hotels/" },
+    { settingsSlot: 4, label: "مجله گردشگری", href: "/articles/" },
+    { settingsSlot: 5, label: "درباره ما", href: "/about/" },
+    { settingsSlot: 7, label: "تماس با ما", href: "/contact/" },
+    { settingsSlot: 8, label: "خرید اقساطی", href: "/installments/" },
   ],
   socialLinks: [
     {

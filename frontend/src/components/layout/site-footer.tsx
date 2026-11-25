@@ -72,12 +72,13 @@ export async function SiteFooter() {
       (/^\/services\/?$/.test(pathname) && ["flight", "hotel", "bus", "train", "visa"].includes(new URLSearchParams(query).get("type") ?? ""));
   };
   const quickLinks = siteConfig.footerLinks
-    .map((item, index) => ({
-      id: `footer-quick-${index + 1}`,
-      label: values[`footerQuick${index + 1}Label`]?.trim() || item.label,
-      href: safeInternalHref(values[`footerQuick${index + 1}Url`], item.href),
+    .map((item) => ({
+      id: `footer-quick-${item.settingsSlot}`,
+      label: values[`footerQuick${item.settingsSlot}Label`]?.trim() || item.label,
+      href: safeInternalHref(values[`footerQuick${item.settingsSlot}Url`], item.href),
     }))
     .filter((item) => item.href !== siteConfig.contactHref && !isCommerceLink(item.href) && !isTravelServiceLink(item.href))
+    .filter((item) => !/^\/faq\/?(?:[?#]|$)/.test(item.href))
     .filter((item, index, items) =>
       items.findIndex(
         (candidate) => candidate.href === item.href || candidate.label === item.label,
