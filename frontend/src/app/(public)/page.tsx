@@ -169,7 +169,7 @@ export default async function HomePage() {
   const iran = rankedCountries.find(item => ["ایران", "iran"].includes(normalizeCountryName(item.country).toLowerCase()));
   const foreign = rankedCountries.filter(item => item !== iran && isHomepageCountry(item.country)).slice(0, 3);
   const groups = await Promise.all([...(iran ? [iran] : []), ...foreign].map(async item => {
-    const params = new URLSearchParams({ country: item.country, pageSize: item === iran ? "3" : "1" });
+    const params = new URLSearchParams({ country: item.country, pageSize: item === iran ? "9" : "3" });
     return apiGet<{ items: HomeHotel[] }>(`/hotels?${params}`).then(data => data.items).catch(() => []);
   }));
   const hotelItems = groups.flat();

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useHomepageSearchService } from "./homepage-search-guide";
 import { CountryFlag } from "@/components/content/country-flag";
 import { BusIcon, PlaneIcon, TrainIcon } from "@/components/layout/site-icons";
@@ -53,9 +53,47 @@ function HotelCountryGrid({ cards }: { cards: ShowcaseCard[] }) {
 }
 
 function PopularHotels({ cards, title }: { cards: ShowcaseCard[]; title: string }) {
+  const track = useRef<HTMLDivElement>(null);
+  const id = useId();
+  const [edges, setEdges] = useState({ previous: false, next: false });
+
+  useEffect(() => {
+    const el = track.current;
+    if (!el) return;
+    function update() {
+      if (!el) return;
+      const offset = -el.scrollLeft;
+      const previous = offset > 2;
+      const next = offset < el.scrollWidth - el.clientWidth - 2;
+      setEdges(old => old.previous === previous && old.next === next ? old : { previous, next });
+    }
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    el.addEventListener("scroll", update, { passive: true });
+    return () => {
+      observer.disconnect();
+      el.removeEventListener("scroll", update);
+    };
+  }, [cards.length]);
+
+  function move(direction: number) {
+    const el = track.current;
+    const card = el?.firstElementChild;
+    if (!el || !card) return;
+    const step = card.getBoundingClientRect().width + parseFloat(getComputedStyle(el).columnGap);
+    el.scrollBy({ left: direction * step, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+  }
+
   return <section className={styles.popular}>
-    <h2>{title}</h2>
-    {cards.length ? <div className={styles.popularGrid}>
+    <header className={styles.popularHeader}>
+      <h2>{title}</h2>
+      {(edges.previous || edges.next) && <div className={styles.popularControls}>
+        <button type="button" aria-controls={id} aria-label={`قبلی، ${title}`} disabled={!edges.previous} onClick={() => move(1)}>→</button>
+        <button type="button" aria-controls={id} aria-label={`بعدی، ${title}`} disabled={!edges.next} onClick={() => move(-1)}>←</button>
+      </div>}
+    </header>
+    {cards.length ? <div ref={track} id={id} role="region" aria-label={title} dir="rtl" tabIndex={0} className={styles.popularGrid}>
       {cards.map(card => <Link className={styles.popularCard} href={card.href} key={card.id}>
         <div className={styles.popularPhoto}><ShowcaseImage src={card.imageUrl} sizes="(max-width:600px) 90vw, 30vw" /></div>
         <div className={styles.popularBody}>
