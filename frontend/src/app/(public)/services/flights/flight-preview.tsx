@@ -28,7 +28,7 @@ export function FlightPreview() {
     <Link className={styles.back} href={flightList}>بازگشت به پروازها</Link>
     <header className={styles.header}>
       <div><p>{date}</p><h1 id="flight-preview-heading">پرواز {flight.origin} به {flight.destination}</h1></div>
-      <span className={styles.badge}>فقط نمایش</span>
+      <span className={styles.badge}>پرواز آزمایشی</span>
     </header>
     <article className={styles.ticket} aria-label="مشخصات پرواز">
       <div className={styles.itinerary}>
@@ -45,7 +45,8 @@ export function FlightPreview() {
         <h2>نرخ بلیت</h2>
         <dl>{([["بزرگسال", flight.adult], ["کودک", flight.child], ["نوزاد", flight.infant]] as const).map(([label, rial]) =>
           <div key={label}><dt>{label}</dt><dd>{number.format(rial / 10)} تومان</dd></div>)}</dl>
-        <p>رزرو و پرداخت برای این پیش‌نمایش غیرفعال است.</p>
+        <p>سفارش آزمایشی در آوینا ثبت می‌شود. مبلغ پرداختی صفر است.</p>
+        <Link className={styles.purchase} href={'/services/flights/?showResults=1&flightNumber=AV9030&departureFrom=2026-11-30'}>شروع خرید آزمایشی</Link>
       </aside>
     </article>
   </section>;
