@@ -157,25 +157,41 @@ export function CombinedTourCheckout({ hotelSummary, departureDate, country, las
           <PassengerCheckoutModal inline lastTravelDay={lastTravelDay} requiresPassport={!!country?.trim() && !/^(ایران|ايران|iran|irn|ir)$/i.test(country.trim())} fixedPassengerCounts={counts} initialPassengers={passengers} open={editing || !passengers.length}
             onClose={onClose} onComplete={value => { setPassengers(value); setEditing(false); setConfirmedAmount(null); }} />
           {passengers.length && !editing ? (
-            <div className="space-y-3">
-              <h2 className="font-black text-brand">بازبینی مسافران و مبلغ</h2>
-              {hotelSummary && <p>{hotelSummary}</p>}
-              {departureDate && <p>تاریخ سفر · {formatPersianDate(departureDate)}{lastTravelDay && ` تا ${formatPersianDate(lastTravelDay)}`}</p>}
-              <ul>{passengers.map((person, i) => <li key={i}>{person.firstNameEn || person.firstName} {person.lastNameEn || person.lastName} · <bdi>{person.passportNumber || person.nationalCode}</bdi></li>)}</ul>
-              {revisedPrice ? <p className="text-sm font-bold text-brand">مبلغ نهایی به‌روز‌شده {formatCurrency(payable, "IRT")}</p> : <TourPriceBreakdown summary={priceSummary} />}
-              <button type="button" className="text-sm font-bold text-brand underline" disabled={busy || addingToCart} onClick={() => {
-                setEditing(true);
-                setConfirmedAmount(null);
-                setNotice("");
-              }}>ویرایش اطلاعات مسافران</button>
-              <CartAddButton itemType="tour" tourId={tourId} tourDepartureId={departureId} tourHotelPriceId={tourHotelPriceId}
+            <div className="grid min-w-0 gap-4 sm:grid-cols-2">
+              <h2 className="text-lg font-black text-brand sm:col-span-2">بازبینی مسافران و مبلغ</h2>
+              <section className="min-w-0 space-y-2 rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sky-950 shadow-sm">
+                <h3 className="text-sm font-bold">اقامت و تاریخ سفر</h3>
+                {hotelSummary && <p className="break-words font-bold"><bdi>{hotelSummary}</bdi></p>}
+                {departureDate && <p className="text-sm">{formatPersianDate(departureDate)}{lastTravelDay && lastTravelDay !== departureDate && ` تا ${formatPersianDate(lastTravelDay)}`}</p>}
+              </section>
+              <section className="min-w-0 space-y-2 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-950 shadow-sm">
+                <h3 className="text-sm font-bold">خلاصهٔ هزینه</h3>
+                {revisedPrice ? <p className="font-black">مبلغ نهایی به‌روز‌شده {formatCurrency(payable, "IRT")}</p> : <TourPriceBreakdown summary={priceSummary} />}
+              </section>
+              <section className="rounded-2xl border border-violet-200 bg-violet-50 p-4 shadow-sm sm:col-span-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h3 className="font-bold text-violet-950">مسافران ({passengers.length.toLocaleString("fa-IR")})</h3>
+                  <button type="button" className="min-h-10 text-sm font-bold text-brand underline" disabled={busy || addingToCart} onClick={() => {
+                    setEditing(true);
+                    setConfirmedAmount(null);
+                    setNotice("");
+                  }}>ویرایش اطلاعات مسافران</button>
+                </div>
+                <ul className="mt-2 grid gap-2 sm:grid-cols-2">{passengers.map((person, i) => (
+                  <li className="grid min-w-0 gap-1 rounded-xl border border-violet-100 bg-white p-3" key={i}>
+                    <strong className="break-words text-sm text-brand"><bdi>{person.firstNameEn || person.firstName} {person.lastNameEn || person.lastName}</bdi></strong>
+                    <span className="text-xs text-muted">{person.passportNumber ? "گذرنامه" : "کد ملی"} · <bdi>{person.passportNumber || person.nationalCode}</bdi></span>
+                  </li>
+                ))}</ul>
+              </section>
+              <CartAddButton className="sm:col-span-2" itemType="tour" tourId={tourId} tourDepartureId={departureId} tourHotelPriceId={tourHotelPriceId}
                 combinedDeparturePriceId={combinedDeparturePriceId} roomSelection={roomSelection} disabled={busy}
                 onPendingChange={setAddingToCart} onAdded={setCartItem} idleLabel="انتخاب اقساط، اعتبار آژانس یا کد تخفیف" />
-              <label className="flex items-center gap-2 text-sm">
+              <label className="flex items-center gap-2 text-sm sm:col-span-2">
                 <input type="checkbox" disabled={busy} checked={termsAccepted} onChange={(event) => setConfirmedAmount(event.target.checked ? payable : null)} />
                 <span><Link href="/terms/" target="_blank" className="font-bold underline">شرایط خرید و استرداد</Link> و مبلغ {formatCurrency(payable, "IRT")} را تأیید می‌کنم.</span>
               </label>
-              <button type="button" disabled={busy || addingToCart || !termsAccepted} className="account-primary rounded-lg bg-brand px-4 py-2 text-sm text-white disabled:opacity-50" onClick={() => void submit()}>
+              <button type="button" disabled={busy || addingToCart || !termsAccepted} className="account-primary min-h-11 rounded-xl bg-brand px-4 py-2 sm:col-span-2 text-sm text-white disabled:opacity-50" onClick={() => void submit()}>
                 {busy ? "در حال ثبت…" : "ثبت درخواست رزرو"}
               </button>
             </div>

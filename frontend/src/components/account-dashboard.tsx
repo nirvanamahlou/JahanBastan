@@ -1,11 +1,10 @@
 "use client";
 
-import { ErpFlightCheckoutRecovery } from "@/components/content/erp-flight-result-card";
-import { ErpFlightOrders } from "@/components/content/erp-flight-orders";
+import { TripCard } from "@/components/trip-card";
 
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 
 import { AccountForm } from "@/components/account-form";
@@ -59,7 +58,6 @@ type SavedTour = { id: number; tourId: number; title: string; slug: string; pric
 type OrderServiceItem = { title: string; details: string | null };
 type Order = {
   id: number;
-  orderNumber: string;
   title: string | null;
   amount: string;
   currency: string;
@@ -83,6 +81,8 @@ type Section = "profile" | "trips" | "passengers" | "insurance" | "favorites" | 
 const navItems: Array<{ id: Section; label: string; icon: string }> = [
   { id: "profile", label: "حساب کاربری", icon: "◉" },
   { id: "trips", label: "سفرهای من", icon: "◫" },
+  { id: "passengers", label: "لیست مسافران", icon: "♙" },
+  { id: "favorites", label: "علاقه‌مندی‌ها", icon: "♡" },
   { id: "visa", label: "درخواست ویزا", icon: "▣" },
   { id: "support", label: "درخواست پشتیبانی", icon: "◔" },
   { id: "wallet", label: "موجودی و اعتبار من", icon: "¤" },
@@ -145,17 +145,14 @@ export function AccountDashboard() {
   const onlineSalesEnabled = useOnlineSalesEnabled();
   const router = useRouter();
   const [dashboard, setDashboard] = useState<Dashboard | null>(null);
-  const [active, setActive] = useState<Section>(() => {
-    if (typeof window === "undefined") return "profile";
-    const tab = new URLSearchParams(window.location.search).get("tab");
-    return navItems.some((item) => item.id === tab) ? tab as Section : "profile";
-  });
+  const tab = useSearchParams().get("tab");
+  const active = navItems.find(item => item.id === tab)?.id ?? "profile";
   const [loading, setLoading] = useState(true);
   const [notice, setNotice] = useState("");
   const [profileSaving, setProfileSaving] = useState(false);
   const [passengers, setPassengers] = useState<Passenger[]>([]);
   const [passengerSearch, setPassengerSearch] = useState("");
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<Order[] | null>(null);
   const [supportRequests, setSupportRequests] = useState<SupportRequest[]>([]);
   const [alerts, setAlerts] = useState<AvailabilityAlert[]>([]);
   const [insurances, setInsurances] = useState<Insurance[]>([]);
@@ -196,6 +193,7 @@ export function AccountDashboard() {
     if (section === "trips") {
       const response = await request("/account/orders");
       if (response?.ok) setOrders(await response.json() as Order[]);
+      else setNotice("دریافت سفارش‌ها انجام نشد. صفحه را دوباره باز کنید.");
     }
     if (section === "support") {
       const response = await request("/account/support-requests");
@@ -213,11 +211,12 @@ export function AccountDashboard() {
   }, [loadDashboard]);
 
   useEffect(() => {
+    if (!dashboard) return;
     const timer = window.setTimeout(() => { void loadSection(active); }, 0);
     return () => window.clearTimeout(timer);
     // The section change is the trigger; search refreshes explicitly from its button.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [active]);
+  }, [active, dashboard?.user.email]);
 
   const cartTotal = useMemo(() => dashboard?.cartItems.reduce((total, item) => total + Number(item.priceAmount ?? 0), 0) ?? 0, [dashboard]);
 
@@ -273,7 +272,8 @@ export function AccountDashboard() {
 
   async function addPassenger(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
+    const element = event.currentTarget;
+    const form = new FormData(element);
     const response = await request("/account/passengers", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -298,7 +298,7 @@ export function AccountDashboard() {
       }),
     });
     setNotice(response?.ok ? "مسافر جدید ذخیره شد." : "ذخیره مسافر ناموفق بود؛ فیلدهای ضروری و اطلاعات شناسایی را بررسی کنید.");
-    if (response?.ok) { event.currentTarget.reset(); await loadSection("passengers"); }
+    if (response?.ok) { element.reset(); await loadSection("passengers"); }
   }
   async function deletePassenger(id: number) {
     const response = await request(`/account/passengers/${id}`, { method: "DELETE" });
@@ -359,7 +359,7 @@ export function AccountDashboard() {
       setNotice("حذف از فهرست سفرها ناموفق بود. دوباره تلاش کنید.");
       return;
     }
-    setOrders((current) => current.filter((item) => !(item.source === order.source && item.id === order.id)));
+    setOrders((current) => (current ?? []).filter((item) => !(item.source === order.source && item.id === order.id)));
     setNotice("این مورد از فهرست سفرهای شما حذف شد.");
     await loadDashboard();
   }
@@ -383,7 +383,7 @@ export function AccountDashboard() {
 
   return (
     <div className="mx-auto grid max-w-7xl gap-5 lg:grid-cols-[230px_minmax(0,1fr)]" dir="rtl">
-      <aside className="h-fit rounded-2xl border border-border bg-white p-2 shadow-sm lg:sticky lg:top-24"><div className="border-b border-border px-3 py-4"><p className="font-black text-brand">پنل کاربری</p><p className="mt-1 truncate text-xs text-muted" dir="ltr">{dashboard.user.email}</p></div><nav className="mt-2" aria-label="بخش‌های پنل کاربری">{navItems.map((item) => <button className={`flex min-h-11 w-full items-center justify-between rounded-xl px-3 text-right text-sm font-bold transition ${active === item.id ? "bg-brand text-white" : "text-brand hover:bg-surface-muted"}`} key={item.id} onClick={() => { setActive(item.id); void loadSection(item.id); }} type="button"><span>{item.label}</span><span aria-hidden>{item.icon}</span></button>)}</nav><button className="mt-2 flex min-h-11 w-full items-center justify-between rounded-xl border border-red-200 px-3 text-sm font-bold text-red-700" onClick={() => void logout()} type="button"><span>خروج از حساب کاربری</span><span aria-hidden>↩</span></button></aside>
+      <aside className="h-fit rounded-2xl border border-border bg-white p-2 shadow-sm lg:sticky lg:top-24"><div className="border-b border-border px-3 py-4"><p className="font-black text-brand">پنل کاربری</p><p className="mt-1 truncate text-xs text-muted" dir="ltr">{dashboard.user.email}</p></div><nav className="mt-2" aria-label="بخش‌های پنل کاربری">{navItems.map((item) => <Link aria-current={active === item.id ? "page" : undefined} href={`/account/?tab=${item.id}`} scroll={false} className={`flex min-h-11 w-full items-center justify-between rounded-xl px-3 text-right text-sm font-bold transition ${active === item.id ? "bg-brand text-white" : "text-brand hover:bg-surface-muted"}`} key={item.id}><span>{item.label}</span><span aria-hidden>{item.icon}</span></Link>)}</nav><button className="mt-2 flex min-h-11 w-full items-center justify-between rounded-xl border border-red-200 px-3 text-sm font-bold text-red-700" onClick={() => void logout()} type="button"><span>خروج از حساب کاربری</span><span aria-hidden>↩</span></button></aside>
       <main className="min-w-0 space-y-5">
         {notice ? <p role="status" aria-live="polite" aria-atomic="true" className="rounded-xl bg-brand/10 px-4 py-3 text-sm font-bold text-brand">{notice}</p> : null}
         {active === "profile" ? (
@@ -426,39 +426,19 @@ export function AccountDashboard() {
             </form>
           </section>
         ) : null}
-        {active === "trips" ? <section className="space-y-5"><header><h1 className="text-2xl font-black text-brand">سفرهای من</h1><p className="mt-1 text-sm text-muted">روی هر سفر بزنید تا وضعیت فعلی، مبلغ و شناسهٔ سفارش همان‌جا نمایش داده شود.</p></header><ErpFlightCheckoutRecovery /><ErpFlightOrders />{dashboard.cartItems.length > 0 && <section className="rounded-2xl border border-border bg-white p-4"><h2 className="font-bold text-brand">انتخاب‌های ناتمام در سبد سفر</h2><ul className="mt-2 space-y-2">{dashboard.cartItems.map((item) => <li className="flex flex-wrap justify-between gap-2 text-sm" key={item.id}><span>{item.titleSnapshot}</span>{item.priceAmount && item.currency && <strong>{formatCurrency(item.priceAmount, item.currency)}</strong>}</li>)}</ul><Link className="mt-3 inline-block font-bold text-brand underline" href="/cart/">ادامه خرید در سبد سفر</Link></section>}<OrderList onRemove={removeOrder} orders={orders} /></section> : null}
+        {active === "trips" ? (
+          <section className="space-y-5">
+            <h1 className="text-2xl font-black text-brand">سفرهای من</h1>
+            {orders && orders.length > 0 && <OrderList onRemove={removeOrder} orders={orders} />}
+            {orders?.length === 0 && <EmptyState title="هنوز سفری ثبت نشده است" description="پس از ثبت سفارش، سفر شما اینجا نمایش داده می‌شود." />}
+          </section>
+        ) : null}
         {active === "passengers" ? (
           <section className="space-y-5">
             <header>
               <h1 className="text-2xl font-black text-brand">لیست مسافران</h1>
               <p className="mt-1 text-sm text-muted">مسافران پرتکرار را یک بار ثبت کنید تا در خریدها سریع‌تر انتخاب شوند.</p>
             </header>
-            <form className="grid gap-3 rounded-2xl border border-border bg-white p-4 md:grid-cols-2 xl:grid-cols-3" onSubmit={addPassenger}>
-              <InputField label="نام" name="firstName" required />
-              <InputField label="نام خانوادگی" name="lastName" required />
-              <InputField dir="ltr" label="نام انگلیسی" name="firstNameEn" status="با ثبت گذرنامه الزامی" />
-              <InputField dir="ltr" label="نام خانوادگی انگلیسی" name="lastNameEn" status="با ثبت گذرنامه الزامی" />
-              <InputField label="کد ملی" name="nationalCode" inputMode="numeric" status="کد ملی یا گذرنامه الزامی" />
-              <InputField dir="ltr" label="شماره گذرنامه" name="passportNumber" status="کد ملی یا گذرنامه الزامی" />
-              <label className="grid gap-1.5 text-sm font-bold text-brand"><FieldLabel label="تاریخ انقضای گذرنامه" status="با ثبت گذرنامه الزامی" /><JalaliDateInput ariaLabel="تاریخ انقضای گذرنامه" className="min-h-11 w-full rounded-xl border border-border bg-white px-3 text-sm font-normal text-foreground outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/15" min={minimumPassportExpiryDate()} name="passportExpiryDate" value={null} /></label>
-              <InputField dir="ltr" label="ایمیل" name="email" type="email" inputMode="email" />
-              <label className="grid gap-1.5 text-sm font-bold text-brand"><FieldLabel label="جنسیت" required /><SiteSelect ariaLabel="جنسیت" id="passenger-gender" name="gender" options={[{ label: "انتخاب کنید", value: "" }, { label: "مرد", value: "male" }, { label: "زن", value: "female" }]} required /></label>
-              <InputField label="سن" max={120} min={0} name="age" type="number" inputMode="numeric" />
-              <label className="grid gap-1.5 text-sm font-bold text-brand"><FieldLabel label="تاریخ تولد" required /><JalaliDateInput ariaLabel="تاریخ تولد مسافر" yearSelection className="min-h-11 w-full rounded-xl border border-border bg-white px-3 text-sm font-normal text-foreground outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/15" max={new Date().toISOString().slice(0, 10)} name="birthDate" required value={null} /></label>
-              <InputField label="شماره موبایل" name="phone" type="tel" inputMode="tel" />
-              <fieldset className="grid gap-3 rounded-2xl border border-brand/15 bg-surface-muted p-4 md:col-span-2 xl:col-span-3">
-                <legend className="px-2 font-black text-brand">اطلاعات حیوان خانگی</legend>
-                <label className="flex min-h-11 items-center gap-2 rounded-xl border border-border bg-white px-3 text-sm font-bold text-brand"><input name="hasPet" type="checkbox" /> همراه مسافر حیوان خانگی است</label>
-                <div className="grid gap-3 md:grid-cols-3">
-                  <InputField label="نام حیوان" name="petName" placeholder="اختیاری" />
-                  <InputField label="نوع حیوان" name="petType" placeholder="مثلاً سگ یا گربه" status="در صورت همراه‌داشتن حیوان الزامی" />
-                  <InputField label="وزن حیوان (کیلوگرم)" min={0.1} max={100} name="petWeightKg" status="در صورت همراه‌داشتن حیوان الزامی" type="number" inputMode="decimal" />
-                </div>
-                <p className="text-xs leading-6 text-muted">در صورت انتخاب حیوان خانگی، نوع و وزن آن را وارد کنید تا هماهنگی حمل انجام شود.</p>
-              </fieldset>
-              <label className="flex min-h-11 items-center gap-2 rounded-xl border border-border px-3 text-sm font-bold text-brand"><input name="isDefault" type="checkbox" /> مسافر پیش‌فرض</label>
-              <button className="min-h-11 rounded-xl bg-brand px-5 text-sm font-black text-white md:col-span-2 xl:col-span-3" type="submit">افزودن مسافر</button>
-            </form>
             <div className="flex gap-2"><input className="min-h-11 flex-1 rounded-xl border border-border bg-white px-3 text-sm" onChange={(event) => setPassengerSearch(event.target.value)} placeholder="جستجوی نام، نام انگلیسی، ایمیل، کد ملی یا شماره گذرنامه" value={passengerSearch} /><button className="rounded-xl border border-brand px-4 text-sm font-bold text-brand" onClick={() => void loadSection("passengers")} type="button">جستجو</button></div>
             {passengers.length ? (
               <ul className="grid gap-3 md:grid-cols-2">
@@ -490,6 +470,35 @@ export function AccountDashboard() {
                 })}
               </ul>
             ) : <EmptyState title="مسافری ثبت نشده است" description="برای دسترسی سریع‌تر در زمان خرید، اولین مسافر را از فرم بالا اضافه کنید." />}
+            <details className="rounded-2xl border border-border bg-white p-4">
+              <summary className="cursor-pointer font-bold text-brand">افزودن مسافر جدید</summary>
+            <form className="grid gap-3 rounded-2xl border border-border bg-white p-4 md:grid-cols-2 xl:grid-cols-3" onSubmit={addPassenger}>
+              <InputField label="نام" name="firstName" required />
+              <InputField label="نام خانوادگی" name="lastName" required />
+              <InputField dir="ltr" label="نام انگلیسی" name="firstNameEn" status="با ثبت گذرنامه الزامی" />
+              <InputField dir="ltr" label="نام خانوادگی انگلیسی" name="lastNameEn" status="با ثبت گذرنامه الزامی" />
+              <InputField label="کد ملی" name="nationalCode" inputMode="numeric" status="کد ملی یا گذرنامه الزامی" />
+              <InputField dir="ltr" label="شماره گذرنامه" name="passportNumber" status="کد ملی یا گذرنامه الزامی" />
+              <label className="grid gap-1.5 text-sm font-bold text-brand"><FieldLabel label="تاریخ انقضای گذرنامه" status="با ثبت گذرنامه الزامی" /><JalaliDateInput ariaLabel="تاریخ انقضای گذرنامه" className="min-h-11 w-full rounded-xl border border-border bg-white px-3 text-sm font-normal text-foreground outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/15" min={minimumPassportExpiryDate()} name="passportExpiryDate" value={null} /></label>
+              <InputField dir="ltr" label="ایمیل" name="email" type="email" inputMode="email" />
+              <label className="grid gap-1.5 text-sm font-bold text-brand"><FieldLabel label="جنسیت" required /><SiteSelect ariaLabel="جنسیت" id="passenger-gender" name="gender" options={[{ label: "انتخاب کنید", value: "" }, { label: "مرد", value: "male" }, { label: "زن", value: "female" }]} required /></label>
+              <InputField label="سن" max={120} min={0} name="age" type="number" inputMode="numeric" />
+              <label className="grid gap-1.5 text-sm font-bold text-brand"><FieldLabel label="تاریخ تولد" required /><JalaliDateInput ariaLabel="تاریخ تولد مسافر" yearSelection className="min-h-11 w-full rounded-xl border border-border bg-white px-3 text-sm font-normal text-foreground outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/15" max={new Date().toISOString().slice(0, 10)} name="birthDate" required value={null} /></label>
+              <InputField label="شماره موبایل" name="phone" type="tel" inputMode="tel" />
+              <fieldset className="grid gap-3 rounded-2xl border border-brand/15 bg-surface-muted p-4 md:col-span-2 xl:col-span-3">
+                <legend className="px-2 font-black text-brand">اطلاعات حیوان خانگی</legend>
+                <label className="flex min-h-11 items-center gap-2 rounded-xl border border-border bg-white px-3 text-sm font-bold text-brand"><input name="hasPet" type="checkbox" /> همراه مسافر حیوان خانگی است</label>
+                <div className="grid gap-3 md:grid-cols-3">
+                  <InputField label="نام حیوان" name="petName" placeholder="اختیاری" />
+                  <InputField label="نوع حیوان" name="petType" placeholder="مثلاً سگ یا گربه" status="در صورت همراه‌داشتن حیوان الزامی" />
+                  <InputField label="وزن حیوان (کیلوگرم)" min={0.1} max={100} name="petWeightKg" status="در صورت همراه‌داشتن حیوان الزامی" type="number" inputMode="decimal" />
+                </div>
+                <p className="text-xs leading-6 text-muted">در صورت انتخاب حیوان خانگی، نوع و وزن آن را وارد کنید تا هماهنگی حمل انجام شود.</p>
+              </fieldset>
+              <label className="flex min-h-11 items-center gap-2 rounded-xl border border-border px-3 text-sm font-bold text-brand"><input name="isDefault" type="checkbox" /> مسافر پیش‌فرض</label>
+              <button className="min-h-11 rounded-xl bg-brand px-5 text-sm font-black text-white md:col-span-2 xl:col-span-3" type="submit">افزودن مسافر</button>
+            </form>
+            </details>
           </section>
         ) : null}        {active === "insurance" ? (
           <section className="space-y-5">
@@ -519,7 +528,6 @@ export function AccountDashboard() {
 }
 
 function OrderList({ orders, onRemove }: { orders: Order[]; onRemove: (order: Order) => void }) {
-  if (!orders.length) return <EmptyState title="رزرو یا سفارش مستقیمی ثبت نشده است" description="رزروها و سفارش‌های ثبت‌شدهٔ جهان باستان با وضعیت فعلی در این قسمت نمایش داده می‌شوند." />;
 
   return (
     <ul className="space-y-3">
@@ -528,33 +536,32 @@ function OrderList({ orders, onRemove }: { orders: Order[]; onRemove: (order: Or
         const statusLabel = isAwaitingSupportConfirmation ? "پرداخت ثبت شد؛ در انتظار تأیید پشتیبان" : orderStatusLabels[order.status] ?? order.status;
         const serviceItems = order.serviceItems ?? [];
         return (
-          <li className="overflow-hidden rounded-2xl border border-border bg-white transition hover:border-brand/40" key={`${order.source}-${order.id}`}>
-            <details className="group">
-              <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-4 p-5 text-right">
-                <div className="min-w-0">
-                  <span className="rounded-full bg-brand-soft px-2.5 py-1 text-xs font-black text-brand">{order.source === "booking" ? "رزرو سفر" : "پرداخت"}</span>
-                  <h2 className="mt-3 truncate text-xl font-black text-brand sm:text-2xl">{order.title || "رزرو سفر"}</h2>
-                  {serviceItems[0]?.details ? <p className="mt-1 line-clamp-1 text-sm text-muted">{serviceItems[0].details}</p> : null}
-                  <p className="mt-2 text-xs font-bold text-muted" dir="ltr">ID: {order.orderNumber}</p>
-                </div>
-                <span aria-hidden className="grid size-10 shrink-0 place-items-center rounded-full bg-surface-muted text-xl text-brand transition group-open:rotate-180">⌄</span>
-              </summary>
-              <div className="border-t border-border bg-surface-muted/70 p-5">
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                  <div className="rounded-xl bg-white p-3"><span className="block text-xs text-muted">وضعیت فعلی</span><strong className="mt-1 block text-sm text-brand">{statusLabel}</strong></div>
-                  <div className="rounded-xl bg-white p-3"><span className="block text-xs text-muted">مبلغ نهایی</span><strong className="mt-1 block text-sm text-brand">{formatCurrency(order.amount, order.currency)}</strong></div>
-                  <div className="rounded-xl bg-white p-3"><span className="block text-xs text-muted">زمان ثبت درخواست</span><time className="mt-1 block text-sm font-black text-brand">{formatPersianDateTime(order.createdAt)}</time></div>
-                  <div className="rounded-xl bg-white p-3"><span className="block text-xs text-muted">مسافران و صدور</span><strong className="mt-1 block text-sm text-brand">{order.passengerCount.toLocaleString("fa-IR")} مسافر{order.ticketsIssued ? " · بلیت صادر شده" : ""}</strong></div>
-                </div>
-
-                {serviceItems.length ? <section className="mt-4 rounded-xl border border-brand/10 bg-white p-4"><h3 className="text-sm font-black text-brand">جزئیات خدمات انتخاب‌شده</h3><ul className="mt-3 grid gap-2">{serviceItems.map((item, index) => <li className="rounded-lg bg-surface-muted px-3 py-2 text-sm" key={`${item.title}-${index}`}><strong className="text-brand">{item.title}</strong>{item.details ? <span className="mr-2 text-muted">· {item.details}</span> : null}</li>)}</ul></section> : null}
-
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                  <div className="text-sm font-bold text-muted">{isAwaitingSupportConfirmation ? <p>پرداخت ثبت شده است؛ پس از تأیید پشتیبان، بلیت صادر می‌شود.</p> : <><p>شناسهٔ پیگیری: <span dir="ltr">{order.orderNumber}</span></p>{order.updatedAt ? <p className="mt-1 text-xs">آخرین تغییر وضعیت: {formatPersianDateTime(order.updatedAt)}</p> : null}{order.paymentExpiresAt && order.status === "approved" ? <p className="mt-1 text-xs text-amber-800">مهلت پرداخت: {formatPersianDateTime(order.paymentExpiresAt)}</p> : null}</>}</div>
-                  {order.source === "booking" && <Link className="inline-flex min-h-10 items-center rounded-xl bg-brand px-4 font-bold text-white" href={`/payment/waiting/?booking=${order.id}`}>وضعیت سفارش و پرداخت</Link>}<button className="min-h-10 rounded-xl border border-red-200 px-4 text-sm font-black text-red-700 transition hover:bg-red-50" onClick={() => void onRemove(order)} type="button">حذف از سفرهای من</button>
-                </div>
+          <li key={`${order.source}-${order.id}`}>
+            <TripCard title={order.title || "رزرو سفر"} status={statusLabel} amount={formatCurrency(order.amount, order.currency)}
+              subtitle={serviceItems[0]?.details ?? undefined}
+              facts={[
+                { label: "زمان ثبت درخواست", value: formatPersianDateTime(order.createdAt) },
+                ...(order.source === "booking" ? [{ label: "مسافران", value: `${order.passengerCount.toLocaleString("fa-IR")} نفر` }] : []),
+                ...(order.updatedAt ? [{ label: "آخرین تغییر وضعیت", value: formatPersianDateTime(order.updatedAt) }] : []),
+                ...(order.ticketsIssued ? [{ label: "وضعیت بلیت", value: "صادر شده" }] : []),
+                ...(order.paymentExpiresAt && order.status === "approved" ? [{ label: "مهلت پرداخت", value: formatPersianDateTime(order.paymentExpiresAt) }] : []),
+              ]}>
+              {serviceItems.length > 0 && <section>
+                <h3 className="mb-2 text-sm font-bold text-brand">خدمات انتخاب‌شده</h3>
+                <ul className="grid gap-2">{serviceItems.map((item, index) => (
+                  <li className="rounded-xl border border-border p-3" key={index}>
+                    <strong className="text-sm text-brand">{item.title}</strong>
+                    {item.details && <div className="mt-2 flex flex-wrap gap-2">
+                      {item.details.split(" · ").map((part, i) => <bdi className="rounded-lg bg-surface-muted px-2 py-1 text-xs" key={i}>{part}</bdi>)}
+                    </div>}
+                  </li>
+                ))}</ul>
+              </section>}
+              <div className="flex flex-wrap items-center gap-3 border-t border-border pt-4">
+                {order.source === "booking" && <Link className="inline-flex min-h-11 items-center rounded-xl bg-brand px-4 text-sm font-bold text-white" href={`/payment/waiting/?booking=${order.id}`}>وضعیت سفارش و پرداخت</Link>}
+                <button className="min-h-11 rounded-xl border border-red-200 px-4 text-sm font-bold text-red-700 hover:bg-red-50" onClick={() => void onRemove(order)} type="button">حذف از سفرهای من</button>
               </div>
-            </details>
+            </TripCard>
           </li>
         );
       })}

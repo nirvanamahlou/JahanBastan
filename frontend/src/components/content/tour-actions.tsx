@@ -2,13 +2,16 @@
 
 import { useState } from "react";
 
+import { SaveTourButton } from "@/components/customer-commerce-actions";
 import { PUBLIC_API_BASE_URL } from "@/lib/api/client";
 
 export function TourActions({
+  tourId,
   showBookingAction,
   slug,
   title,
 }: {
+  tourId: number;
   showBookingAction: boolean;
   slug: string;
   title: string;
@@ -41,6 +44,7 @@ export function TourActions({
       >
         اشتراک‌گذاری
       </button>
+      <SaveTourButton tourId={tourId} className="col-span-2" />
       {showBookingAction ? (
         <button className="col-span-2 min-h-11 w-full rounded-xl bg-accent-strong px-3 py-2 text-center text-xs font-black leading-5 text-white shadow-[0_10px_22px_rgba(223,79,145,0.28)] transition hover:-translate-y-0.5 hover:bg-accent-strong/85 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white" onClick={() => { window.location.hash = "tour-booking"; window.requestAnimationFrame(() => document.getElementById("tour-booking")?.scrollIntoView({ behavior: "smooth", block: "center" })); }} type="button">انتخاب تاریخ و هتل خرید</button>
       ) : null}
