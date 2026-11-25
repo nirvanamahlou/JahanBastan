@@ -1,8 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { FlightRouteCard } from "./flight-route-card";
 import { useRouter } from "next/navigation";
+
+import { AccountForm } from "@/components/account-form";
+import { Dialog } from "@/components/ui/dialog";
 
 import {
   PassengerCheckoutModal,
@@ -145,6 +148,9 @@ export function ErpFlightResultCard({
   passengerCounts: PassengerCounts;
 }) {
   const [modalOpen, setModalOpen] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
+  const [checkingSelection, setCheckingSelection] = useState(false);
+  const selectionInProgress = useRef(false);
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("");
@@ -166,14 +172,27 @@ export function ErpFlightResultCard({
 
   const selectionAnchor = "flight-" + flight.product_ids.map(encodeURIComponent).join("_");
 
-  async function choose() {
-    const session = await readCustomerSession().catch(() => null);
-    if (!session?.ok) {
-      router.push(
-        `/account/?next=${encodeURIComponent(window.location.pathname + window.location.search + "#" + selectionAnchor)}`,
-      );
-      return;
+  async function choose(verifiedSession?: Response) {
+    if (selectionInProgress.current) return;
+    selectionInProgress.current = true;
+    setCheckingSelection(true);
+    setNotice("");
+    try {
+      const session = verifiedSession ?? await readCustomerSession().catch(() => null);
+      if (session?.status === 401 || session?.status === 403) {
+        setAuthOpen(true);
+      } else if (!session?.ok) {
+        setNotice("بررسی وضعیت ورود انجام نشد. دوباره تلاش کنید.");
+      } else {
+        await continueSelection(session);
+      }
+    } finally {
+      selectionInProgress.current = false;
+      setCheckingSelection(false);
     }
+  }
+
+  async function continueSelection(session: Response) {
     const account = (await session
       .json()
       .catch(() => null)) as CustomerSession | null;
@@ -401,7 +420,7 @@ export function ErpFlightResultCard({
           {seats !== null ? <span className="mt-2 text-xs font-bold text-muted">{number.format(seats)} صندلی باقی‌مانده</span> : null}
           <button
             className="mt-4 min-h-11 w-full rounded-md bg-brand px-4 text-sm font-black text-white disabled:opacity-60"
-            disabled={soldOut || busy || modalOpen || Boolean(review) || result?.state === "draft"}
+            disabled={soldOut || busy || checkingSelection || authOpen || modalOpen || Boolean(review) || result?.state === "draft"}
             onClick={() =>
               result?.retryable ? void checkout() : void choose()
             }
@@ -409,6 +428,8 @@ export function ErpFlightResultCard({
           >
             {busy
               ? "در حال ثبت پیش‌نویس…"
+              : checkingSelection
+                ? "در حال بررسی حساب…"
               : result?.state === "draft"
                 ? "پیش‌نویس ثبت شد"
                 : result?.retryable ? "تلاش دوباره" : soldOut ? "ظرفیت تکمیل است" : "انتخاب بلیت"}
@@ -476,6 +497,20 @@ export function ErpFlightResultCard({
           </div>
         </div>
       </dialog>}
+      {authOpen && (
+        <Dialog open compact title="ورود و ثبت‌نام" onClose={() => setAuthOpen(false)}>
+          <Suspense fallback={null}>
+            <AccountForm
+              compact
+              refreshAfterAuthentication={false}
+              onAuthenticated={(session) => {
+                setAuthOpen(false);
+                void choose(session);
+              }}
+            />
+          </Suspense>
+        </Dialog>
+      )}
       <PassengerCheckoutModal
         buyerContact={buyer}
         onBuyerContactChange={setBuyer}

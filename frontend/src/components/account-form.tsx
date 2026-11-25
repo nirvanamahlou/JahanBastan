@@ -53,7 +53,7 @@ async function readErrorBody(response: Response): Promise<ApiErrorBody | null> {
   }
 }
 
-export function AccountForm({ onAuthenticated, refreshAfterAuthentication = true, compact = false }: { onAuthenticated?: () => void; refreshAfterAuthentication?: boolean; compact?: boolean } = {}) {
+export function AccountForm({ onAuthenticated, refreshAfterAuthentication = true, compact = false }: { onAuthenticated?: (session: Response) => void; refreshAfterAuthentication?: boolean; compact?: boolean } = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [mode, setMode] = useState<Mode>(() =>
@@ -155,7 +155,7 @@ export function AccountForm({ onAuthenticated, refreshAfterAuthentication = true
       setSmsDeadline(null);
       window.dispatchEvent(new Event("customer-authenticated"));
       if (onAuthenticated) {
-        onAuthenticated();
+        onAuthenticated(sessionResponse);
         if (refreshAfterAuthentication) router.refresh();
         return;
       }
@@ -237,7 +237,7 @@ export function AccountForm({ onAuthenticated, refreshAfterAuthentication = true
     setSmsDeadline(null);
     window.dispatchEvent(new Event("customer-authenticated"));
     if (onAuthenticated) {
-      onAuthenticated();
+      onAuthenticated(sessionResponse);
       if (refreshAfterAuthentication) router.refresh();
       return;
     }
