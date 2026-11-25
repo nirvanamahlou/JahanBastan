@@ -15,7 +15,6 @@ const staticRoutes = [
   "/travel-guide",
   "/articles",
   "/hotels",
-  "/faq",
   "/about",
   "/contact",
   "/installments",

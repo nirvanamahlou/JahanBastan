@@ -23,7 +23,6 @@ export const siteConfig = {
       href: "/about/",
       children: [
         { label: "درباره جهان باستان", href: "/about/" },
-        { label: "سوالات متداول", href: "/faq/" },
         { label: "تماس با ما", href: "/contact/" },
       ],
     },
@@ -34,7 +33,6 @@ export const siteConfig = {
     { label: "هتل‌ها", href: "/hotels/" },
     { label: "مجله گردشگری", href: "/articles/" },
     { label: "درباره ما", href: "/about/" },
-    { label: "سوالات متداول", href: "/faq/" },
     { label: "تماس با ما", href: "/contact/" },
     { label: "خرید اقساطی", href: "/installments/" },
   ],
