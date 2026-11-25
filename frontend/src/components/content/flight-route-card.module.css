@@ -27,6 +27,13 @@
 .footer svg { width: 15px; height: 15px; }
 .footer strong { color: var(--brand); font-weight: 700; }
 
+.compact .header { padding-bottom: 5px; }
+.compact .route { padding-block: 6px; }
+.compact .endpoint { gap: 2px; }
+.compact .time { font-size: clamp(18px, 4.4cqi, 22px); }
+.compact .connection { padding-top: 8px; }
+.compact .footer { padding-top: 4px; }
+
 @container (max-width: 350px) {
   .route { gap: 7px; }
   .city { font-size: 13px; }

@@ -25,7 +25,7 @@ export default async function FlightCheckoutPage({ searchParams }: {
   ) : null;
 
   return (
-    <Container className="grid gap-4 py-6 [--container-max:64rem] sm:py-8" dir="rtl">
+    <Container className="grid gap-3 py-5 [--container-max:60rem] sm:py-6" dir="rtl">
       <h1 className="text-xl font-black text-brand sm:text-2xl">خرید بلیت پرواز</h1>
       {flight && selection ? (
         <ErpFlightCheckout key={selection.products.join("/")} flight={flight} passengerCounts={selection.counts} resultsHref={resultsHref} />

@@ -334,16 +334,16 @@ export function ErpFlightCheckout({ flight, passengerCounts, resultsHref }: {
   } : passengerCounts;
   const activeStep = phase === "review" || phase === "resume" ? 1 : 0;
   return (
-    <div className="grid gap-4" data-flight-checkout>
+    <div className="grid gap-3" data-flight-checkout>
       <ol aria-label="مراحل خرید پرواز" className="grid grid-cols-3 gap-2 rounded-xl border border-border bg-surface p-2 text-center text-xs sm:text-sm">
         {steps.map((label, index) => (
           <li key={label} aria-current={activeStep === index ? "step" : undefined} className={activeStep === index ? "rounded-lg bg-brand-soft px-1 py-2 font-bold text-brand" : "px-1 py-2 text-muted"}>{label}</li>
         ))}
       </ol>
-      <section className="rounded-xl border border-border bg-surface px-4 py-3" aria-label="پرواز انتخاب‌شده">
-        <h2 className="mb-2 text-base font-bold text-brand">پرواز انتخاب‌شده</h2>
+      <section className="rounded-xl border border-border bg-surface px-3 py-2 sm:px-4" aria-label="پرواز انتخاب‌شده">
+        <h2 className="mb-1.5 text-sm font-bold text-brand">پرواز انتخاب‌شده</h2>
         <div className={legs.length > 1 ? "grid gap-3 sm:grid-cols-2" : ""}>
-          {legs.map((leg, index) => <FlightTimeline key={leg.product_id} leg={leg} label={index === 0 ? "رفت" : "برگشت"} />)}
+          {legs.map((leg, index) => <FlightTimeline compact key={leg.product_id} leg={leg} label={index === 0 ? "رفت" : "برگشت"} />)}
         </div>
       </section>
       {notice && <p role="status" className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">{notice}</p>}

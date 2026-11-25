@@ -66,7 +66,7 @@ export type FlightTimelineLeg = Pick<ErpFlightLeg,
   "service_number" | "baggage_kg"
 > & { cabin_class_code?: string | null };
 
-export function FlightTimeline({ leg, label, detailed = false }: { leg: FlightTimelineLeg; label: string; detailed?: boolean }) {
+export function FlightTimeline({ leg, label, detailed = false, compact = false }: { leg: FlightTimelineLeg; label: string; detailed?: boolean; compact?: boolean }) {
   const departure = new Date(leg.departure);
   const arrival = new Date(leg.arrival);
   const date = flightDate.format(departure);
@@ -78,6 +78,7 @@ export function FlightTimeline({ leg, label, detailed = false }: { leg: FlightTi
   ].filter(Boolean).join(" و ");
 
   return <FlightRouteCard
+    compact={compact}
     label={label} date={date} carrier={leg.carrier}
     flightNumber={leg.service_number}
     cabin={leg.cabin_class_code === "ECONOMY" ? "اکونومی" : leg.cabin_class_code === "BUSINESS" ? "بیزینس" : leg.cabin_class_code === "FIRST" ? "فرست کلاس" : leg.cabin_class_code}

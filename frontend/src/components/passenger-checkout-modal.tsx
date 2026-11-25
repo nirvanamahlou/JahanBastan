@@ -470,21 +470,21 @@ const subscribeToHydration = () => () => undefined;
         ref={dialogRef}
         aria-labelledby="passenger-checkout-title"
         aria-modal={inline ? undefined : true}
-        className={inline ? "mt-4 w-full rounded-2xl border border-border bg-background" : "my-auto max-h-[calc(100dvh-1.5rem)] w-full max-w-5xl overflow-x-hidden overflow-y-auto rounded-[2rem] border-2 border-white/80 bg-background shadow-[0_32px_100px_rgba(1,37,105,0.42)] sm:max-h-[calc(100dvh-3rem)]"}
+        className={inline ? "w-full rounded-xl border border-border bg-background" : "my-auto max-h-[calc(100dvh-1.5rem)] w-full max-w-5xl overflow-x-hidden overflow-y-auto rounded-[2rem] border-2 border-white/80 bg-background shadow-[0_32px_100px_rgba(1,37,105,0.42)] sm:max-h-[calc(100dvh-3rem)]"}
         role={inline ? undefined : "dialog"}
         tabIndex={-1}
       >
-        <header className={`${inline ? "" : "sticky top-0 z-10"} flex items-start justify-between gap-4 border-b border-border bg-background/95 px-5 py-4 backdrop-blur sm:px-7`}>
+        <header className={`flex items-start justify-between gap-4 border-b border-border ${inline ? "px-3 py-2.5 sm:px-4" : "sticky top-0 z-10 bg-background/95 px-5 py-4 backdrop-blur sm:px-7"}`}>
           <div>
             <p className="text-xs font-black text-accent-strong">{context === "flight" ? "ثبت درخواست بلیت هواپیما" : "تکمیل خرید بلیط و هتل"}</p>
-            <h2 className="mt-1 text-xl font-black text-brand sm:text-2xl" id="passenger-checkout-title">
+            <h2 className={`mt-1 font-black text-brand ${inline ? "text-base sm:text-lg" : "text-xl sm:text-2xl"}`} id="passenger-checkout-title">
               {step === "count" ? "تعداد مسافران را مشخص کنید" : "اطلاعات مسافران"}
             </h2>
           </div>
           {!inline && <button aria-label="بستن" className="grid size-10 shrink-0 place-items-center rounded-full border border-border text-xl text-brand hover:bg-surface-muted" onClick={onClose} type="button">×</button>}
         </header>
 
-        <div className="space-y-5 p-5 sm:p-7">
+        <div className={inline ? "space-y-3 p-3 sm:p-4" : "space-y-5 p-5 sm:p-7"}>
           {seatsFull && <p role="status" className="rounded-xl bg-amber-50 px-4 py-3 text-sm font-bold text-amber-950">
             {tooManySeats ? "تعداد بزرگسالان و کودکان را کاهش دهید." : "همهٔ صندلی‌های موجود این پرواز انتخاب شده‌اند."}
             {" "}ظرفیت پرواز {availableSeats?.toLocaleString("fa-IR")} صندلی است.
@@ -519,8 +519,8 @@ const subscribeToHydration = () => () => undefined;
           ) : (
             <>
               {buyerContact && onBuyerContactChange && (
-                <fieldset className="grid min-w-0 grid-cols-[repeat(auto-fit,minmax(min(100%,12rem),1fr))] gap-4 rounded-2xl border border-border bg-white p-4">
-                  <legend className="px-2 font-black text-brand">اطلاعات خریدار</legend>
+                <fieldset className={`grid min-w-0 border border-border bg-white ${inline ? "gap-2.5 rounded-xl p-3 sm:grid-cols-2 lg:grid-cols-5" : "grid-cols-[repeat(auto-fit,minmax(min(100%,12rem),1fr))] gap-4 rounded-2xl p-4"}`}>
+                  <legend className={`px-2 font-black text-brand ${inline ? "text-sm" : ""}`}>اطلاعات خریدار</legend>
                   {([
                     ["fullName", "نام کامل خریدار", "text", 120, true],
                     ["buyerMobile", "شماره همراه خریدار", "tel", 32, true],
@@ -528,13 +528,13 @@ const subscribeToHydration = () => () => undefined;
                     ["landline", "تلفن ثابت (اختیاری)", "tel", 32, false],
                     ["postalCode", "کد پستی (اختیاری)", "text", 20, false],
                   ] as const).map(([key, label, type, maxLength, required]) => (
-                    <label key={key} className="grid min-w-0 gap-1.5 text-sm font-bold text-brand">
+                    <label key={key} className={`min-w-0 font-bold text-brand ${inline ? "flex flex-col justify-between gap-1 text-xs" : "grid gap-1.5 text-sm"}`}>
                       {label}
                       <input type={type} dir={key === "postalCode" || type === "tel" ? "ltr" : undefined}
                         inputMode={key === "postalCode" ? "numeric" : undefined}
                         required={required} disabled={busy} maxLength={maxLength} value={buyerContact[key]}
                         onChange={(event) => onBuyerContactChange({ ...buyerContact, [key]: event.target.value })}
-                        className="min-h-11 w-full min-w-0 rounded-xl border border-border bg-surface-muted/60 px-3 font-normal focus-visible:outline-2 focus-visible:outline-brand" />
+                        className={`min-h-11 w-full min-w-0 border border-border bg-surface-muted/60 font-normal focus-visible:outline-2 focus-visible:outline-brand ${inline ? "rounded-lg px-2.5 lg:min-h-10" : "rounded-xl px-3"}`} />
                     </label>
                   ))}
                 </fieldset>
@@ -549,13 +549,13 @@ const subscribeToHydration = () => () => undefined;
                   </strong>
                 </div>
               ) : null}
-              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-7 text-amber-950">
+              <div className={`border border-amber-200 bg-amber-50 text-sm text-amber-950 ${inline ? "rounded-xl px-3 py-2 leading-relaxed" : "rounded-2xl p-4 leading-7"}`}>
                 {requiresPassport ? "برای این سفر گذرنامهٔ معتبر الزامی است." : "در صورت ثبت گذرنامه، اعتبار آن بررسی می‌شود."}
                 {" "}تاریخ انقضای گذرنامه باید {new Intl.DateTimeFormat("fa-IR-u-ca-persian", { dateStyle: "medium" }).format(new Date(minimumExpiry + "T12:00:00"))} یا بعد از آن باشد.
               </div>
-              <div className="space-y-4">
+              <div className={inline ? "space-y-3" : "space-y-4"}>
                 {passengers.map((passenger, index) => (
-                  <article className="rounded-2xl border border-border bg-white p-4 sm:p-5" key={index}>
+                  <article className={`border border-border bg-white ${inline ? "rounded-xl p-3" : "rounded-2xl p-4 sm:p-5"}`} key={index}>
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <h3 className="font-black text-brand">مسافر {index + 1} · {passengerTypeLabel(passenger.passengerType)}</h3>
                       {context === "flight" && <button type="button" disabled={busy || (passenger.passengerType === "adult" && (counts.adults <= 1 || counts.adults <= counts.infants))}

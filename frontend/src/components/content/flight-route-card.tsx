@@ -4,11 +4,11 @@ import { SuitcaseIcon } from "@/components/layout/site-icons";
 import styles from "./flight-route-card.module.css";
 
 type Endpoint = { city: string; code?: string | null; airport?: string | null; time: string; dateTime?: string; date?: string };
-type Props = { label: string; date?: string; carrier: string; flightNumber?: string | null; cabin?: string | null; duration?: string; baggage?: string | null; origin: Endpoint; destination: Endpoint };
+type Props = { label: string; date?: string; carrier: string; flightNumber?: string | null; cabin?: string | null; duration?: string; baggage?: string | null; origin: Endpoint; destination: Endpoint; compact?: boolean };
 
-export function FlightRouteCard({ label, date, carrier, flightNumber, cabin, duration, baggage, origin, destination }: Props) {
+export function FlightRouteCard({ label, date, carrier, flightNumber, cabin, duration, baggage, origin, destination, compact = false }: Props) {
   return (
-    <section className={styles.card} aria-label={label} dir="rtl">
+    <section className={compact ? `${styles.card} ${styles.compact}` : styles.card} aria-label={label} dir="rtl">
       <header className={styles.header}>
         <div className={styles.airline}>
           <span className={styles.logo}>
