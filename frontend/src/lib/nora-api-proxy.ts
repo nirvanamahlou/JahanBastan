@@ -89,7 +89,7 @@ export async function proxyNoraRequest(request: Request): Promise<Response> {
   const incoming = new URL(request.url);
   const prefix = `${NORA_API_PREFIX}/`;
   const rubiCatalog = request.method === "POST" &&
-    ["/api/v1/erp/catalog-delivery", "/api/v1/erp/hotel-profile", "/api/v1/erp/geography-profile"].includes(incoming.pathname) && !incoming.search;
+    ["/api/v1/erp/catalog-delivery", "/api/v1/erp/hotel-profile", "/api/v1/erp/geography-profile", "/api/v1/erp/visa-profile", "/api/v1/erp/profile-withdrawal"].includes(incoming.pathname) && !incoming.search;
   if (!rubiCatalog && (
     !incoming.pathname.startsWith(prefix) ||
     !permitted(request.method, incoming.pathname.slice(prefix.length))

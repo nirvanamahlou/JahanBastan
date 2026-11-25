@@ -1,16 +1,33 @@
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
-from uuid import NAMESPACE_URL, uuid5
+from uuid import NAMESPACE_URL, UUID, uuid5
 
 from sqlalchemy import func, or_, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.content import Country, Destination, Hotel, HotelImage, MediaAsset
+from app.models.content import (
+    Country,
+    Destination,
+    Hotel,
+    HotelImage,
+    MediaAsset,
+    Tour,
+    TourCombinedPackage,
+    TourCombinedPackageHotel,
+    TourDeparture,
+    TourDepartureHotelPrice,
+    TourHotelPackage,
+    TravelService,
+)
 from app.services.avina_hotel_media import PreparedImage
 
 if TYPE_CHECKING:
-    from app.api.routes.erp_hotels import GeographyProfile, HotelProfile
+    from app.api.routes.erp_hotels import (
+        GeographyProfile,
+        HotelProfile,
+        ProfileWithdrawal,
+    )
 
 
 async def register_image(session: AsyncSession, image: PreparedImage, name: str) -> int:
@@ -218,3 +235,97 @@ async def publish_geography(
         session.add(row)
         await session.flush()
         return row.slug
+
+
+async def withdraw_profile(session: AsyncSession, profile: "ProfileWithdrawal"):
+    kind = profile.kind
+    code = profile.identificationCode
+    geography_key = profile.countryName if kind == "cities" else profile.name
+    lock_key = code if kind == "hotels" else "avina-geo:" + (geography_key or "")
+    if kind == "visa-services":
+        lock_key = f"avina-visa:{profile.id}"
+    if (kind == "hotels" and not code) or (kind == "cities" and not geography_key):
+        return {"linked": False, "blocked": False}
+    async with session.begin():
+        if profile.action == "withdraw":
+            await session.execute(
+                select(func.pg_advisory_xact_lock(func.hashtextextended(lock_key, 0)))
+            )
+        if kind == "visa-services":
+            query = select(TravelService).where(
+                TravelService.avina_visa_service_id == UUID(profile.id)
+            )
+        elif kind == "hotels":
+            query = select(Hotel).where(Hotel.avina_identification_code == code)
+        elif kind == "countries":
+            query = select(Country).where(
+                or_(
+                    Country.slug == f"country-{profile.id}",
+                    Country.name == profile.name,
+                )
+            )
+        else:
+            query = select(Destination).where(
+                or_(
+                    Destination.slug == f"city-{profile.id}",
+                    (Destination.country == geography_key)
+                    & or_(
+                        Destination.city == profile.name,
+                        Destination.title == profile.name,
+                    ),
+                )
+            )
+        if profile.action == "withdraw":
+            query = query.with_for_update()
+        records = (await session.scalars(query.limit(2))).all()
+        if len(records) > 1:
+            raise ValueError("تطبیق پروفایل در جهان باستان یکتا نیست.")
+        if kind == "visa-services" and (
+            not records or records[0].status != "published"
+        ):
+            return {"linked": False, "blocked": False}
+        if not records or records[0].status not in ("published", "archived"):
+            return {"linked": False, "blocked": False}
+        row = records[0]
+        dependents = []
+        if kind == "hotels":
+            dependents = [
+                select(Tour.id).where(
+                    Tour.status == "published",
+                    or_(
+                        Tour.hotel_id == row.id,
+                        Tour.hotel_packages.any(TourHotelPackage.hotel_id == row.id),
+                        Tour.combined_packages.any(
+                            TourCombinedPackage.hotels.any(
+                                TourCombinedPackageHotel.hotel_id == row.id
+                            )
+                        ),
+                        Tour.departures.any(
+                            TourDeparture.hotel_prices.any(
+                                TourDepartureHotelPrice.hotel_id == row.id
+                            )
+                        ),
+                    ),
+                )
+            ]
+        elif kind == "countries":
+            dependents = [
+                select(Destination.id).where(
+                    Destination.country == row.name, Destination.status == "published"
+                )
+            ]
+        elif kind == "cities":
+            dependents = [
+                select(model.id).where(
+                    model.destination_id == row.id, model.status == "published"
+                )
+                for model in (Hotel, Tour)
+            ]
+        blocked = any(
+            [await session.scalar(query.limit(1)) is not None for query in dependents]
+        )
+        if profile.action == "withdraw" and blocked:
+            raise ValueError("محتوای منتشرشده به این مقصد وابسته است.")
+        if profile.action == "withdraw":
+            row.status = "archived"
+        return {"linked": True, "blocked": blocked}

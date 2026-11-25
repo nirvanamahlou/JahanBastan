@@ -2,6 +2,7 @@
 
 from datetime import date, datetime, time
 from decimal import Decimal
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -587,11 +588,22 @@ class TravelServiceList(CatalogSchema):
     offset: int
 
 
+class PublicVisaProfile(CatalogSchema):
+    code: str
+    english_name: str | None
+    country_code: str | None
+    visa_type: str
+    reference_validity_days: int | None
+    reference_validity_mode: Literal["DAYS", "PASSPORT_EXPIRY"]
+    required_documents: list[str]
+
+
 class TravelServiceDetail(TravelServiceSummary):
     gallery_image_ids: list[int]
     meta_title: str | None
     meta_description: str | None
     visa_requirements: str | None
+    avina_visa_profile: PublicVisaProfile | None = None
 
 
 class PublicSiteSettings(CatalogSchema):

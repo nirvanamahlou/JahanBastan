@@ -585,7 +585,7 @@ class TravelServiceWrite(CatalogSchema):
     visa_form_url: VisaFormUrl = None
     image_id: int | None = Field(default=None, ge=1)
     gallery_image_ids: list[int] = Field(default_factory=list, max_length=6)
-    display_order: int = Field(default=0, ge=0, le=32767)
+    display_order: int = Field(default=0, ge=0, le=2147483647)
     is_featured: bool = False
     status: PublicationStatus = PublicationStatus.DRAFT
     meta_title: str | None = Field(default=None, max_length=70)
@@ -676,7 +676,7 @@ class TravelServiceUpdate(CatalogSchema):
     visa_form_url: VisaFormUrl = None
     image_id: int | None = Field(default=None, ge=1)
     gallery_image_ids: list[int] | None = Field(default=None, max_length=6)
-    display_order: int | None = Field(default=None, ge=0, le=32767)
+    display_order: int | None = Field(default=None, ge=0, le=2147483647)
     is_featured: bool | None = None
     status: PublicationStatus | None = None
     meta_title: str | None = Field(default=None, max_length=70)
