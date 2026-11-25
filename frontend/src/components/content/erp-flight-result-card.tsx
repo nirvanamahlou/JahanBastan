@@ -394,8 +394,8 @@ export function ErpFlightResultCard({
           ) : null}
         </div>
         <aside className="flex flex-col justify-center border-t border-brand/10 bg-slate-50 p-4 lg:border-s lg:border-t-0">
-          <span className="text-xs text-muted">{flight.return_leg ? "نرخ رفت‌وبرگشت یک بزرگسال" : "نرخ یک بزرگسال"}</span>
-          <strong className="mt-1 block text-lg text-brand">
+          <span className="text-center text-xs text-muted">{flight.return_leg ? "نرخ رفت‌وبرگشت یک بزرگسال" : "نرخ یک بزرگسال"}</span>
+          <strong className="mt-1 block text-center text-lg text-brand">
             {formatCurrency(flight.amount, flight.currency)}
           </strong>
           {seats !== null ? <span className="mt-2 text-xs font-bold text-muted">{number.format(seats)} صندلی باقی‌مانده</span> : null}

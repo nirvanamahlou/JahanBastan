@@ -577,7 +577,6 @@ export default async function FlightsPage({ searchParams }: { searchParams: Prom
                   <AvailabilityNotice departureDate={departureFrom} destination={destination} iconImageId={emptyStateIconId} label="پرواز" origin={origin} serviceType="flight" />
                   ) : null}
                 </div>
-                <TransportGuide content={guideSettings["transportFlightGuide"]} title="راهنمای خرید بلیت هواپیما" />
               </TicketSelectionProvider>
             </div>
             ) : (
