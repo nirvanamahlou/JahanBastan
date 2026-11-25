@@ -116,8 +116,8 @@ export default async function ContactPage() {
     : defaultOfficeMapLinkUrl;
 
   return (
-    <Container className="grid gap-6 py-5 [--container-max:58rem] sm:gap-8 sm:py-7">
-      <h1 className="text-xl font-black leading-tight text-brand sm:text-2xl">
+    <Container className="grid gap-6 py-5 [--container-max:48rem] sm:gap-8 sm:py-7">
+      <h1 className="text-lg font-black leading-tight text-brand sm:text-xl">
         درباره و تماس با {item?.siteName ?? "جهان باستان"}
       </h1>
       <section id="about" className="scroll-mt-24" aria-labelledby="about-title">
@@ -208,7 +208,7 @@ export default async function ContactPage() {
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
               allowFullScreen
-              className="h-44 w-full border-0 sm:h-56"
+              className="h-36 w-full border-0 sm:h-44"
             />
           </section>
         ) : null}
