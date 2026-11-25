@@ -8,7 +8,8 @@ import { CombinedTourCheckout } from "@/components/checkout/combined-tour-checko
 import { useOnlineSalesEnabled } from "@/components/online-sales-provider";
 import { isFinalLocalTourPrice } from "@/lib/tour-price-currency";
 import { formatCurrency } from "@/lib/currency";
-import { toToman, type ExchangeRates } from "@/lib/currency-conversion";
+import { TourPriceBreakdown } from "./tour-price-breakdown";
+import { summarizeTourPrice, type ExchangeRates } from "@/lib/currency-conversion";
 import { BedIcon } from "@/components/layout/site-icons";
 import { HotelStars } from "@/components/content/hotel-stars";
 import { PUBLIC_API_BASE_URL } from "@/lib/api/client";
@@ -62,8 +63,10 @@ type SelectionKey = "double" | "single" | "extra" | "childWithBed" | "childWitho
 type Selection = Record<SelectionKey, number>;
 const emptySelection: Selection = { double: 0, single: 0, extra: 0, childWithBed: 0, childWithoutBed: 0, infant: 0 };
 
-export function CombinedPackageCard({ item, tourId, departureId, capacityRemaining, bookingDisabled, exchangeRates }: {
+export function CombinedPackageCard({ item, tourId, departureId, capacityRemaining, bookingDisabled, exchangeRates, country, lastTravelDay }: {
   item: CombinedPackage;
+  country?: string | null;
+  lastTravelDay?: string | null;
   tourId?: number;
   departureId?: number | null;
   capacityRemaining?: number | null;
@@ -87,14 +90,12 @@ export function CombinedPackageCard({ item, tourId, departureId, capacityRemaini
   const availablePrices = prices.filter(([, , price]) => price !== null && Number(price) > 0);
   const selectedCount = Object.values(selection).reduce((sum, count) => sum + count, 0);
   const passengerCount = selection.double * 2 + selection.single + selection.extra + selection.childWithBed + selection.childWithoutBed + selection.infant;
-  const total = prices.reduce<number | null>((sum, [key, , price, currency, addFlight, flightPrice, flightCurrency]) => {
-    if (sum === null || !selection[key]) return sum;
-    const hotel = toToman(price, currency, exchangeRates ?? {});
-    const flight = addFlight && Number(flightPrice) > 0 ? toToman(flightPrice, flightCurrency, exchangeRates ?? {}) : 0;
-    if (hotel === null || flight === null) return null;
-    const factor = key === "double" ? 2 : 1;
-    return sum + (hotel * factor + flight * factor) * selection[key];
-  }, 0);
+  const priceSummary = summarizeTourPrice(prices.flatMap(([key, , amount, currency, addFlight, flightPrice, flightCurrency]) => {
+    const quantity = selection[key] * (key === "double" ? 2 : 1);
+    const parts = [{ amount, currency, quantity }];
+    if (addFlight && Number(flightPrice) > 0) parts.push({ amount: flightPrice, currency: flightCurrency, quantity });
+    return parts;
+  }), exchangeRates ?? {});
   const canPurchase = Boolean(tourId && departureId && item.combinedDeparturePriceId);
   const requiresFlightQuote = canPurchase && item.regularFlightPrice === null;
   const capacityExceeded = capacityRemaining !== null && capacityRemaining !== undefined && passengerCount > capacityRemaining;
@@ -159,13 +160,13 @@ export function CombinedPackageCard({ item, tourId, departureId, capacityRemaini
         <Link className="mt-3 inline-flex rounded-xl bg-brand px-4 py-2 font-black text-white" href="/contact/">تماس با کارشناسان</Link>
       </div> : null}
       {canPurchase && selectedCount > 0 && !requiresFlightQuote ? <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border bg-white p-2.5">
-        <p className="text-xs font-bold text-brand">جمع قابل پرداخت: {total === null ? "نیازمند محاسبهٔ نرخ ارز" : formatCurrency(total, "IRT")}</p>
+        <TourPriceBreakdown summary={priceSummary} />
         <button className="account-primary min-h-10 rounded-lg bg-brand px-3 text-xs font-bold text-white disabled:opacity-50" disabled={!onlineSalesEnabled || bookingDisabled || capacityExceeded} onClick={() => setCheckoutOpen(true)} type="button">
           {!onlineSalesEnabled ? "تماس حاصل فرمایید" : bookingDisabled ? "این تاریخ قابل رزرو نیست" : capacityExceeded ? "ظرفیت کافی نیست" : "خرید و ادامه ورود اطلاعات مسافران"}
         </button>
       </div> : null}
       {checkoutOpen && tourId && departureId && item.combinedDeparturePriceId ? (
-        <CombinedTourCheckout combinedDeparturePriceId={item.combinedDeparturePriceId} departureId={departureId}
+        <CombinedTourCheckout country={country} lastTravelDay={lastTravelDay} priceSummary={priceSummary} combinedDeparturePriceId={item.combinedDeparturePriceId} departureId={departureId}
           onClose={() => setCheckoutOpen(false)} roomSelection={selection} tourId={tourId} />
       ) : null}
     </article>

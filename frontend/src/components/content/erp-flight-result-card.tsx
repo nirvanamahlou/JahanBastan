@@ -38,6 +38,7 @@ export type ErpFlightLeg = {
   carrier_logo_sha256?: string | null;
   origin_airport?: Airport | null;
   destination_airport?: Airport | null;
+  international?: boolean | null;
   remaining_capacity?: number | null;
   baggage_kg?: string | null;
   departure: string;
@@ -356,8 +357,9 @@ export function ErpFlightResultCard({
   }
 
   const legs = [flight, ...(flight.return_leg ? [flight.return_leg] : [])];
-  const capacities = legs.map((leg) => leg.remaining_capacity);
-  const seats = capacities.every((capacity): capacity is number => typeof capacity === "number") ? Math.min(...capacities) : null;
+  const capacities = legs.map((leg) => leg.remaining_capacity).filter((value): value is number => typeof value === "number" && Number.isFinite(value));
+  const seats = capacities.length ? Math.min(...capacities) : null;
+  const soldOut = seats !== null && seats < 1 && !result?.retryable;
   return (
     <article id={selectionAnchor} className="flight-interactive-panel scroll-mt-28 target:ring-2 target:ring-brand overflow-hidden rounded-2xl border border-brand/15 bg-white shadow-sm">
       <div className="grid lg:grid-cols-[minmax(0,1fr)_10rem]">
@@ -401,7 +403,7 @@ export function ErpFlightResultCard({
           {seats !== null ? <span className="mt-2 text-xs font-bold text-muted">{number.format(seats)} صندلی باقی‌مانده</span> : null}
           <button
             className="mt-4 min-h-11 w-full rounded-xl bg-accent-strong px-4 text-sm font-black text-white disabled:opacity-60"
-            disabled={busy || modalOpen || Boolean(review) || result?.state === "draft"}
+            disabled={soldOut || busy || modalOpen || Boolean(review) || result?.state === "draft"}
             onClick={() =>
               result?.retryable ? void checkout() : void choose()
             }
@@ -411,7 +413,7 @@ export function ErpFlightResultCard({
               ? "در حال ثبت پیش‌نویس…"
               : result?.state === "draft"
                 ? "پیش‌نویس ثبت شد"
-                : result?.retryable ? "تلاش دوباره" : "انتخاب بلیت"}
+                : result?.retryable ? "تلاش دوباره" : soldOut ? "ظرفیت تکمیل است" : "انتخاب بلیت"}
           </button>
         </aside>
       </div>
@@ -481,6 +483,9 @@ export function ErpFlightResultCard({
         onBuyerContactChange={setBuyer}
         saveBuyerContact={saveBuyerContact}
         context="flight"
+        availableSeats={seats}
+        requiresPassport={legs.some(leg => leg.international === true)}
+        lastTravelDay={tehranTravelDay.format(new Date(legs[legs.length - 1].arrival))}
         fixedPassengerCounts={passengerCounts}
         onClose={() => setModalOpen(false)}
         onComplete={(passengers) => void reviewCheckout(passengers)}

@@ -1,4 +1,5 @@
 import { TourProfileFacts } from "@/components/content/tour-profile-facts";
+import { hasBookableTourPackage } from "@/lib/tour-departure-availability";
 import { TourProfileHero } from "@/components/content/tour-profile-hero";
 import { DatedCombinedPackages } from "@/components/content/dated-combined-packages";
 import type { PublicCombinedPackage } from "@/types/combined-pricing";
@@ -290,9 +291,9 @@ export default async function TourPage({ params, searchParams }: Props) {
   if (!item) notFound();
 
   const { departureId } = await searchParams;
-  const initialDepartureId = typeof departureId === "string"
-    ? item.departures.find((departure) => departure.departureDate && String(departure.id) === departureId)?.id
-    : undefined;
+  // Keep an unavailable or invalid explicit selection distinct from a visit without a date.
+  const initialDepartureId = departureId === undefined ? undefined
+    : typeof departureId === "string" && /^[1-9]\d*$/.test(departureId) ? Number(departureId) : 0;
   const seo = tourSeoCopy(item);
   const images = [item.imageId, ...item.galleryImageIds].filter(
     (id): id is number => Boolean(id),
@@ -488,7 +489,7 @@ export default async function TourPage({ params, searchParams }: Props) {
               capacityRemaining: departure.capacityRemaining,
               priceAmount: departure.priceAmount,
               currency: departure.currency,
-              canBook: Boolean(departure.departureDate && (departure.hotelPrices.some((offer) => offer.isAvailable !== false) || item.combinedPackages?.some((packageItem) => packageItem.departurePrices?.some((price) => price.departureId === departure.id)))),
+              canBook: hasBookableTourPackage(departure, item.combinedPackages),
               flightDetails: hasDepartureFlightDetails(departure) ? <TourFlightTickets departures={[departure]} item={item} /> : null,
             }))} />
           </div>
@@ -496,7 +497,7 @@ export default async function TourPage({ params, searchParams }: Props) {
 
         {hasHotels ? (
           <div className="tour-tab-panel mt-4" data-tour-section="hotels">
-            <DatedCombinedPackages key={initialDepartureId} initialDepartureId={initialDepartureId} departures={item.departures} exchangeRates={{ usdToIrt: settings.socialLinks.exchangeRateUsdIrt, eurToIrt: settings.socialLinks.exchangeRateEurIrt }} packages={item.combinedPackages ?? []} standaloneHotels={hasStandaloneHotels} tourId={item.id} />
+            <DatedCombinedPackages country={tourCountry} key={initialDepartureId} initialDepartureId={initialDepartureId} departures={item.departures} exchangeRates={{ usdToIrt: settings.socialLinks.exchangeRateUsdIrt, eurToIrt: settings.socialLinks.exchangeRateEurIrt }} packages={item.combinedPackages ?? []} standaloneHotels={hasStandaloneHotels} tourId={item.id} />
             {hasStandaloneHotels ? <TourHotelFilter key={initialDepartureId} initialDepartureId={initialDepartureId} country={item.destination?.country} departures={item.departures as TourBookingDeparture[]} destination={item.destination?.title} exchangeRates={{ usdToIrt: settings.socialLinks.exchangeRateUsdIrt, eurToIrt: settings.socialLinks.exchangeRateEurIrt }} faqs={faqPayload.items} isInstallmentAvailable={item.isInstallmentAvailable} packages={[]} tourId={item.id} tourSlug={item.slug} /> : null}
           </div>
         ) : null}

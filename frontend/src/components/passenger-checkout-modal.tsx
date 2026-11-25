@@ -93,13 +93,14 @@ function minimumPassportExpiryDate() {
   return value.toISOString().slice(0, 10);
 }
 
-function passportWarning(passenger: Pick<PassengerCheckoutData, "passportNumber" | "passportExpiryDate">) {
+function passportWarning(passenger: Pick<PassengerCheckoutData, "passportNumber" | "passportExpiryDate">, minimumExpiry: string, required: boolean) {
+  if (required && !passenger.passportNumber.trim()) return "برای این سفر ثبت شماره گذرنامه الزامی است.";
   if (!passenger.passportNumber && !passenger.passportExpiryDate) return "";
   if (passenger.passportNumber && !passenger.passportExpiryDate) {
     return "برای شماره گذرنامه، تاریخ انقضای گذرنامه را وارد کنید.";
   }
-  if (passenger.passportExpiryDate && passenger.passportExpiryDate < minimumPassportExpiryDate()) {
-    return "تاریخ انقضای گذرنامه باید حداقل چهار ماه از امروز فاصله داشته باشد.";
+  if (passenger.passportExpiryDate && passenger.passportExpiryDate < minimumExpiry) {
+    return "تاریخ انقضای گذرنامه از حداقل تاریخ اعتبار این سفر زودتر است.";
   }
   return "";
 }
@@ -158,6 +159,9 @@ type PassengerCheckoutModalProps = {
   open: boolean;
   onClose: () => void;
   onComplete: (passengers: PassengerCheckoutData[]) => void;
+  availableSeats?: number | null;
+  requiresPassport?: boolean;
+  lastTravelDay?: string | null;
   fixedPassengerCounts?: PassengerCounts | null;
   context?: "flight";
 };
@@ -175,6 +179,9 @@ export function PassengerCheckoutModal({
   open,
   onClose,
   onComplete,
+  availableSeats = null,
+  requiresPassport = false,
+  lastTravelDay,
   fixedPassengerCounts,
   context,
   buyerContact,
@@ -205,7 +212,11 @@ const subscribeToHydration = () => () => undefined;
 
   const total = counts.adults + counts.children + counts.infants;
   const DateInput = context === "flight" ? FlightDateInput : JalaliDateInput;
-  const minimumExpiry = minimumPassportExpiryDate();
+  const seatsUsed = counts.adults + counts.children;
+  const seatsFull = availableSeats !== null && seatsUsed >= availableSeats;
+  const tooManySeats = availableSeats !== null && seatsUsed > availableSeats;
+  const minimumValidity = minimumPassportExpiryDate();
+  const minimumExpiry = lastTravelDay && lastTravelDay > minimumValidity ? lastTravelDay : minimumValidity;
 
   useEffect(() => {
     if (!open) return;
@@ -285,12 +296,13 @@ const subscribeToHydration = () => () => undefined;
       const minimum = key === "adults" ? 1 : 0;
       const next = Math.max(minimum, Math.min(20, current[key] + delta));
       const nextTotal = current.adults + current.children + current.infants + next - current[key];
-      if (nextTotal > 20) return current;
+      if (nextTotal > 20 || (delta > 0 && key !== "infants" && seatsFull)) return current;
       return { ...current, [key]: next };
     });
   }
 
   function continueToDetails() {
+    if (tooManySeats) return;
     const nextKinds = passengerKinds(counts);
     setPassengers(nextKinds.map((kind, index) => passengers[index]?.passengerType === kind ? passengers[index] : emptyPassenger(kind)));
     setStep("details");
@@ -313,7 +325,7 @@ const subscribeToHydration = () => () => undefined;
     const selected = history.find((item) => item.id === Number(value));
     if (!selected) return;
     const selectedForm = historyToForm(selected, passengers[index]?.passengerType ?? "adult");
-    const warning = passportWarning(selectedForm);
+    const warning = passportWarning(selectedForm, minimumExpiry, requiresPassport);
     if (warning) {
       setNotice(selected.fullName + ": " + warning + " برای ادامه اطلاعات پاسپورت جدید را وارد کنید.");
       setErrors((current) => ({ ...current, [index]: warning }));
@@ -347,7 +359,7 @@ const subscribeToHydration = () => () => undefined;
         nextErrors[index] = "برای مسافر دارای گذرنامه، نام و نام خانوادگی انگلیسی الزامی است.";
         return;
       }
-      const warning = passportWarning(passenger);
+      const warning = passportWarning(passenger, minimumExpiry, requiresPassport);
       if (warning) {
         nextErrors[index] = warning;
         return;
@@ -361,6 +373,10 @@ const subscribeToHydration = () => () => undefined;
   }
 
   async function saveAndContinue() {
+    if (tooManySeats || (availableSeats !== null && passengers.filter(person => person.passengerType !== "infant").length > availableSeats)) {
+      setNotice("تعداد بزرگسالان و کودکان از ظرفیت پرواز بیشتر است.");
+      return;
+    }
     if (buyerContact && (buyerContact.fullName.trim().length < 2 || !buyerContact.buyerMobile.trim() || !buyerContact.address.trim())) {
       setNotice("نام کامل، شماره همراه و نشانی خریدار را وارد کنید.");
       return;
@@ -437,6 +453,7 @@ const subscribeToHydration = () => () => undefined;
 
   const passengerTypeLabel = (kind: PassengerKind) => kind === "adult" ? "بزرگسال" : kind === "child" ? "کودک" : "نوزاد";
   const fieldStatus = (key: keyof PassengerCheckoutData) => {
+    if (requiresPassport && ["passportNumber", "firstNameEn", "lastNameEn"].includes(key)) return { label: "الزامی", required: true };
     if (key === "firstName" || key === "lastName") return { label: "الزامی", required: true };
     if (key === "firstNameEn" || key === "lastNameEn") return { label: "با ثبت گذرنامه الزامی", required: false };
     if (key === "nationalCode" || key === "passportNumber") return { label: "یکی از این دو الزامی", required: false };
@@ -463,6 +480,10 @@ const subscribeToHydration = () => () => undefined;
         </header>
 
         <div className="space-y-5 p-5 sm:p-7">
+          {seatsFull && <p role="status" className="rounded-xl bg-amber-50 px-4 py-3 text-sm font-bold text-amber-950">
+            {tooManySeats ? "تعداد بزرگسالان و کودکان را کاهش دهید." : "همهٔ صندلی‌های موجود این پرواز انتخاب شده‌اند."}
+            {" "}ظرفیت پرواز {availableSeats?.toLocaleString("fa-IR")} صندلی است.
+          </p>}
           {step === "count" ? (
             <>
               <div className="rounded-2xl border border-brand/15 bg-brand/5 p-4 text-sm leading-7 text-brand">
@@ -480,20 +501,20 @@ const subscribeToHydration = () => () => undefined;
                     <div className="mt-4 flex items-center justify-between rounded-xl bg-surface-muted p-2">
                       <button aria-label={"کاهش " + label} className="grid size-9 place-items-center rounded-lg bg-white text-lg font-black text-brand disabled:opacity-35" disabled={counts[key] <= (key === "adults" ? 1 : 0)} onClick={() => updateCount(key, -1)} type="button">−</button>
                       <output aria-live="polite" className="font-black text-brand">{counts[key].toLocaleString("fa-IR")}</output>
-                      <button aria-label={"افزایش " + label} className="grid size-9 place-items-center rounded-lg bg-white text-lg font-black text-brand" onClick={() => updateCount(key, 1)} type="button">+</button>
+                      <button aria-label={"افزایش " + label} className="grid size-9 place-items-center rounded-lg bg-white text-lg font-black text-brand" disabled={key !== "infants" && seatsFull} onClick={() => updateCount(key, 1)} type="button">+</button>
                     </div>
                   </div>
                 ))}
               </div>
               <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-brand px-4 py-3 text-sm font-black text-white">
                 <span>مجموع مسافران: {total.toLocaleString("fa-IR")} نفر</span>
-                <button className="min-h-11 rounded-xl bg-accent-strong px-5 text-sm font-black text-white hover:bg-accent-strong/90" onClick={continueToDetails} type="button">ادامه و ورود اطلاعات</button>
+                <button className="min-h-11 rounded-xl bg-accent-strong px-5 text-sm font-black text-white hover:bg-accent-strong/90" disabled={tooManySeats} onClick={continueToDetails} type="button">ادامه و ورود اطلاعات</button>
               </div>
             </>
           ) : (
             <>
               {buyerContact && onBuyerContactChange && (
-                <fieldset className="grid gap-4 rounded-2xl border border-border bg-white p-4 md:grid-cols-3">
+                <fieldset className="grid min-w-0 grid-cols-[repeat(auto-fit,minmax(min(100%,12rem),1fr))] gap-4 rounded-2xl border border-border bg-white p-4">
                   <legend className="px-2 font-black text-brand">اطلاعات خریدار</legend>
                   {([
                     ["fullName", "نام کامل خریدار", "text", 120, true],
@@ -502,13 +523,13 @@ const subscribeToHydration = () => () => undefined;
                     ["landline", "تلفن ثابت (اختیاری)", "tel", 32, false],
                     ["postalCode", "کد پستی (اختیاری)", "text", 20, false],
                   ] as const).map(([key, label, type, maxLength, required]) => (
-                    <label key={key} className="grid gap-1.5 text-sm font-bold text-brand">
+                    <label key={key} className="grid min-w-0 gap-1.5 text-sm font-bold text-brand">
                       {label}
                       <input type={type} dir={key === "postalCode" || type === "tel" ? "ltr" : undefined}
                         inputMode={key === "postalCode" ? "numeric" : undefined}
                         required={required} disabled={busy} maxLength={maxLength} value={buyerContact[key]}
                         onChange={(event) => onBuyerContactChange({ ...buyerContact, [key]: event.target.value })}
-                        className="min-h-11 rounded-xl border border-border bg-surface-muted/60 px-3 font-normal focus-visible:outline-2 focus-visible:outline-brand" />
+                        className="min-h-11 w-full min-w-0 rounded-xl border border-border bg-surface-muted/60 px-3 font-normal focus-visible:outline-2 focus-visible:outline-brand" />
                     </label>
                   ))}
                 </fieldset>
@@ -524,13 +545,21 @@ const subscribeToHydration = () => () => undefined;
                 </div>
               ) : null}
               <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-7 text-amber-950">
-                اگر پاسپورت دارید، تاریخ انقضا باید حداقل تا {new Intl.DateTimeFormat("fa-IR-u-ca-persian", { dateStyle: "medium" }).format(new Date(minimumExpiry + "T12:00:00"))} معتبر باشد. پاسپورت منقضی یا با اعتبار کمتر از چهار ماه پذیرفته نمی‌شود.
+                {requiresPassport ? "برای این سفر گذرنامهٔ معتبر الزامی است." : "در صورت ثبت گذرنامه، اعتبار آن بررسی می‌شود."}
+                {" "}تاریخ انقضای گذرنامه باید {new Intl.DateTimeFormat("fa-IR-u-ca-persian", { dateStyle: "medium" }).format(new Date(minimumExpiry + "T12:00:00"))} یا بعد از آن باشد.
               </div>
               <div className="space-y-4">
                 {passengers.map((passenger, index) => (
                   <article className="rounded-2xl border border-border bg-white p-4 sm:p-5" key={index}>
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <h3 className="font-black text-brand">مسافر {index + 1} · {passengerTypeLabel(passenger.passengerType)}</h3>
+                      {context === "flight" && <button type="button" disabled={busy || (passenger.passengerType === "adult" && (counts.adults <= 1 || counts.adults <= counts.infants))}
+                        className="text-sm text-brand disabled:opacity-50" onClick={() => {
+                          const group = { adult: "adults", child: "children", infant: "infants" }[passenger.passengerType] as keyof PassengerCounts;
+                          setPassengers(current => current.filter((_, i) => i !== index));
+                          setCounts(current => ({ ...current, [group]: current[group] - 1 }));
+                          setErrors({});
+                        }}>حذف مسافر</button>}
                       {historyLoading ? <span className="text-xs text-muted">در حال دریافت مسافران ثبت‌شده…</span> : history.length ? (
                         <fieldset className="w-full">
                           <legend className="sr-only">انتخاب از مسافران ثبت‌شده</legend>
@@ -538,7 +567,7 @@ const subscribeToHydration = () => () => undefined;
                             {history.map((item) => {
                               const selected = passenger.id === item.id;
                               const selectedElsewhere = passengers.some((otherPassenger, otherIndex) => otherIndex !== index && otherPassenger.id === item.id);
-                              const passportIssue = passportWarning(historyToForm(item, passenger.passengerType));
+                              const passportIssue = passportWarning(historyToForm(item, passenger.passengerType), minimumExpiry, requiresPassport);
                               const unavailable = Boolean(selectedElsewhere || (passportIssue && !selected));
                               return (
                                 <label className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-xs transition ${selected ? "border-brand bg-white text-brand" : "border-transparent text-foreground hover:border-brand/25 hover:bg-white"} ${unavailable ? "cursor-not-allowed opacity-50" : ""}`} key={item.id}>
@@ -601,6 +630,7 @@ const subscribeToHydration = () => () => undefined;
                               updatePassenger(index, key, uppercase);
                             }}
                             required={
+                              (requiresPassport && ["passportNumber", "firstNameEn", "lastNameEn"].includes(key)) ||
                               key === "firstName" ||
                               key === "lastName" ||
                               ((key === "firstNameEn" || key === "lastNameEn") && Boolean(passenger.passportNumber))
@@ -611,14 +641,14 @@ const subscribeToHydration = () => () => undefined;
                         </label>
                       ))}
                       <label className="grid gap-1.5 text-sm font-bold text-brand">
-                        <span className="flex flex-wrap items-center gap-1.5"><span>تاریخ انقضای گذرنامه</span><span className="rounded-full bg-surface-muted px-2 py-0.5 text-[10px] font-black text-muted">با ثبت گذرنامه الزامی</span></span>
+                        <span className="flex flex-wrap items-center gap-1.5"><span>تاریخ انقضای گذرنامه</span><span className="rounded-full bg-surface-muted px-2 py-0.5 text-[10px] font-black text-muted">{requiresPassport ? "الزامی" : "با ثبت گذرنامه الزامی"}</span></span>
                         <DateInput
                           {...(context === "flight" ? { defaultGregorian: true } : {})}
                           ariaLabel={`تاریخ انقضای گذرنامه مسافر ${index + 1}`}
                           className="min-h-11 w-full rounded-xl border border-border bg-white px-3 text-sm font-normal outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/15"
                           min={minimumExpiry}
                           onChange={(value) => updatePassenger(index, "passportExpiryDate", value ?? "")}
-                          required={Boolean(passenger.passportNumber)}
+                          required={requiresPassport || Boolean(passenger.passportNumber)}
                           value={passenger.passportExpiryDate || null}
                         />
                       </label>
@@ -658,12 +688,18 @@ const subscribeToHydration = () => () => undefined;
               </div>
               {notice ? <p className="rounded-xl bg-brand/10 px-4 py-3 text-sm font-bold text-brand" role="status" aria-live="polite" aria-atomic="true">{notice}</p> : null}
               <div className={`flex flex-wrap items-center gap-3 ${hasFixedPassengerCounts ? "justify-end" : "justify-between"}`}>
-                {context === "flight" && <button className="min-h-11 rounded-xl border border-brand/30 px-5 font-bold text-brand disabled:opacity-50" type="button" disabled={busy || passengers.length >= 30} onClick={() => {
-                  setPassengers((current) => [...current, emptyPassenger("adult")]);
-                  setCounts((current) => ({ ...current, adults: current.adults + 1 }));
-                }}>＋ افزودن مسافر</button>}
+                {context === "flight" && <div className="flex flex-wrap gap-2" role="group" aria-label="افزودن مسافر">
+                  {([["adult", "adults"], ["child", "children"], ["infant", "infants"]] as const).map(([kind, group]) => (
+                    <button key={kind} className="min-h-11 rounded-xl border border-brand/30 px-3 font-bold text-brand disabled:opacity-50" type="button"
+                      disabled={busy || passengers.length >= 30 || (kind === "infant" ? counts.infants >= counts.adults : seatsFull)}
+                      onClick={() => {
+                        setPassengers(current => [...current, emptyPassenger(kind)]);
+                        setCounts(current => ({ ...current, [group]: current[group] + 1 }));
+                      }}>＋ {passengerTypeLabel(kind)}</button>
+                  ))}
+                </div>}
                 {!hasFixedPassengerCounts ? <button className="min-h-11 rounded-xl border border-border px-5 text-sm font-black text-brand hover:bg-surface-muted" onClick={() => setStep("count")} type="button">بازگشت به تعداد مسافران</button> : null}
-                <button className="min-h-11 rounded-xl bg-brand px-6 text-sm font-black text-white hover:bg-brand/90 disabled:opacity-60" disabled={busy} onClick={() => void saveAndContinue()} type="button">{busy ? "در حال ذخیره اطلاعات…" : inline ? "ذخیره اطلاعات مسافران" : "ثبت اطلاعات و ادامه خرید"}</button>
+                <button className="min-h-11 rounded-xl bg-brand px-6 text-sm font-black text-white hover:bg-brand/90 disabled:opacity-60" disabled={busy || tooManySeats} onClick={() => void saveAndContinue()} type="button">{busy ? "در حال ذخیره اطلاعات…" : inline ? "ذخیره اطلاعات مسافران" : "ثبت اطلاعات و ادامه خرید"}</button>
               </div>
             </>
           )}
