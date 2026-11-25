@@ -152,6 +152,7 @@ export type FlightBuyerContact = {
 };
 
 type PassengerCheckoutModalProps = {
+  initialPassengers?: PassengerCheckoutData[];
   buyerContact?: FlightBuyerContact;
   onBuyerContactChange?: (contact: FlightBuyerContact) => void;
   saveBuyerContact?: () => Promise<void>;
@@ -175,6 +176,7 @@ function passengerKinds(counts: PassengerCounts): PassengerKind[] {
 }
 
 export function PassengerCheckoutModal({
+  initialPassengers,
   inline = false,
   open,
   onClose,
@@ -227,7 +229,7 @@ const subscribeToHydration = () => () => undefined;
         : { adults: 1, children: 0, infants: 0 };
       setStep(hasFixedPassengerCounts ? "details" : "count");
       setCounts(nextCounts);
-      setPassengers(passengerKinds(nextCounts).map(emptyPassenger));
+      setPassengers(initialPassengers?.length ? initialPassengers.map(person => ({ ...person })) : passengerKinds(nextCounts).map(emptyPassenger));
       setErrors({});
       setNotice("");
       setHistoryLoading(true);
@@ -248,7 +250,7 @@ const subscribeToHydration = () => () => undefined;
       active = false;
       window.clearTimeout(resetTimer);
     };
-  }, [fixedAdults, fixedChildren, fixedInfants, hasFixedPassengerCounts, open]);
+  }, [fixedAdults, fixedChildren, fixedInfants, hasFixedPassengerCounts, initialPassengers, open]);
 
   useEffect(() => {
     if (!open || inline) return;

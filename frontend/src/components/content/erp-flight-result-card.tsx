@@ -335,6 +335,7 @@ export function ErpFlightResultCard({
       setModalOpen(false);
       if (checkoutResult.state === "draft") {
         discardPendingErpCheckout(window.localStorage, customerId.current);
+        router.push(`/payment/waiting/?flight=${encodeURIComponent(checkoutResult.id)}`);
       } else if (checkoutResult.state === "failed" && checkoutResult.errorCode === "quote_changed") {
         discardPendingErpCheckout(window.localStorage, customerId.current);
         key.current = null;
@@ -382,7 +383,7 @@ export function ErpFlightResultCard({
           ) : null}
           {result?.state === "draft" ? (
             <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-950">
-              <strong>درخواست پرواز ثبت شد.</strong> <a className="mr-2 font-bold underline" href="/account/?tab=trips">پیگیری در سفرهای من</a>
+              <strong>درخواست پرواز ثبت شد.</strong> <a className="mr-2 font-bold underline" href={`/payment/waiting/?flight=${encodeURIComponent(result.id)}`}>وضعیت همین پرواز</a>
               <p className="mt-1">
                 شماره قرارداد:{" "}
                 <bdi dir="ltr">
@@ -572,7 +573,7 @@ export function ErpFlightCheckoutRecovery() {
         <p className="mt-2 text-sm text-emerald-800">
           پیش‌نویس ERP ثبت شده است. شماره قرارداد:{" "}
           <bdi dir="ltr">{result.contractNumber || "در حال همگام‌سازی"}</bdi>.{" "}
-          {result.paymentMessage}
+          {result.paymentMessage} <a className="underline" href={`/payment/waiting/?flight=${encodeURIComponent(result.id)}`}>وضعیت همین پرواز</a>
         </p>
       ) : (
         <>

@@ -166,7 +166,7 @@ export function CombinedPackageCard({ item, tourId, departureId, capacityRemaini
         </button>
       </div> : null}
       {checkoutOpen && tourId && departureId && item.combinedDeparturePriceId ? (
-        <CombinedTourCheckout country={country} lastTravelDay={lastTravelDay} priceSummary={priceSummary} combinedDeparturePriceId={item.combinedDeparturePriceId} departureId={departureId}
+        <CombinedTourCheckout hotelSummary={item.hotels.map(row => [row.hotel.name, row.roomType].filter(Boolean).join(" · ")).join("، ")} country={country} lastTravelDay={lastTravelDay} priceSummary={priceSummary} combinedDeparturePriceId={item.combinedDeparturePriceId} departureId={departureId}
           onClose={() => setCheckoutOpen(false)} roomSelection={selection} tourId={tourId} />
       ) : null}
     </article>

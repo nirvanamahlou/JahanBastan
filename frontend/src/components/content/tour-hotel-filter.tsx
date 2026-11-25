@@ -410,7 +410,7 @@ export function TourHotelFilter({
                   </div>
                 ) : !canSelectRoom ? <p className={hotelStyles.bookingUnavailable}>{!offer.isAvailable || offer.capacityRemaining === 0 ? "تکمیل ظرفیت" : "استعلام قیمت و ظرفیت"}</p> : null}
                 {checkoutOfferId === offer.id && roomCount > 0 && canSelectRoom ? (
-                  <CombinedTourCheckout country={country} lastTravelDay={offer.departure.departureDate ? tourReturnDate(offer.departure.departureDate, offer.departure.returnDate ?? null, offer.departure.nights) ?? offer.departure.departureDate : null} priceSummary={priceSummary} departureId={offer.departure.id} onClose={() => setCheckoutOfferId(null)}
+                  <CombinedTourCheckout hotelSummary={[offer.hotel.name, offer.roomType, offer.serviceType].filter(Boolean).join(" · ")} departureDate={offer.departure.departureDate} country={country} lastTravelDay={offer.departure.departureDate ? tourReturnDate(offer.departure.departureDate, offer.departure.returnDate ?? null, offer.departure.nights) ?? offer.departure.departureDate : null} priceSummary={priceSummary} departureId={offer.departure.id} onClose={() => setCheckoutOfferId(null)}
                     roomSelection={selection} tourHotelPriceId={offer.id} tourId={tourId} />
                 ) : null}
               </article>

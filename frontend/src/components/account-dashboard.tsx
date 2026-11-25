@@ -57,7 +57,6 @@ type Agency = {
 type CartItem = { id: number; titleSnapshot: string; priceAmount: string | null; currency: string | null };
 type SavedTour = { id: number; tourId: number; title: string; slug: string; priceAmount: string | null; currency: string | null };
 type OrderServiceItem = { title: string; details: string | null };
-type PaymentStartResponse = { checkoutUrl?: string | null; detail?: string }; 
 type Order = {
   id: number;
   orderNumber: string;
@@ -157,7 +156,6 @@ export function AccountDashboard() {
   const [passengers, setPassengers] = useState<Passenger[]>([]);
   const [passengerSearch, setPassengerSearch] = useState("");
   const [orders, setOrders] = useState<Order[]>([]);
-  const [payingOrderId, setPayingOrderId] = useState<number | null>(null);
   const [supportRequests, setSupportRequests] = useState<SupportRequest[]>([]);
   const [alerts, setAlerts] = useState<AvailabilityAlert[]>([]);
   const [insurances, setInsurances] = useState<Insurance[]>([]);
@@ -365,34 +363,6 @@ export function AccountDashboard() {
     setNotice("این مورد از فهرست سفرهای شما حذف شد.");
     await loadDashboard();
   }
-  async function startPayment(order: Order) {
-    setNotice("");
-    setPayingOrderId(order.id);
-    try {
-      const response = await request("/payments/intents", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          crmContractNumber: order.orderNumber,
-          amount: Number(order.amount),
-          currency: order.currency,
-        }),
-      });
-      const body = (await response?.json().catch(() => null)) as PaymentStartResponse | null;
-      if (!response?.ok || !body?.checkoutUrl) {
-        throw new Error(
-          response?.status === 503
-            ? "درگاه پرداخت هنوز فعال نشده است."
-            : body?.detail || "ورود به درگاه پرداخت ناموفق بود.",
-        );
-      }
-      window.location.assign(body.checkoutUrl);
-    } catch (error) {
-      setNotice(error instanceof Error ? error.message : "ورود به درگاه پرداخت ناموفق بود.");
-    } finally {
-      setPayingOrderId(null);
-    }
-  }
   async function logout() {
     await request("/account/logout", { method: "POST" });
     window.dispatchEvent(new Event("customer-logged-out"));
@@ -456,7 +426,7 @@ export function AccountDashboard() {
             </form>
           </section>
         ) : null}
-        {active === "trips" ? <section className="space-y-5"><header><h1 className="text-2xl font-black text-brand">سفرهای من</h1><p className="mt-1 text-sm text-muted">روی هر سفر بزنید تا وضعیت فعلی، مبلغ و شناسهٔ سفارش همان‌جا نمایش داده شود.</p></header><ErpFlightCheckoutRecovery /><ErpFlightOrders />{dashboard.cartItems.length > 0 && <section className="rounded-2xl border border-border bg-white p-4"><h2 className="font-bold text-brand">انتخاب‌های ناتمام در سبد سفر</h2><ul className="mt-2 space-y-2">{dashboard.cartItems.map((item) => <li className="flex flex-wrap justify-between gap-2 text-sm" key={item.id}><span>{item.titleSnapshot}</span>{item.priceAmount && item.currency && <strong>{formatCurrency(item.priceAmount, item.currency)}</strong>}</li>)}</ul><Link className="mt-3 inline-block font-bold text-brand underline" href="/cart/">ادامه خرید در سبد سفر</Link></section>}<OrderList onPay={startPayment} onRemove={removeOrder} orders={orders} payingOrderId={payingOrderId} /></section> : null}
+        {active === "trips" ? <section className="space-y-5"><header><h1 className="text-2xl font-black text-brand">سفرهای من</h1><p className="mt-1 text-sm text-muted">روی هر سفر بزنید تا وضعیت فعلی، مبلغ و شناسهٔ سفارش همان‌جا نمایش داده شود.</p></header><ErpFlightCheckoutRecovery /><ErpFlightOrders />{dashboard.cartItems.length > 0 && <section className="rounded-2xl border border-border bg-white p-4"><h2 className="font-bold text-brand">انتخاب‌های ناتمام در سبد سفر</h2><ul className="mt-2 space-y-2">{dashboard.cartItems.map((item) => <li className="flex flex-wrap justify-between gap-2 text-sm" key={item.id}><span>{item.titleSnapshot}</span>{item.priceAmount && item.currency && <strong>{formatCurrency(item.priceAmount, item.currency)}</strong>}</li>)}</ul><Link className="mt-3 inline-block font-bold text-brand underline" href="/cart/">ادامه خرید در سبد سفر</Link></section>}<OrderList onRemove={removeOrder} orders={orders} /></section> : null}
         {active === "passengers" ? (
           <section className="space-y-5">
             <header>
@@ -548,15 +518,13 @@ export function AccountDashboard() {
   );
 }
 
-function OrderList({ orders, onRemove, onPay, payingOrderId }: { orders: Order[]; onRemove: (order: Order) => void; onPay: (order: Order) => void; payingOrderId: number | null }) {
-  const [renderedAt] = useState(() => Date.now());
+function OrderList({ orders, onRemove }: { orders: Order[]; onRemove: (order: Order) => void }) {
   if (!orders.length) return <EmptyState title="رزرو یا سفارش مستقیمی ثبت نشده است" description="رزروها و سفارش‌های ثبت‌شدهٔ جهان باستان با وضعیت فعلی در این قسمت نمایش داده می‌شوند." />;
 
   return (
     <ul className="space-y-3">
       {orders.map((order) => {
         const isAwaitingSupportConfirmation = order.source === "booking" && order.status === "paid" && !order.ticketsIssued;
-        const canPay = order.source === "booking" && order.status === "approved" && Number(order.amount) > 0 && (!order.paymentExpiresAt || new Date(order.paymentExpiresAt).getTime() > renderedAt);
         const statusLabel = isAwaitingSupportConfirmation ? "پرداخت ثبت شد؛ در انتظار تأیید پشتیبان" : orderStatusLabels[order.status] ?? order.status;
         const serviceItems = order.serviceItems ?? [];
         return (
@@ -583,7 +551,7 @@ function OrderList({ orders, onRemove, onPay, payingOrderId }: { orders: Order[]
 
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
                   <div className="text-sm font-bold text-muted">{isAwaitingSupportConfirmation ? <p>پرداخت ثبت شده است؛ پس از تأیید پشتیبان، بلیت صادر می‌شود.</p> : <><p>شناسهٔ پیگیری: <span dir="ltr">{order.orderNumber}</span></p>{order.updatedAt ? <p className="mt-1 text-xs">آخرین تغییر وضعیت: {formatPersianDateTime(order.updatedAt)}</p> : null}{order.paymentExpiresAt && order.status === "approved" ? <p className="mt-1 text-xs text-amber-800">مهلت پرداخت: {formatPersianDateTime(order.paymentExpiresAt)}</p> : null}</>}</div>
-                  {canPay ? <button className="inline-flex min-h-10 items-center rounded-xl bg-brand px-4 text-sm font-black text-white transition hover:bg-brand/90 disabled:cursor-not-allowed disabled:opacity-60" disabled={payingOrderId === order.id} onClick={() => void onPay(order)} type="button">{payingOrderId === order.id ? "در حال ورود به درگاه…" : "ورود به لینک پرداخت"}</button> : null}<button className="min-h-10 rounded-xl border border-red-200 px-4 text-sm font-black text-red-700 transition hover:bg-red-50" onClick={() => void onRemove(order)} type="button">حذف از سفرهای من</button>
+                  {order.source === "booking" && <Link className="inline-flex min-h-10 items-center rounded-xl bg-brand px-4 font-bold text-white" href={`/payment/waiting/?booking=${order.id}`}>وضعیت سفارش و پرداخت</Link>}<button className="min-h-10 rounded-xl border border-red-200 px-4 text-sm font-black text-red-700 transition hover:bg-red-50" onClick={() => void onRemove(order)} type="button">حذف از سفرهای من</button>
                 </div>
               </div>
             </details>

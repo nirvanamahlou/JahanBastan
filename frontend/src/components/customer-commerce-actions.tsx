@@ -9,6 +9,8 @@ import { addGuestCartIntent, notifyCartUpdated, type GuestCartPayload } from "@/
 import { useOnlineSalesEnabled } from "@/components/online-sales-provider";
 
 type CartAddButtonProps = {
+  onPendingChange?: (pending: boolean) => void;
+  onAdded?: (id: number) => void;
   itemType: "tour" | "flight" | "train" | "bus";
   tourId?: number;
   travelServiceId?: number;
@@ -56,6 +58,8 @@ function CartFinalizationNotice({ href }: { href: string }) {
 }
 
 export function CartAddButton({
+  onAdded,
+  onPendingChange,
   itemType,
   tourId,
   travelServiceId,
@@ -77,6 +81,7 @@ export function CartAddButton({
 
   async function addToCart() {
     setState("loading");
+    onPendingChange?.(true);
     const payload: GuestCartPayload = itemType === "tour"
       ? { itemType, tourId, tourDepartureId, hotelPackageId, tourHotelPriceId, combinedDeparturePriceId, roomSelection }
       : { itemType, travelServiceId };
@@ -88,15 +93,21 @@ export function CartAddButton({
     }).catch(() => null);
 
     if (response?.status === 401) {
+      onPendingChange?.(false);
       saveForGuest(payload, router);
       return;
     }
     if (response?.ok) {
       setState("added");
       notifyCartUpdated();
+      if (onAdded) {
+        const item = await response.json().catch(() => null);
+        if (Number.isSafeInteger(item?.id)) onAdded(item.id);
+      }
     } else {
       setState("error");
     }
+    onPendingChange?.(false);
   }
 
   return (

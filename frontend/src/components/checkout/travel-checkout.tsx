@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useRef, useEffect, useMemo, useState } from "react";
 
 import { JalaliDateInput } from "@/components/admin/jalali-date-input";
 import {
@@ -191,7 +191,8 @@ function toDateInput(date: Date) {
   return date.toISOString().slice(0, 10);
 }
 
-export function TravelCheckout() {
+export function TravelCheckout({ selection }: { selection?: { itemId: number; passengers: PassengerCheckoutData[] } } = {}) {
+  const initialSelection = useRef(selection);
   const [items, setItems] = useState<CartItem[] | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [configuration, setConfiguration] = useState<Configuration | null>(null);
@@ -223,7 +224,6 @@ export function TravelCheckout() {
   const [documentPassengerByRequirement, setDocumentPassengerByRequirement] = useState<Record<number, string>>({});
   const [alternatives, setAlternatives] = useState<HotelAlternative[]>([]);
   const [signedIn, setSignedIn] = useState(false);
-  const [payingBooking, setPayingBooking] = useState<number | null>(null);
   const [guestItems, setGuestItems] = useState<GuestCartIntent[]>([]);
   const [refreshingCart, setRefreshingCart] = useState(false);
   const [consulting, setConsulting] = useState(false);
@@ -298,6 +298,16 @@ export function TravelCheckout() {
       }
     }
     setItems(nextItems);
+    const selected = initialSelection.current;
+    if (selected && cartResponse.ok) {
+      initialSelection.current = undefined;
+      if (nextItems.length === 1 && nextItems[0].id === selected.itemId) {
+        setPassengers(selected.passengers);
+        setStep(2);
+      } else {
+        setNotice("سبد شما شامل انتخاب‌های دیگری است. پیش از ادامه، موارد سبد و تعداد مسافران را بررسی کنید.");
+      }
+    }
     setBookings(bookingResponse.ok ? ((await bookingResponse.json()) as Booking[]) : []);
     if (agencyResponse.ok) {
       setAgencyCredit((await agencyResponse.json()) as AgencyCredit | null);
@@ -598,34 +608,6 @@ export function TravelCheckout() {
     }));
   }
 
-  async function payBooking(row: Booking) {
-    setNotice("");
-    setPayingBooking(row.id);
-    try {
-      const response = await fetch(`${PUBLIC_API_BASE_URL}/payments/intents`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          crmContractNumber: row.bookingNumber,
-          amount: Number(row.payableNowAmount ?? row.totalAmount),
-          currency: row.currency,
-        }),
-      });
-      const result = await response.json().catch(() => null);
-      if (response.status === 503 && result?.detail === "online payment is not configured") {
-        window.location.assign("/payment/waiting/");
-      } else if (response.ok && result?.checkoutUrl) {
-        window.location.assign(result.checkoutUrl);
-      } else {
-        setNotice("ورود به درگاه انجام نشد. وضعیت یا اعتبار پرداخت را در سفرهای من بررسی کنید.");
-      }
-    } catch {
-      setNotice("ارتباط با سرویس پرداخت برقرار نشد. دوباره تلاش کنید.");
-    } finally {
-      setPayingBooking(null);
-    }
-  }
 
   if (items === null) {
     return <div className="rounded-3xl border border-border bg-white p-12 text-center">در حال دریافت سبد خرید…</div>;
@@ -710,7 +692,7 @@ export function TravelCheckout() {
                 </article>
                 );
               })}
-              <ErpFlightOrders cart onSelect={(order, payable) => { setFlightStep(0); setLastFlightStep(0); setFlight({ order, payable }); }} empty={!items.length && !guestItems.length ? <div className="rounded-2xl border border-dashed border-border bg-white p-10 text-center"><p>سبد خرید شما خالی است.</p><Link className="mt-4 inline-flex rounded-xl bg-brand px-5 py-3 font-black text-white" href="/tours/">مشاهده تورها</Link></div> : undefined} />
+              <ErpFlightOrders cart onSelect={(order, payable) => { setFlightStep(3); setLastFlightStep(3); setFlight({ order, payable }); }} empty={!items.length && !guestItems.length ? <div className="rounded-2xl border border-dashed border-border bg-white p-10 text-center"><p>سبد خرید شما خالی است.</p><Link className="mt-4 inline-flex rounded-xl bg-brand px-5 py-3 font-black text-white" href="/tours/">مشاهده تورها</Link></div> : undefined} />
             </section>
             {items.length > 0 && <aside className="h-fit rounded-2xl border border-border bg-white p-5 lg:sticky lg:top-24">
               <h2 className="text-xl font-black text-brand">خلاصه سفر</h2>
@@ -739,6 +721,7 @@ export function TravelCheckout() {
             )}
             <PassengerCheckoutModal
               inline
+              initialPassengers={passengers}
               fixedPassengerCounts={fixedTourPassengerCounts}
               onClose={() => setPassengerModal(false)}
               onComplete={(value) => {
@@ -854,11 +837,11 @@ export function TravelCheckout() {
             <h2 className="mt-5 text-2xl font-black text-emerald-900">درخواست رزرو با موفقیت ثبت شد</h2>
             <p className="mt-2 text-emerald-800">شماره پیگیری: <strong dir="ltr">{booking.bookingNumber}</strong></p>
             <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-emerald-900">کارشناس موجودی، قیمت نهایی و مدارک را بررسی می‌کند. نتیجه و امکان پرداخت از همین صفحه و حساب کاربری در دسترس خواهد بود.</p>
-            <div className="mt-6 flex flex-wrap justify-center gap-2"><a className="rounded-xl border border-emerald-700 px-5 py-3 font-black text-emerald-800" href={`${PUBLIC_API_BASE_URL}/account/bookings/${booking.id}/proforma.pdf`}>دانلود پیش‌فاکتور</a><Link className="rounded-xl bg-emerald-700 px-5 py-3 font-black text-white" href="/account/?tab=trips">پیگیری در حساب کاربری</Link></div>
+            <div className="mt-6 flex flex-wrap justify-center gap-2"><a className="rounded-xl border border-emerald-700 px-5 py-3 font-black text-emerald-800" href={`${PUBLIC_API_BASE_URL}/account/bookings/${booking.id}/proforma.pdf`}>دانلود پیش‌فاکتور</a><Link className="rounded-xl bg-emerald-700 px-5 py-3 font-black text-white" href={`/payment/waiting/?booking=${booking.id}`}>وضعیت همین سفارش و پرداخت</Link></div>
           </section>
         ) : null}
 
-        {!flight && bookings.length ? <section className="rounded-3xl border border-border bg-white p-6"><h2 className="text-xl font-black text-brand">سفارش‌های اخیر</h2><div className="mt-4 grid gap-2">{bookings.slice(0, 5).map((row) => <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-surface-muted p-4" key={row.id}><div><strong className="block text-brand" dir="ltr">{row.bookingNumber}</strong><span className="text-xs text-muted">{row.paymentMethod === "installment" ? "اقساطی" : "نقدی"} · {row.status}</span></div><div className="flex flex-wrap items-center gap-3"><span className="font-black">{money(row.totalAmount, row.currency)}</span>{row.status === "approved" && Number(row.payableNowAmount ?? row.totalAmount) > 0 ? <button type="button" disabled={payingBooking !== null} onClick={() => void payBooking(row)} className="min-h-11 rounded-xl bg-brand px-4 font-bold text-white disabled:opacity-50">{payingBooking === row.id ? "در حال اتصال…" : "ادامه به پرداخت"}</button> : <Link href="/account/?tab=trips" className="font-bold text-brand underline">پیگیری سفارش</Link>}</div></div>)}</div></section> : null}
+        {!flight && bookings.length ? <section className="rounded-3xl border border-border bg-white p-6"><h2 className="text-xl font-black text-brand">سفارش‌های اخیر</h2><div className="mt-4 grid gap-2">{bookings.slice(0, 5).map((row) => <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-surface-muted p-4" key={row.id}><div><strong className="block text-brand" dir="ltr">{row.bookingNumber}</strong><span className="text-xs text-muted">{row.paymentMethod === "installment" ? "اقساطی" : "نقدی"} · {row.status}</span></div><div className="flex flex-wrap items-center gap-3"><span className="font-black">{money(row.totalAmount, row.currency)}</span><Link href={`/payment/waiting/?booking=${row.id}`} className="font-bold text-brand underline">وضعیت سفارش و پرداخت</Link></div></div>)}</div></section> : null}
       </div>
     </>
   );

@@ -76,6 +76,7 @@ export function ErpFlightOrders({
             <span className="text-muted">{formatPersianDateTime(order.createdAt)}</span>
             {!order.contractNumber && <small className="w-full break-all text-muted">شناسهٔ پیگیری <bdi>{order.id}</bdi></small>}
             <span aria-live="polite">{statuses[order.id] || (order.state === "cancelled" ? "لغوشده در آوینا" : order.state === "draft" ? "درخواست ثبت شده" : order.state === "failed" ? "ثبت انجام نشد" : "در حال ثبت")}</span>
+            <Link className="inline-flex min-h-11 items-center rounded-xl bg-brand px-4 font-bold text-white" href={`/payment/waiting/?flight=${encodeURIComponent(order.id)}`}>پیگیری سفارش</Link>
             {onSelect && <button type="button" className="min-h-11 rounded-xl bg-brand px-4 font-bold text-white" onClick={() => onSelect(order, !!order.contractNumber && !["تسویه در آوینا تأیید شد", "لغوشده در آوینا"].includes(statuses[order.id]))}>جزئیات</button>}
             {order.state === "draft" && order.contractNumber ? (
               <button type="button" disabled={statuses[order.id] === "در حال بررسی…"} className={cart ? "inline-flex min-h-11 items-center rounded-xl bg-brand px-4 font-bold text-white hover:bg-brand-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:opacity-60" : "font-bold text-brand underline"} onClick={() => void checkSettlement(order)}>بررسی وضعیت تسویه</button>
@@ -220,7 +221,7 @@ export function FlightCartDetails({
                   {["ادامه به اطلاعات مسافران", "مشاهده درخواست ثبت‌شده", "مرور نهایی سفارش"][step]}
                   <ArrowLeftIcon aria-hidden className="mr-2 size-4 shrink-0" />
                 </button>
-              ) : payable && <Link href="/payment/waiting/" className={action}>ادامه به پرداخت</Link>}
+              ) : payable && <Link href={`/payment/waiting/?flight=${encodeURIComponent(order.id)}`} className={action}>وضعیت سفارش و پرداخت</Link>}
               {step > 0 && <button type="button" className="min-h-11 rounded-xl border border-border px-4 text-sm font-bold" onClick={() => onStep(step - 1)}>مرحله قبل</button>}
             </footer>
           </aside>
