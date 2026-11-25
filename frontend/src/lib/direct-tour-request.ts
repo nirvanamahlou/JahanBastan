@@ -35,5 +35,5 @@ export function finishDirectTourRequest(pending: { slot: string; requestKey: str
 export function directTourAmount(value: unknown): number | null {
   if (typeof value !== "number" && (typeof value !== "string" || !value.trim())) return null;
   const amount = Number(value);
-  return Number.isFinite(amount) && amount >= 0 ? amount : null;
+  return Number.isSafeInteger(amount) && amount > 0 ? amount : null;
 }

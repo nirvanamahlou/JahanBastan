@@ -42,5 +42,5 @@ test("a missing converted total cannot be accepted as a zero price", () => {
   const { directTourAmount } = load({});
   for (const bad of [null, undefined, "", "  ", "bad", Infinity, -1, false]) assert.equal(directTourAmount(bad), null);
   assert.equal(directTourAmount("1050.00"), 1050);
-  assert.equal(directTourAmount(0), 0);
+  assert.equal(directTourAmount(0), null);
 });

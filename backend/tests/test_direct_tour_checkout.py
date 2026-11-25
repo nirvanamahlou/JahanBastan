@@ -2,6 +2,8 @@
 
 import asyncio
 import os
+from decimal import Decimal
+from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
 from uuid import uuid4
 
@@ -11,7 +13,11 @@ from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from app.models import BookingRequest, CustomerUser
-from app.repositories.bookings import BookingRepository, DirectRequestMismatch
+from app.repositories.bookings import (
+    BookingRepository,
+    DirectPriceChanged,
+    DirectRequestMismatch,
+)
 from app.repositories.customer_commerce import CustomerCommerceRepository
 from app.schemas.booking import BookingCreate
 
@@ -123,3 +129,38 @@ async def test_concurrent_and_retried_direct_confirmation_returns_one_order() ->
                 delete(CustomerUser).where(CustomerUser.id == customer_id)
             )
         await engine.dispose()
+
+
+@pytest.mark.asyncio
+async def test_repriced_confirmation_stops_before_a_booking_or_hold(
+    monkeypatch,
+) -> None:
+    selection = BookingCreate.model_validate(payload("tourHotelPriceId")).tour_selection
+    session = MagicMock()
+    session.get = AsyncMock(return_value=None)
+    session.scalars = AsyncMock()
+    session.scalars.return_value = MagicMock()
+    session.scalars.return_value.all.return_value = [
+        SimpleNamespace(
+            item_type="tour",
+            status="active",
+            price_amount=Decimal(450),
+            currency="IRT",
+        )
+    ]
+    repo = BookingRepository(session)
+    monkeypatch.setattr(
+        repo, "_direct_tour_cart", AsyncMock(return_value=SimpleNamespace(id=19))
+    )
+    monkeypatch.setattr(repo, "_validate_tour_hotels", AsyncMock())
+    with pytest.raises(DirectPriceChanged) as changed:
+        await repo.create_from_cart(
+            12,
+            None,
+            [{"passenger_type": "adult"}],
+            terms_accepted=True,
+            tour_selection=selection,
+            accepted_total_irt=300,
+        )
+    assert changed.value.total == 450
+    session.add.assert_not_called()
