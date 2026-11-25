@@ -1,6 +1,6 @@
 """Contracts for draft-only Avina ERP flight checkout."""
 
-from datetime import datetime
+from datetime import date, datetime
 from typing import Literal
 from uuid import UUID
 
@@ -12,6 +12,11 @@ class ErpCheckoutSchema(BaseModel):
     model_config = ConfigDict(
         alias_generator=to_camel, populate_by_name=True, serialize_by_alias=True
     )
+
+
+class ErpFlightCapacityCheck(ErpCheckoutSchema):
+    product_ids: list[str] = Field(min_length=1, max_length=2)
+    birth_dates: list[date] = Field(min_length=1, max_length=30)
 
 
 class ErpFlightCheckoutCreate(ErpCheckoutSchema):

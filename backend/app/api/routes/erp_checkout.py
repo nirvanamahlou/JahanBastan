@@ -6,9 +6,11 @@ from uuid import UUID
 from fastapi import APIRouter, Header, HTTPException, Response
 
 from app.api.dependencies.auth import CurrentCustomer, DatabaseSession, TrustedOrigin
+from app.integrations.avina import AvinaError, avina_client
 from app.repositories import rubi_catalog
 from app.repositories.erp_checkout import ErpCheckoutRepository
 from app.schemas.erp_checkout import (
+    ErpFlightCapacityCheck,
     ErpFlightCheckoutCreate,
     ErpFlightCheckoutRead,
     ErpFlightQuoteReview,
@@ -27,6 +29,29 @@ async def list_erp_flight_checkouts(
 ) -> list[ErpFlightCheckoutRead]:
     response.headers["Cache-Control"] = "private, no-store"
     return await ErpFlightCheckoutService(session).recent(customer.id)
+
+
+@router.post("/capacity", status_code=204)
+async def check_erp_flight_capacity(
+    payload: ErpFlightCapacityCheck,
+    _customer: CurrentCustomer,
+    _trusted: TrustedOrigin,
+) -> Response:
+    """Ask Avina for both legs before checkout writes any traveler profiles."""
+    try:
+        await avina_client.quote(
+            payload.product_ids, [birth.isoformat() for birth in payload.birth_dates]
+        )
+    except AvinaError as error:
+        if error.status in {400, 403, 404, 409, 422}:
+            raise HTTPException(
+                409,
+                "ظرفیت یا امکان فروش برای تعداد مسافران انتخاب‌شده تأیید نشد.",
+            ) from error
+        raise HTTPException(
+            503, "استعلام ظرفیت پرواز از آوینا انجام نشد. دوباره تلاش کنید."
+        ) from error
+    return Response(status_code=204, headers={"Cache-Control": "private, no-store"})
 
 
 @router.post("/review")

@@ -196,6 +196,19 @@ export function ErpFlightCheckout({ flight, passengerCounts, resultsHref }: {
     if (phase === "review") window.scrollTo(0, 0);
   }, [phase]);
 
+  async function checkFlightCapacity(birthDates: string[]) {
+    const response = await fetch(`${PUBLIC_API_BASE_URL}/account/erp-flight-checkouts/capacity`, {
+      method: "POST",
+      credentials: "include",
+      cache: "no-store",
+      headers: { "Content-Type": "application/json", "X-Requested-With": "XMLHttpRequest" },
+      body: JSON.stringify({ productIds: flight.product_ids, birthDates }),
+    }).catch(() => null);
+    if (response?.status === 204) return;
+    const data = await response?.json().catch(() => null);
+    throw new Error(typeof data?.detail === "string" ? data.detail : "ظرفیت پرواز تأیید نشد. دوباره تلاش کنید.");
+  }
+
   async function saveBuyerContact() {
     if (!buyer) return;
     const response = await fetch(`${PUBLIC_API_BASE_URL}/account/me`, {
@@ -360,6 +373,7 @@ export function ErpFlightCheckout({ flight, passengerCounts, resultsHref }: {
           buyerContact={buyer}
           onBuyerContactChange={setBuyer}
           saveBuyerContact={saveBuyerContact}
+          checkFlightCapacity={checkFlightCapacity}
           context="flight"
           availableSeats={seats}
           requiresPassport={legs.some(leg => leg.international === true)}

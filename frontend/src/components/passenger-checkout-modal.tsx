@@ -156,6 +156,7 @@ type PassengerCheckoutModalProps = {
   buyerContact?: FlightBuyerContact;
   onBuyerContactChange?: (contact: FlightBuyerContact) => void;
   saveBuyerContact?: () => Promise<void>;
+  checkFlightCapacity?: (birthDates: string[]) => Promise<void>;
   inline?: boolean;
   open: boolean;
   onClose: () => void;
@@ -189,6 +190,7 @@ export function PassengerCheckoutModal({
   buyerContact,
   onBuyerContactChange,
   saveBuyerContact,
+  checkFlightCapacity,
 }: PassengerCheckoutModalProps) {
 const subscribeToHydration = () => () => undefined;
 
@@ -390,6 +392,7 @@ const subscribeToHydration = () => () => undefined;
     setBusy(true);
     setNotice("");
     try {
+      await checkFlightCapacity?.(passengers.map(person => person.birthDate));
       await saveBuyerContact?.();
       const saved: PassengerCheckoutData[] = [];
       for (const passenger of passengers) {
