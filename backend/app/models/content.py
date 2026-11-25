@@ -703,11 +703,19 @@ class BookingRequest(TimestampMixin, Base):
             "agency_credit_charged_amount >= 0",
             name="chk_booking_requests_agency_credit_charged",
         ),
+        Index(
+            "uq_booking_direct_request",
+            "customer_id",
+            "direct_request_key",
+            unique=True,
+        ),
         Index("idx_booking_requests_customer_created", "customer_id", "created_at"),
         Index("idx_booking_requests_status_created", "status", "created_at"),
     )
 
     id: Mapped[int] = mapped_column(BigInteger, Identity(always=True), primary_key=True)
+    direct_request_key: Mapped[str | None] = mapped_column(String(36))
+    direct_request_digest: Mapped[str | None] = mapped_column(String(64))
     booking_number: Mapped[str] = mapped_column(String(40), unique=True, nullable=False)
     customer_id: Mapped[int] = mapped_column(
         ForeignKey("customer_users.id", ondelete="RESTRICT"), nullable=False

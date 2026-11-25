@@ -3,6 +3,7 @@
 from datetime import date, datetime, time
 from decimal import Decimal
 from typing import Literal
+from uuid import UUID
 
 from pydantic import AliasChoices, BaseModel, ConfigDict, Field, model_validator
 from pydantic.alias_generators import to_camel
@@ -58,6 +59,8 @@ class BookingCreate(BookingSchema):
     terms_accepted: bool = False
     terms_version: str = Field(default="checkout-1405-01", max_length=40)
     discount_code: str | None = Field(default=None, min_length=3, max_length=40)
+    direct_request_key: UUID | None = None
+    accepted_total_irt: int | None = Field(default=None, gt=0)
     tour_selection: CartItemCreate | None = Field(
         default=None,
         validation_alias=AliasChoices("tourSelection", "combinedSelection"),
@@ -67,21 +70,34 @@ class BookingCreate(BookingSchema):
     def validate_tour_selection(self) -> "BookingCreate":
         selection = self.tour_selection
         if selection is None:
+            if (
+                self.direct_request_key is not None
+                or self.accepted_total_irt is not None
+            ):
+                raise ValueError("direct confirmation requires a tour selection")
             return self
+        if self.direct_request_key is not None and self.accepted_total_irt is None:
+            raise ValueError("the displayed tour total is required")
         if selection.item_type != "tour":
             raise ValueError("a dated tour selection is required")
         rooms = selection.room_selection
-        if selection.tour_hotel_price_id is not None and not (rooms.get('double') or rooms.get('single')):
-            raise ValueError('a single or double room is required')
+        if selection.tour_hotel_price_id is not None and not (
+            rooms.get("double") or rooms.get("single")
+        ):
+            raise ValueError("a single or double room is required")
         expected = {
-            "adult": 2 * rooms.get("double", 0) + rooms.get("single", 0) + rooms.get("extra", 0),
+            "adult": 2 * rooms.get("double", 0)
+            + rooms.get("single", 0)
+            + rooms.get("extra", 0),
             "child": rooms.get("childWithBed", 0) + rooms.get("childWithoutBed", 0),
             "infant": rooms.get("infant", 0),
         }
-        if any(sum(p.passenger_type == kind for p in self.passengers) != count for kind, count in expected.items()):
+        if any(
+            sum(p.passenger_type == kind for p in self.passengers) != count
+            for kind, count in expected.items()
+        ):
             raise ValueError("passengers do not match the selected rates")
         return self
-
 
 
 class BookingItemRead(BookingSchema):
