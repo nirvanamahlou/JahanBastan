@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useId, useRef, useState } from "react";
+import { useState } from "react";
 import { useHomepageSearchService } from "./homepage-search-guide";
 import { CountryFlag } from "@/components/content/country-flag";
 import styles from "./homepage-showcase-rev48.module.css";
@@ -28,56 +28,29 @@ function CountryCard({ country }: { country: ShowcaseCard }) {
   );
 }
 
-function HotelCountryStrip({ cards }: { cards: ShowcaseCard[] }) {
-  const id = useId();
-  const strip = useRef<HTMLDivElement>(null);
-  const [edges, setEdges] = useState({ previous: false, next: false });
+function HotelCountryGrid({ cards }: { cards: ShowcaseCard[] }) {
+  return <div className={styles.hotelGrid} role="region" aria-label="کشورهای هتل">
+    {cards.map(card => <Link href={card.href} key={card.id} className={styles.hotelTile}>
+      <ShowcaseImage src={card.imageUrl} sizes="(max-width:600px) 100vw, 48vw" />
+      <h3><CountryFlag country={card.title} imageId={card.flagId} />{card.title}</h3>
+      <span className={styles.hotelCount}>{card.subtitle}</span>
+    </Link>)}
+  </div>;
+}
 
-  useEffect(() => {
-    const viewport = strip.current;
-    if (!viewport) return;
-    function update() {
-      if (!viewport) return;
-      const distance = -viewport.scrollLeft;
-      const limit = viewport.scrollWidth - viewport.clientWidth;
-      const previous = distance > 1;
-      const next = distance < limit - 1;
-      setEdges(current => current.previous === previous && current.next === next ? current : { previous, next });
-    }
-    update();
-    const resize = new ResizeObserver(update);
-    resize.observe(viewport);
-    viewport.addEventListener("scroll", update, { passive: true });
-    return () => {
-      resize.disconnect();
-      viewport.removeEventListener("scroll", update);
-    };
-  }, [cards.length]);
-
-  function move(direction: -1 | 1) {
-    const viewport = strip.current;
-    const firstCard = viewport?.firstElementChild;
-    if (!viewport || !firstCard) return;
-    const gap = parseFloat(getComputedStyle(viewport).columnGap) || 0;
-    viewport.scrollBy({
-      left: -direction * (firstCard.getBoundingClientRect().width + gap),
-      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
-    });
-  }
-
-  return (
-    <div className={styles.stripLayout} dir="rtl">
-      <div id={id} ref={strip} dir="rtl" className={styles.hotelStrip} role="region" aria-label="کشورهای هتل">
-        {cards.map(country => <CountryCard key={country.id} country={country} />)}
-      </div>
-      {edges.previous || edges.next ? (
-        <div className={styles.stripControls}>
-          <button type="button" aria-label="کشور قبلی" aria-controls={id} disabled={!edges.previous} onClick={() => move(-1)}><span dir="ltr" aria-hidden="true">→</span></button>
-          <button type="button" aria-label="کشور بعدی" aria-controls={id} disabled={!edges.next} onClick={() => move(1)}><span dir="ltr" aria-hidden="true">←</span></button>
+function PopularHotels({ cards, title }: { cards: ShowcaseCard[]; title: string }) {
+  return <section className={styles.popular}>
+    <h2>{title}</h2>
+    {cards.length ? <div className={styles.popularGrid}>
+      {cards.map(card => <Link className={styles.popularCard} href={card.href} key={card.id}>
+        <div className={styles.popularPhoto}><ShowcaseImage src={card.imageUrl} sizes="(max-width:600px) 90vw, 30vw" /></div>
+        <div className={styles.popularBody}>
+          {card.stars ? <span className={styles.stars} aria-label={`${card.stars} ستاره`}>{"★".repeat(Math.min(5, card.stars))}</span> : null}
+          <h3>{card.title}</h3><p>{card.subtitle}</p>
         </div>
-      ) : null}
-    </div>
-  );
+      </Link>)}
+    </div> : <p className={styles.empty}>در حال حاضر هتلی برای نمایش موجود نیست.</p>}
+  </section>;
 }
 
 export function HomepageServiceShowcase({ panels }: { panels: Record<string, ShowcasePanel> }) {
@@ -93,14 +66,14 @@ export function HomepageServiceShowcase({ panels }: { panels: Record<string, Sho
     {!isTour ? <div className={styles.controls}><Link href={panel.href}>همه کشورها</Link></div> : null}
     {isTour ? <div id="tour-country-grid" className={styles.countryGrid}>
       {cards.map(country => <CountryCard key={country.id} country={country} />)}
-    </div> : serviceType === "hotel" ? <HotelCountryStrip cards={cards} /> : <div className={styles.tiles}>
+    </div> : serviceType === "hotel" ? <HotelCountryGrid cards={cards.slice(0, expanded ? undefined : 5)} /> : <div className={styles.tiles}>
       {cards.slice(0, expanded ? undefined : 6).map((card) => <Link href={card.href} key={card.id} className={styles.tile}>
         <ShowcaseImage src={card.imageUrl} sizes="(max-width:760px) 45vw, 30vw" />
         <div className={styles.overlay}><h3>{card.title}</h3>{card.subtitle ? <p>{card.subtitle}</p> : null}<span className={styles.tileAction}>←</span></div>
       </Link>)}
     </div>}
     {!cards.length ? <p className={styles.empty}>در حال حاضر گزینه‌ای برای این بخش منتشر نشده است.</p> : null}
-    {(!isTour && serviceType !== "hotel" && cards.length > 6) ? (
+    {(!isTour && cards.length > (serviceType === "hotel" ? 5 : 6)) ? (
       <button
         type="button"
         className={styles.more}
@@ -110,6 +83,10 @@ export function HomepageServiceShowcase({ panels }: { panels: Record<string, Sho
         {expanded ? "نمایش کمتر" : "نمایش کشورهای بیشتر"}
       </button>
     ) : null}
+    {serviceType === "hotel" && <>
+      <PopularHotels title="هتل‌های محبوب خارجی" cards={panel.recommendations.filter(card => card.international)} />
+      <PopularHotels title="هتل‌های محبوب داخلی" cards={panel.recommendations.filter(card => !card.international)} />
+    </>}
   </div></section>;
 }
 

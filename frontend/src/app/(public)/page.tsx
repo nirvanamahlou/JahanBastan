@@ -75,10 +75,9 @@ type Option = { label: string; value: string };
 type FilterOptions = { destinations: Option[]; origins: Option[]; tourTypes: Option[]; transportations: Option[] };
 
 export default async function HomePage() {
-  const [searchDestinationPayload, servicePayload, allHotelItems, tourPayload, filterOptions, countryPayload, settings, allHotelDirectory, erpFlights] = await Promise.all([
+  const [searchDestinationPayload, servicePayload, tourPayload, filterOptions, countryPayload, settings, allHotelDirectory, erpFlights] = await Promise.all([
     apiGet<{ items: HomeDestination[] }>("/destinations?pageSize=100", { cache: "no-store" }).catch(() => ({ items: [] })),
     loadAllPages<HomeService>((offset, limit) => apiGet(`/services?pageSize=${limit}&offset=${offset}`, { cache: "no-store" })).then((items) => ({ items })).catch(() => ({ items: [] })),
-    apiGet<{ items: HomeHotel[] }>("/hotels?pageSize=3", { cache: "no-store" }).then(payload => payload.items).catch((): HomeHotel[] => []),
     loadAllPages<HomeTour>((offset, limit) => apiGet(`/tours?pageSize=${limit}&offset=${offset}`, { cache: "no-store" })).then((items) => ({ items })).catch(() => ({ items: [] })),
     apiGet<FilterOptions>("/tours/filter-options", { cache: "no-store" }).catch(() => ({ destinations: [], origins: [], tourTypes: [], transportations: [] })),
     apiGet<{ items: HomeCountry[] }>("/countries", { cache: "no-store" }).catch(() => ({ items: [] })),
@@ -94,8 +93,15 @@ export default async function HomePage() {
   const visibleCountryNames = new Set(homepageCountries.map(country => normalizeCountryName(country.name)));
   const isHomepageCountry = (name: string) => visibleCountryNames.has(normalizeCountryName(name));
   tourPayload.items = tourPayload.items.filter(tour => (tour.routeDestinations?.length ? tour.routeDestinations : tour.destination ? [tour.destination] : []).some(destination => isHomepageCountry(destination.country)));
-  const hotelItems = allHotelItems.filter(hotel => isHomepageCountry(hotel.destination.country));
-  const hotelDirectory = allHotelDirectory.filter(country => isHomepageCountry(country.country));
+  const rankedCountries = [...allHotelDirectory].sort((a, b) => b.count - a.count);
+  const iran = rankedCountries.find(item => ["ایران", "iran"].includes(normalizeCountryName(item.country).toLowerCase()));
+  const foreign = rankedCountries.filter(item => item !== iran && isHomepageCountry(item.country)).slice(0, 3);
+  const groups = await Promise.all([...(iran ? [iran] : []), ...foreign].map(async item => {
+    const params = new URLSearchParams({ country: item.country, pageSize: item === iran ? "3" : "1" });
+    return apiGet<{ items: HomeHotel[] }>(`/hotels?${params}`).then(data => data.items).catch(() => []);
+  }));
+  const hotelItems = groups.flat();
+  const hotelDirectory = allHotelDirectory;
   const destinationPayload = { items: searchDestinationPayload.items.slice(0, 12) };
 
   const countryCards = [...homepageCountries];
@@ -264,7 +270,7 @@ export default async function HomePage() {
   const mediaUrl = (id: number | null) => id ? `${PUBLIC_API_BASE_URL}/media/${id}` : null;
   const destinationImage = (name: string) => mediaUrl(searchDestinationPayload.items.find((item) => item.title === name)?.imageId ?? null);
   const tourCards = tourPayload.items.map((tour) => ({ id: `tour-${tour.id}`, title: tour.title, href: `/tours/${tour.slug}/`, imageUrl: mediaUrl(tour.imageId), subtitle: [tour.durationDays ? `${tour.durationDays.toLocaleString("fa-IR")} روز` : null, tour.departureDate ? formatPersianDate(tour.departureDate) : null].filter(Boolean).join(" · "), price: tour.priceAmount ? formatCurrency(tour.priceAmount, tour.currency) : "تماس بگیرید" }));
-  const hotelCards = hotelExplorerItems.map((hotel) => ({ id: `hotel-${hotel.id}`, title: hotel.title, href: hotel.href, imageUrl: hotel.imageUrl, subtitle: hotel.subtitle, price: hotel.price, stars: hotel.starRating }));
+  const hotelCards = hotelExplorerItems.map((hotel) => ({ id: `hotel-${hotel.id}`, title: hotel.title, href: hotel.href, imageUrl: hotel.imageUrl, subtitle: hotel.subtitle, price: hotel.price, stars: hotel.starRating, international: hotel.country !== iran?.country }));
   const countryTilesFor = (offers: CountryOffer[], href: string, label: string, destinationPhoto = false, onlyHomepageCountries = true) => groupCountryOffers(offers).filter(group => !onlyHomepageCountries || isHomepageCountry(group.country)).map((group) => {
     const flag = (onlyHomepageCountries ? countryCards : countryPayload.items).find((item) => normalizeCountryName(item.name) === group.country);
     const destination = searchDestinationPayload.items.find((item) => normalizeCountryName(item.country) === group.country && item.imageId);
@@ -287,7 +293,7 @@ export default async function HomePage() {
     id: item.country, title: item.country, country: item.country,
     flagId: countryCards.find(country => normalizeCountryName(country.name) === normalizeCountryName(item.country))?.imageId,
     href: `/hotels/?country=${encodeURIComponent(item.country)}`,
-    imageUrl: mediaUrl(item.imageId), subtitle: `${item.count.toLocaleString("fa-IR")} هتل`,
+    imageUrl: mediaUrl(searchDestinationPayload.items.find(city => normalizeCountryName(city.country) === normalizeCountryName(item.country) && city.imageId)?.imageId ?? item.imageId), subtitle: `${item.count.toLocaleString("fa-IR")} هتل`,
   }));
   const visaTiles = countryTilesFor(servicePayload.items.filter((service) => service.serviceType === "visa").map((service) => ({ id: service.id, country: service.country ?? "", imageUrl: mediaUrl(service.imageId), amount: service.basePrice, currency: service.currency })), "/services/?type=visa&showResults=1", "ویزای منتشرشده");
   const countryRank = new Map(countryCards.map((country, index) => [normalizeCountryName(country.name), index]));
