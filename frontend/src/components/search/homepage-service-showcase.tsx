@@ -5,9 +5,23 @@ import Link from "next/link";
 import { useState } from "react";
 import { useHomepageSearchService } from "./homepage-search-guide";
 import { CountryFlag } from "@/components/content/country-flag";
+import { BusIcon, PlaneIcon, TrainIcon } from "@/components/layout/site-icons";
+import transportStyles from "./homepage-transport-cards.module.css";
 import styles from "./homepage-showcase-rev48.module.css";
 
-export type ShowcaseCard = { id: string; title: string; href: string; imageUrl: string | null; subtitle?: string | null; price?: string | null; country?: string; flagId?: number | null; international?: boolean; stars?: number };
+export type ShowcaseCard = {
+  id: string;
+  title: string;
+  href: string;
+  imageUrl: string | null;
+  subtitle?: string | null;
+  price?: string | null;
+  country?: string;
+  flagId?: number | null;
+  international?: boolean;
+  stars?: number;
+  transport?: { carrier: string | null; logoUrl: string | null; travelClass: string | null; hours: string | null };
+};
 export type ShowcasePanel = { title: string; eyebrow: string; description: string; href: string; action: string; tiles: ShowcaseCard[]; recommendations: ShowcaseCard[] };
 function ShowcaseImage({ src, sizes }: { src: string | null; sizes: string }) {
   const [failed, setFailed] = useState(false);
@@ -53,6 +67,64 @@ function PopularHotels({ cards, title }: { cards: ShowcaseCard[]; title: string 
   </section>;
 }
 
+const transportKinds = {
+  flight: { title: "پروازهای موجود", label: "پرواز", icon: PlaneIcon },
+  train: { title: "قطارهای موجود", label: "قطار", icon: TrainIcon },
+  bus: { title: "سرویس‌های اتوبوس", label: "اتوبوس", icon: BusIcon },
+};
+
+function TransportShowcase({ kind, panel }: { kind: keyof typeof transportKinds; panel: ShowcasePanel }) {
+  const { title, label, icon: Icon } = transportKinds[kind];
+  const cards = panel.recommendations;
+
+  return (
+    <section className={transportStyles.section} data-service-showcase={kind} aria-labelledby="homepage-transport-title">
+      <header className={transportStyles.header}>
+        <h2 id="homepage-transport-title">{title}</h2>
+        <Link href={panel.href}>{panel.action} <span aria-hidden="true">←</span></Link>
+      </header>
+      {cards.length ? (
+        <ul className={transportStyles.grid} aria-label={title}>
+          {cards.map((card) => (
+            <li key={card.id}>
+              <Link className={transportStyles.card} href={card.href}>
+                <div className={transportStyles.cardTop}>
+                  <span className={transportStyles.carrier}>
+                    {card.transport?.logoUrl ? (
+                      <Image src={card.transport.logoUrl} alt="" width={24} height={24} />
+                    ) : <Icon aria-hidden="true" />}
+                    {card.transport?.carrier || label}
+                  </span>
+                  {card.transport?.travelClass && <span>{card.transport.travelClass}</span>}
+                </div>
+                <h3>{card.title}</h3>
+                {(card.subtitle || card.transport?.hours) && (
+                  <p className={transportStyles.schedule}>
+                    {card.subtitle && <span>{card.subtitle}</span>}
+                    {card.transport?.hours && <span>{card.transport.hours}</span>}
+                  </p>
+                )}
+                <div className={transportStyles.cardBottom}>
+                  <span>{card.price || "مشاهده جزئیات"}</span>
+                  <span className={transportStyles.arrow} aria-hidden="true">←</span>
+                </div>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      ) : <p className={transportStyles.empty}>فعلاً بلیتی برای نمایش موجود نیست.</p>}
+      {panel.tiles.length > 0 && (
+        <details className={transportStyles.countries} key={kind}>
+          <summary>مرور بر اساس کشور</summary>
+          <ul>
+            {panel.tiles.map((country) => <li key={country.id}><Link href={country.href}>{country.title}</Link></li>)}
+          </ul>
+        </details>
+      )}
+    </section>
+  );
+}
+
 export function HomepageServiceShowcase({ panels }: { panels: Record<string, ShowcasePanel> }) {
   const { serviceType } = useHomepageSearchService();
   const [expandedService, setExpandedService] = useState<string | null>(null);
@@ -60,6 +132,9 @@ export function HomepageServiceShowcase({ panels }: { panels: Record<string, Sho
   const panel = panels[serviceType];
   if (!panel) return null;
   const cards = panel.tiles;
+  if (serviceType === "flight" || serviceType === "train" || serviceType === "bus") {
+    return <TransportShowcase kind={serviceType} panel={panel} />;
+  }
   const isTour = serviceType === "tour";
   return <section id={isTour ? "tour-countries" : undefined} data-service-showcase={serviceType} className={styles.section}><div className={styles.panel}>
     <header className={styles.heading}><span>{panel.eyebrow}</span><h2>{panel.title}</h2>{panel.description ? <p>{panel.description}</p> : null}</header>

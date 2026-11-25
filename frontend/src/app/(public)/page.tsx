@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { groupCountryOffers, mergeCountryCounts, type CountryOffer } from "@/lib/country-catalog";
-import { HomepageServiceShowcase, type ShowcasePanel } from "@/components/search/homepage-service-showcase";
+import { HomepageServiceShowcase, type ShowcaseCard, type ShowcasePanel } from "@/components/search/homepage-service-showcase";
 import { HomepageSearchGuide, HomepageSearchProvider } from "@/components/search/homepage-search-guide";
 import { HomepageHero } from "@/components/search/homepage-hero";
 import type { ErpFlightRate } from "@/components/content/erp-flight-result-card";
@@ -13,6 +13,7 @@ import { formatCurrency } from "@/lib/currency";
 import { normalizeCountryName } from "@/lib/country-name";
 import { flightDestinationCountries } from "@/lib/flight-destination-country";
 import { formatPersianDate } from "@/lib/persian-date";
+import { toPersianDigits } from "@/lib/persian-number";
 import { selectHomepageTours, selectHomepageCountries } from "@/lib/homepage-tours";
 import { absoluteSiteUrl } from "@/lib/site-url";
 import styles from "./home-page.module.css";
@@ -67,12 +68,83 @@ const homeJsonLd = {
 };
 
 type HomeDestination = { id: number; title: string; city?: string | null; slug: string; country: string; bestTravelTime: string | null; imageId: number | null };
-type HomeService = { id: number; title: string; slug: string; serviceType: string; summary: string; country: string | null; imageId: number | null; basePrice: string | null; currency: string; visaType: "tourist" | "business" | "exhibition" | "residency" | "student" | null; visaProcessingTime: string | null; departureDate: string | null; origin: string | null; destinationName: string | null };
+type HomeService = {
+  id: number;
+  title: string;
+  slug: string;
+  serviceType: string;
+  summary: string;
+  country: string | null;
+  imageId: number | null;
+  basePrice: string | null;
+  currency: string;
+  visaType: "tourist" | "business" | "exhibition" | "residency" | "student" | null;
+  visaProcessingTime: string | null;
+  departureDate: string | null;
+  departureTime: string | null;
+  arrivalTime: string | null;
+  origin: string | null;
+  destinationName: string | null;
+  providerCompany: string | null;
+  providerIconImageId: number | null;
+  transportClass: string | null;
+  flightClass: string | null;
+  availableSeats: number | null;
+  tripType: string | null;
+};
 type HomeHotel = { id: number; name: string; slug: string; starRating: number; guestRating: "excellent" | "good" | "average" | null; summary: string; imageId: number | null; basePrice: string | null; currency: string; destination: { title: string; country: string } };
 type HomeTour = { airlineName?: string | null; airlineLogoImageId?: number | null; id: number; slug: string; title: string; origin: string | null; departureDate: string | null; durationDays: number | null; priceAmount: string | null; currency: string | null; transportation: string | null; hotelName: string | null; summary: string | null; imageId: number | null; isHomeRecommended: boolean; isFeatured: boolean; destination: { title: string; slug: string; country: string } | null; routeDestinations?: Array<{ id: number; title: string; slug: string; country: string; city: string | null }> };
 type HomeCountry = { id: number; name: string; slug: string; imageId: number | null; displayOrder?: number };
 type Option = { label: string; value: string };
 type FilterOptions = { destinations: Option[]; origins: Option[]; tourTypes: Option[]; transportations: Option[] };
+
+const tehranDay = new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Tehran" });
+const tehranClock = new Intl.DateTimeFormat("fa-IR", {
+  timeZone: "Asia/Tehran",
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23",
+});
+const cabinLabels: Record<string, string> = {
+  ECONOMY: "اکونومی",
+  BUSINESS: "بیزینس",
+  FIRST: "فرست کلاس",
+};
+
+function travelClass(code: string | null, isRoundTrip: boolean) {
+  return [code && (cabinLabels[code] ?? code), isRoundTrip && "رفت‌وبرگشت"].filter(Boolean).join(" · ") || null;
+}
+
+function flightShowcaseCard(flight: ErpFlightRate, departure: Date): ShowcaseCard {
+  const arrival = new Date(flight.arrival);
+  const day = tehranDay.format(departure);
+  const query = new URLSearchParams({
+    origin: flight.origin,
+    destination: flight.destination,
+    departureFrom: day,
+    tripType: flight.return_leg ? "round_trip" : "one_way",
+    showResults: "1",
+  });
+  const returnDate = flight.return_leg && new Date(flight.return_leg.departure);
+  if (returnDate && Number.isFinite(returnDate.getTime())) {
+    query.set("departureTo", tehranDay.format(returnDate));
+  }
+  const departureClock = tehranClock.format(departure);
+  return {
+    id: `erp-${flight.product_ids.join("-")}`,
+    title: `${flight.origin} به ${flight.destination}`,
+    href: `/services/flights/?${query}`,
+    imageUrl: null,
+    subtitle: formatPersianDate(day),
+    price: formatCurrency(flight.amount, flight.currency),
+    transport: {
+      carrier: flight.carrier,
+      logoUrl: flight.carrier_logo_sha256 ? `${PUBLIC_API_BASE_URL}/erp/airline-logos/${flight.carrier_logo_sha256}` : null,
+      travelClass: travelClass(flight.cabin_class_code, Boolean(flight.return_leg)),
+      hours: Number.isFinite(arrival.getTime()) ? `${departureClock} تا ${tehranClock.format(arrival)}` : departureClock,
+    },
+  };
+}
 
 export default async function HomePage() {
   const [searchDestinationPayload, servicePayload, tourPayload, filterOptions, countryPayload, settings, allHotelDirectory, erpFlights] = await Promise.all([
@@ -313,15 +385,60 @@ export default async function HomePage() {
     amount: flight.amount,
     currency: flight.currency,
   }));
+  const today = tehranDay.format(new Date());
+  const transportLabels = {
+    flight: ["پرواز", "همه پروازها"],
+    train: ["قطار", "همه قطارها"],
+    bus: ["اتوبوس", "همه اتوبوس‌ها"],
+  };
   for (const type of transportServiceTypes) {
-    const label = type === "flight" ? "پرواز" : type === "train" ? "قطار" : "اتوبوس";
+    const [label, action] = transportLabels[type];
+    const href = type === "flight" ? "/services/flights/?showResults=1" : `/services/?type=${type}&showResults=1`;
     const services = publishedTransportServices.filter((service) => service.serviceType === type);
-    const cards = services.map((service) => ({ id: `service-${service.id}`, title: service.origin && service.destinationName ? `${service.origin} ← ${service.destinationName}` : service.title, href: `/services/${service.slug}/`, imageUrl: mediaUrl(service.imageId) ?? destinationImage(service.destinationName ?? ""), subtitle: service.departureDate ? formatPersianDate(service.departureDate) : service.destinationName, price: service.basePrice ? formatCurrency(service.basePrice, service.currency) : "تماس بگیرید", international: Boolean(service.country && !["ایران", "iran"].includes(normalizeCountryName(service.country).toLowerCase())) }));
-    const offers: CountryOffer[] = services.map((service) => ({ id: service.id, country: service.country ?? "", imageUrl: mediaUrl(service.imageId) ?? destinationImage(service.destinationName ?? ""), amount: service.basePrice, currency: service.currency }));
-    if (type === "flight") offers.push(...avinaCountryOffers);
-    const routes = countryTilesFor(offers, type === "flight" ? "/services/flights/?showResults=1" : `/services/?type=${type}&showResults=1`, label, false, type !== "flight");
+    const cards: ShowcaseCard[] = services
+      .filter((service) => (!service.departureDate || service.departureDate >= today) && (service.availableSeats ?? 1) > 0)
+      .map((service) => {
+        const departure = toPersianDigits(service.departureTime?.slice(0, 5) ?? "");
+        const arrival = toPersianDigits(service.arrivalTime?.slice(0, 5) ?? "");
+        return {
+          id: `service-${service.id}`,
+          title: service.origin && service.destinationName ? `${service.origin} به ${service.destinationName}` : service.title,
+          href: `/services/${service.slug}/`,
+          imageUrl: null,
+          subtitle: service.departureDate ? formatPersianDate(service.departureDate) : null,
+          price: formatCurrency(service.basePrice, service.currency) || null,
+          transport: {
+            carrier: service.providerCompany,
+            logoUrl: mediaUrl(service.providerIconImageId),
+            travelClass: travelClass(service.flightClass || service.transportClass, service.tripType === "round_trip"),
+            hours: departure && arrival ? `${departure} تا ${arrival}` : departure || null,
+          },
+        };
+      });
+    const offers: CountryOffer[] = services.map((service) => ({
+      id: service.id,
+      country: service.country ?? "",
+      imageUrl: null,
+      amount: service.basePrice,
+      currency: service.currency,
+    }));
+    if (type === "flight") {
+      cards.unshift(...erpFlights.flatMap((flight) => {
+        const departure = new Date(flight.departure);
+        return Number.isFinite(departure.getTime()) && tehranDay.format(departure) >= today && (flight.remaining_capacity ?? 1) > 0
+          ? [flightShowcaseCard(flight, departure)]
+          : [];
+      }));
+      offers.push(...avinaCountryOffers);
+    }
+    const routes = countryTilesFor(offers, href, label, false, type !== "flight");
     if (type === "flight") routes.sort(compareCountries);
-    showcasePanels[type] = { title: `${label} بر اساس کشور`, eyebrow: type === "train" ? "سفر ریلی راحت و مطمئن" : "سفر بعدی شما", description: "", href: type === "flight" ? "/services/flights/?showResults=1" : `/services/?type=${type}&showResults=1`, action: `مشاهده ${label}ها`, tiles: routes, recommendations: cards };
+    showcasePanels[type] = {
+      title: `${label} بر اساس کشور`,
+      eyebrow: "",
+      description: "",
+      href, action, tiles: routes, recommendations: cards.slice(0, 4),
+    };
   }
   return (
     <HomepageSearchProvider>
