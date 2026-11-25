@@ -1,15 +1,11 @@
 import type { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
 
 import { groupCountryOffers, mergeCountryCounts, type CountryOffer } from "@/lib/country-catalog";
 import { HomepageServiceShowcase, type ShowcasePanel } from "@/components/search/homepage-service-showcase";
-import { BookIcon, ClockIcon, HotelIcon, LocationIcon, PhoneIcon } from "@/components/layout/site-icons";
 import { HomepageSearchGuide, HomepageSearchProvider } from "@/components/search/homepage-search-guide";
 import { HomepageHero } from "@/components/search/homepage-hero";
 import type { ErpFlightRate } from "@/components/content/erp-flight-result-card";
 import type { TransportSearchOptions } from "@/components/search/travel-search";
-import { Container } from "@/components/ui/container";
 import { apiGet, PUBLIC_API_BASE_URL } from "@/lib/api/client";
 import { loadAllPages } from "@/lib/api/load-all-pages";
 import { getPublicSettings } from "@/lib/api/public-settings";
@@ -77,13 +73,6 @@ type HomeTour = { airlineName?: string | null; airlineLogoImageId?: number | nul
 type HomeCountry = { id: number; name: string; slug: string; imageId: number | null; displayOrder?: number };
 type Option = { label: string; value: string };
 type FilterOptions = { destinations: Option[]; origins: Option[]; tourTypes: Option[]; transportations: Option[] };
-
-const companyAdvantages = [
-  { title: "طراحی سفر متناسب با شما", text: "مسیر، مدت و بودجه سفر براساس اولویت‌های شما تنظیم می‌شود.", icon: LocationIcon },
-  { title: "راهنمایی ویزا و مدارک", text: "چک‌لیست مدارک و مراحل لازم را روشن و مرحله‌به‌مرحله دریافت می‌کنید.", icon: BookIcon },
-  { title: "انتخاب دقیق اقامت", text: "هتل‌ها براساس موقعیت، کیفیت و تناسب با سبک سفر مقایسه می‌شوند.", icon: HotelIcon },
-  { title: "برنامه‌ریزی منعطف", text: "تاریخ، پرواز و برنامه سفر با گزینه‌های جایگزین هماهنگ می‌شوند.", icon: ClockIcon },
-] as const;
 
 export default async function HomePage() {
   const [searchDestinationPayload, servicePayload, allHotelItems, tourPayload, filterOptions, countryPayload, settings, allHotelDirectory, erpFlights] = await Promise.all([
@@ -347,21 +336,6 @@ export default async function HomePage() {
 
       <HomepageServiceShowcase panels={showcasePanels} />
       <HomepageSearchGuide content={Object.fromEntries(Object.entries(settings?.socialLinks ?? {}).filter(([key]) => key.startsWith("searchGuide")))} />
-      <section className={styles.aboutSection} aria-labelledby="home-about-title">
-        <Container className={styles.about}>
-          <div className={styles.aboutCopy}>
-            <span className={styles.eyebrow}>چرا جهان باستان؟</span>
-            <h2 id="home-about-title">همراه شما،<br />از انتخاب تا تجربهٔ سفر</h2>
-            <p>در آژانس جهان باستان، تورهای داخلی و خارجی، هتل و خدمات سفر را مقایسه کنید و برای انتخاب مسیر و شرایط رزرو از کارشناسان ما راهنمایی بگیرید.</p>
-            <div className={styles.aboutFeatures}>{companyAdvantages.map(({ icon: Icon, ...benefit }) => <div key={benefit.title} className={styles.aboutFeature}><Icon /><div><h3>{benefit.title}</h3><p>{benefit.text}</p></div></div>)}</div>
-            <Link className={styles.aboutCta} href="/contact/">برنامه‌ریزی سفر با کارشناس ←</Link>
-          </div>
-          <div className={styles.aboutImage}><Image src="/images/design-rev48/about-travel-illustration.webp" alt="تصویر گرافیکی سفر با هواپیما، هتل و مقصدهای جهان" fill sizes="(max-width:900px) 90vw, 45vw" className="object-cover" /><span>سفر بعدی شما از اینجا آغاز می‌شود</span></div>
-        </Container>
-      </section>
-      <section className={styles.consultationSection}>
-        <Container className={styles.consultation}><span className={styles.consultationIcon}><PhoneIcon /></span><div><span className={styles.eyebrow}>مشاوره اختصاصی سفر</span><h2>برای انتخاب مقصد، کنار شما هستیم</h2><p>مسیر، زمان و بودجه سفرتان را بگویید تا بهترین گزینه‌ها را با هم بررسی کنیم.</p></div><div className={styles.consultationActions}><Link href="/contact/">گفت‌وگو با کارشناس ←</Link><Link href="/travel-guide/">راهنمای سفر</Link></div></Container>
-      </section>
     </div>
     </HomepageSearchProvider>
   );
