@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FlightRouteCard } from "./flight-route-card";
-import { useRouter } from "next/navigation";
 
 import type { FlightBuyerContact } from "@/components/passenger-checkout-modal";
 import { flightCheckoutHref } from "@/lib/erp-flight-checkout-navigation";
@@ -92,12 +91,12 @@ export function FlightTimeline({ leg, label, detailed = false }: { leg: FlightTi
 export function ErpFlightResultCard({
   flight,
   passengerCounts,
+  resultsSearch,
 }: {
   flight: ErpFlightRate;
   passengerCounts: PassengerCounts;
+  resultsSearch: string;
 }) {
-  const router = useRouter();
-  const [navigating, startNavigation] = useTransition();
   const selectionAnchor = "flight-" + flight.product_ids.map(encodeURIComponent).join("_");
   const legs = [flight, ...(flight.return_leg ? [flight.return_leg] : [])];
   const capacities = legs.map((leg) => leg.remaining_capacity).filter((value): value is number => typeof value === "number" && Number.isFinite(value));
@@ -119,16 +118,16 @@ export function ErpFlightResultCard({
             <strong className="block text-base leading-tight text-brand">{formatCurrency(flight.amount, flight.currency)}</strong>
             {seats !== null ? <span className="block text-xs leading-snug text-muted">{number.format(seats)} صندلی باقی‌مانده</span> : null}
           </div>
-          <button
-            className="min-h-10 rounded-md bg-brand px-3 text-xs lg:w-full lg:text-sm font-black text-white disabled:opacity-60"
-            disabled={soldOut || navigating}
-            onClick={() => startNavigation(() => {
-              router.push(flightCheckoutHref(flight, passengerCounts, window.location.search));
-            })}
-            type="button"
-          >
-            {navigating ? "در حال باز کردن…" : soldOut ? "ظرفیت تکمیل است" : "انتخاب بلیت"}
-          </button>
+          {soldOut ? (
+            <button className="min-h-10 rounded-md bg-brand px-3 text-xs font-black text-white opacity-60 lg:w-full lg:text-sm" disabled type="button">
+              ظرفیت تکمیل است
+            </button>
+          ) : (
+            <a className="inline-flex min-h-10 items-center justify-center rounded-md bg-brand px-3 text-xs font-black text-white lg:w-full lg:text-sm"
+              href={flightCheckoutHref(flight, passengerCounts, resultsSearch)}>
+              انتخاب بلیت
+            </a>
+          )}
         </aside>
       </div>
     </article>

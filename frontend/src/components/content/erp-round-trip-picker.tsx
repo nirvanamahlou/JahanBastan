@@ -7,7 +7,7 @@ import type { PassengerCounts } from "@/lib/tour-passenger-counts";
 
 const dateKey = new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Tehran" });
 
-export function ErpRoundTripPicker({ flights, passengerCounts }: { flights: ErpFlightRate[]; passengerCounts: PassengerCounts }) {
+export function ErpRoundTripPicker({ flights, passengerCounts, resultsSearch }: { flights: ErpFlightRate[]; passengerCounts: PassengerCounts; resultsSearch: string }) {
   const [outbound, setOutbound] = useState("");
   const [returnDay, setReturnDay] = useState("");
   const [pair, setPair] = useState("");
@@ -63,7 +63,7 @@ export function ErpRoundTripPicker({ flights, passengerCounts }: { flights: ErpF
           </div>
         )}
       </div>
-      {selected ? <ErpFlightResultCard key={pair} flight={selected} passengerCounts={passengerCounts} /> : null}
+      {selected ? <ErpFlightResultCard key={pair} flight={selected} passengerCounts={passengerCounts} resultsSearch={resultsSearch} /> : null}
     </section>
   );
 }

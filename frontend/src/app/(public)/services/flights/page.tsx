@@ -161,6 +161,13 @@ function PublishedFlightRoutes({ flights }: { flights: ErpFlightRate[] }) {
 
 export default async function FlightsPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const raw = await searchParams;
+  const resultsQuery = new URLSearchParams();
+  for (const [key, value] of Object.entries(raw)) {
+    for (const entry of Array.isArray(value) ? value : [value]) {
+      if (entry !== undefined) resultsQuery.append(key, entry);
+    }
+  }
+  const resultsSearch = `?${resultsQuery}`;
   if (raw.preview === "AV9030") redirect(encodeURI("/services/flights/?showResults=1&flightNumber=AV9030"));
   const country = getValue(raw.country);
   const origin = getValue(raw.origin);
@@ -513,6 +520,7 @@ export default async function FlightsPage({ searchParams }: { searchParams: Prom
                       key={`${origin}/${destination}/${departureFrom}/${departureTo}`}
                       flights={visibleErpFlights}
                       passengerCounts={{ adults: adultCount, children: childCount, infants: infantCount }}
+                      resultsSearch={resultsSearch}
                     />
                   ) : null}
                   {[
@@ -524,6 +532,7 @@ export default async function FlightsPage({ searchParams }: { searchParams: Prom
                       flight={flight}
                       key={`erp-${flight.product_ids.join("-")}`}
                       passengerCounts={{ adults: adultCount, children: childCount, infants: infantCount }}
+                      resultsSearch={resultsSearch}
                     />
                       ),
                     }))),
