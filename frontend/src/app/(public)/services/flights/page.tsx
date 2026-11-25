@@ -22,6 +22,7 @@ import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Container } from "@/components/ui/container";
 import { apiGet, PUBLIC_API_BASE_URL } from "@/lib/api/client";
 import { flightDestinationCountries } from "@/lib/flight-destination-country";
+import { formatCurrency } from "@/lib/currency";
 import { normalizeCountryName } from "@/lib/country-name";
 import { formatPersianDate } from "@/lib/persian-date";
 
@@ -401,15 +402,28 @@ export default async function FlightsPage({ searchParams }: { searchParams: Prom
   const showStops = Boolean(maxStops) || allFlightTickets.some(({ flight }) => flight.stopsCount !== null);
   const chooseErpRoundTrip = !browseAllTripTypes && tripType === "round_trip" && Boolean(origin && destination);
   const availableDates = new Set<string>();
+  const dailyFares = new Map<string, Map<string, number>>();
+  function recordFare(day: string, raw: string | null, currency: string) {
+    availableDates.add(day);
+    const toman = erpAmountInToman(raw ?? "", currency);
+    const price = toman ?? Number(raw);
+    if (!Number.isFinite(price) || price <= 0) return;
+    const unit = toman === null ? currency : "IRT";
+    const fares = dailyFares.get(day) ?? new Map<string, number>();
+    fares.set(unit, Math.min(fares.get(unit) ?? price, price));
+    dailyFares.set(day, fares);
+  }
   if (hasDateStripSearch) {
     const today = tehranDate.format(new Date());
-    for (const flight of (needsNearbyFlights ? nearbyFlights : payload).items) {
+    for (const flight of [...payload.items, ...nearbyFlights.items]) {
       if (flight.departureDate && flight.departureDate >= today && (flight.availableSeats === null || flight.availableSeats > 0) && matchesNativeFilters(flight)) {
-        availableDates.add(flight.departureDate);
+        recordFare(flight.departureDate, flight.basePrice, flight.currency);
       }
     }
-    for (const flight of (needsNearbyFlights ? nearbyErpFlights : erpFlights).filter(matchesErpFilters)) {
-      availableDates.add(tehranDate.format(new Date(flight.departure)));
+    for (const flight of [...erpFlights, ...nearbyErpFlights].filter(matchesErpFilters)) {
+      if ([flight, flight.return_leg].some(leg => leg?.remaining_capacity != null && leg.remaining_capacity < 1)) continue;
+      const day = tehranDate.format(new Date(flight.departure));
+      if (day >= today) recordFare(day, flight.amount, flight.currency);
     }
   }
   const hasFilters = Boolean(country || origin || originAirport || destination || departureFrom || departureTo || requestedTripType || provider || flightClass || flightScope || flightNumber || maxStops || featured || Object.values(facetParams).some(Boolean));
@@ -481,7 +495,7 @@ export default async function FlightsPage({ searchParams }: { searchParams: Prom
                   </select>
                 </LiveFlightForm>
               </div>
-              <TransportDateStrip availableDates={availableDates} pathname="/services/flights/" selectedDate={departureFrom} searchParams={{ country, origin, originAirport, destination, departureTo, tripType: browseAllTripTypes ? "" : tripType, provider, flightClass, flightScope, flightNumber, ...facetParams, maxStops, sort, featured: featured ? "true" : "", ...passengerQuery, showResults: "1" }} />
+              <TransportDateStrip prices={new Map([...dailyFares].map(([day, fares]) => [day, [...fares].map(([unit, value]) => formatCurrency(value, unit))]))} availableDates={availableDates} pathname="/services/flights/" selectedDate={departureFrom} searchParams={{ country, origin, originAirport, destination, departureTo, tripType: browseAllTripTypes ? "" : tripType, provider, flightClass, flightScope, flightNumber, ...facetParams, maxStops, sort, featured: featured ? "true" : "", ...passengerQuery, showResults: "1" }} />
               {!flightTickets.length && !visibleErpFlights.length && alternateTrip ? (
                 <div className="rounded-xl border border-brand/15 bg-brand/5 p-4 text-sm">
                   <p>برای این مسیر و تاریخ، بلیت {alternateTripType === "round_trip" ? "رفت‌وبرگشت" : "یک‌طرفه"} موجود است.</p>

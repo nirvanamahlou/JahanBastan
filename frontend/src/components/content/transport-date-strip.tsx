@@ -5,6 +5,7 @@ type Props = {
   pathname: string;
   selectedDate?: string;
   searchParams: Record<string, string | undefined>;
+  prices?: ReadonlyMap<string, string[]>;
   availableDates?: ReadonlySet<string>;
 };
 
@@ -14,7 +15,7 @@ const gregorianDate = new Intl.DateTimeFormat("en-GB", {
   timeZone: "UTC",
 });
 
-export function TransportDateStrip({ pathname, selectedDate, searchParams, availableDates }: Props) {
+export function TransportDateStrip({ pathname, selectedDate, searchParams, availableDates, prices }: Props) {
   const selected = /^\d{4}-\d{2}-\d{2}$/.test(selectedDate ?? "")
     ? new Date(`${selectedDate}T12:00:00Z`)
     : null;
@@ -59,7 +60,7 @@ export function TransportDateStrip({ pathname, selectedDate, searchParams, avail
         </div>
       ) : null}
       <div className="overflow-x-auto">
-      <div className="grid min-w-[32rem] grid-cols-7 gap-1">
+      <div className={`grid grid-cols-7 gap-1 ${prices ? "min-w-[40rem]" : "min-w-[32rem]"}`}>
         {days.map((date) => {
           const value = date.toISOString().slice(0, 10);
           const active = value === selectedDate;
@@ -80,6 +81,7 @@ export function TransportDateStrip({ pathname, selectedDate, searchParams, avail
               <time className={`mt-1 block text-[10px] ${available ? "text-[#742750]" : active ? "text-white/80" : "text-muted"}`} dateTime={value} dir="ltr">
                 {gregorianDate.format(date)}
               </time>
+              {prices?.get(value)?.map(price => <span key={price} className="mt-1 block text-[11px] font-bold leading-5">از {price}</span>)}
               {available ? <span className="sr-only">پرواز موجود است</span> : null}
             </Link>
           );

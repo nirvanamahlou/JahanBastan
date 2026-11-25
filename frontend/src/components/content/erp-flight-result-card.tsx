@@ -9,7 +9,6 @@ import {
   type FlightBuyerContact,
   type PassengerCheckoutData,
 } from "@/components/passenger-checkout-modal";
-import { PlaneTakeoffIcon } from "@/components/layout/site-icons";
 import { PUBLIC_API_BASE_URL } from "@/lib/api/client";
 import { invalidateCustomerSession, readCustomerSession } from "@/lib/customer-session";
 import { formatCurrency } from "@/lib/currency";
@@ -105,7 +104,6 @@ export type FlightTimelineLeg = Pick<ErpFlightLeg,
 > & { cabin_class_code?: string | null };
 
 export function FlightTimeline({ leg, label, detailed = false }: { leg: FlightTimelineLeg; label: string; detailed?: boolean }) {
-  const logoHash = leg.carrier_logo_sha256;
   const departure = new Date(leg.departure);
   const arrival = new Date(leg.arrival);
   const date = flightDate.format(departure);
@@ -118,7 +116,6 @@ export function FlightTimeline({ leg, label, detailed = false }: { leg: FlightTi
 
   return <FlightRouteCard
     label={label} date={date} carrier={leg.carrier}
-    logo={logoHash ? `${PUBLIC_API_BASE_URL}/erp/airline-logos/${logoHash}` : undefined}
     flightNumber={leg.service_number}
     cabin={leg.cabin_class_code === "ECONOMY" ? "اکونومی" : leg.cabin_class_code === "BUSINESS" ? "بیزینس" : leg.cabin_class_code === "FIRST" ? "فرست کلاس" : leg.cabin_class_code}
     duration={duration}
@@ -362,13 +359,13 @@ export function ErpFlightResultCard({
   const seats = capacities.length ? Math.min(...capacities) : null;
   const soldOut = seats !== null && seats < 1 && !result?.retryable;
   return (
-    <article id={selectionAnchor} className="flight-interactive-panel scroll-mt-28 target:ring-2 target:ring-brand overflow-hidden rounded-2xl border border-brand/15 bg-white shadow-sm">
-      <div className="grid lg:grid-cols-[minmax(0,1fr)_10rem]">
+    <article id={selectionAnchor} className="scroll-mt-28 target:ring-2 target:ring-brand overflow-hidden rounded-xl border border-slate-300 bg-white">
+      <div className="grid lg:grid-cols-[minmax(0,1fr)_12rem]">
         <div className="min-w-0 p-4">
-          <p className="inline-flex items-center gap-2 rounded-full bg-brand/5 px-2.5 py-1 text-xs font-bold text-brand">
-            <PlaneTakeoffIcon className="size-4" /> {flight.return_leg ? "رفت‌وبرگشت" : "یک‌طرفه"}
+          <p className="text-xs font-semibold text-slate-600">
+            {flight.return_leg ? "رفت‌وبرگشت" : "یک‌طرفه"}
           </p>
-          <div className="mt-3 space-y-2">
+          <div className="mt-2 divide-y divide-slate-200">
             {legs.map((leg, index) => (
               <FlightTimeline key={leg.product_id} leg={leg} label={index === 0 ? "رفت" : "برگشت"} />
             ))}
@@ -396,14 +393,14 @@ export function ErpFlightResultCard({
             </div>
           ) : null}
         </div>
-        <aside className="flex flex-col justify-center border-t border-brand/10 bg-gradient-to-b from-white to-brand-soft p-4 lg:border-s lg:border-t-0">
+        <aside className="flex flex-col justify-center border-t border-brand/10 bg-slate-50 p-4 lg:border-s lg:border-t-0">
           <span className="text-xs text-muted">{flight.return_leg ? "نرخ رفت‌وبرگشت یک بزرگسال" : "نرخ یک بزرگسال"}</span>
           <strong className="mt-1 block text-lg text-brand">
             {formatCurrency(flight.amount, flight.currency)}
           </strong>
           {seats !== null ? <span className="mt-2 text-xs font-bold text-muted">{number.format(seats)} صندلی باقی‌مانده</span> : null}
           <button
-            className="mt-4 min-h-11 w-full rounded-xl bg-accent-strong px-4 text-sm font-black text-white disabled:opacity-60"
+            className="mt-4 min-h-11 w-full rounded-md bg-brand px-4 text-sm font-black text-white disabled:opacity-60"
             disabled={soldOut || busy || modalOpen || Boolean(review) || result?.state === "draft"}
             onClick={() =>
               result?.retryable ? void checkout() : void choose()

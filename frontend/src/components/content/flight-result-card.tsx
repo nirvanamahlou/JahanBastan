@@ -13,7 +13,6 @@ import {
   PlaneTakeoffIcon,
   SuitcaseIcon,
 } from "@/components/layout/site-icons";
-import { PUBLIC_API_BASE_URL } from "@/lib/api/client";
 import { formatBaggageAllowance } from "@/lib/baggage";
 import { formatCurrency } from "@/lib/currency";
 import { formatTravelDuration } from "@/lib/travel-duration";
@@ -115,7 +114,6 @@ export function FlightResultCard(props: FlightResultCardProps) {
           </p>
           <FlightRouteCard
             label={directionLabel} carrier={props.provider || ""}
-            logo={props.providerIconImageId ? `${PUBLIC_API_BASE_URL}/media/${props.providerIconImageId}` : undefined}
             flightNumber={flightNumber} duration={travelDuration || undefined}
             cabin={props.serviceCategory ? categoryLabels[props.serviceCategory] ?? props.serviceCategory : null}
             baggage={props.baggage ? formatBaggageAllowance(props.baggage) : null}

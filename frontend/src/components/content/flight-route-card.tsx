@@ -1,21 +1,20 @@
 "use client";
 
-import Image from "next/image";
-import { useState } from "react";
-import { PlaneTakeoffIcon, SuitcaseIcon } from "@/components/layout/site-icons";
+import { SuitcaseIcon } from "@/components/layout/site-icons";
 import styles from "./flight-route-card.module.css";
 
 type Endpoint = { city: string; code?: string | null; airport?: string | null; time: string; dateTime?: string; date?: string };
-type Props = { label: string; date?: string; carrier: string; logo?: string; flightNumber?: string | null; cabin?: string | null; duration?: string; baggage?: string | null; origin: Endpoint; destination: Endpoint };
+type Props = { label: string; date?: string; carrier: string; flightNumber?: string | null; cabin?: string | null; duration?: string; baggage?: string | null; origin: Endpoint; destination: Endpoint };
 
-export function FlightRouteCard({ label, date, carrier, logo, flightNumber, cabin, duration, baggage, origin, destination }: Props) {
-  const [failedLogo, setFailedLogo] = useState<string | null>(null);
+export function FlightRouteCard({ label, date, carrier, flightNumber, cabin, duration, baggage, origin, destination }: Props) {
   return (
     <section className={styles.card} aria-label={label} dir="rtl">
       <header className={styles.header}>
         <div className={styles.airline}>
           <span className={styles.logo}>
-            {logo && failedLogo !== logo ? <Image src={logo} alt="" width={44} height={44} unoptimized onError={() => setFailedLogo(logo)} /> : <PlaneTakeoffIcon className="size-6" aria-hidden />}
+            <svg aria-hidden="true" width="32" height="32" viewBox="0 0 32 32" fill="currentColor">
+              <path d="M3 9h26l-5 5H10zM11 16h11l-4 4h-3zM16 22h4l-2 3z" />
+            </svg>
           </span>
           <div className={styles.airlineText}><strong>{carrier || "شرکت هواپیمایی"}</strong><span>{flightNumber ? <>پرواز <bdi>{flightNumber}</bdi></> : null}{flightNumber && cabin ? " · " : null}{cabin}</span></div>
         </div>
@@ -30,7 +29,7 @@ export function FlightRouteCard({ label, date, carrier, logo, flightNumber, cabi
         </div>
         <div className={styles.connection}>
           <span>{duration}</span>
-          <div className={styles.track} aria-hidden><i /><span /><PlaneTakeoffIcon className="size-5 shrink-0 -scale-x-100" /><span /><i /></div>
+          <div className={styles.track} aria-hidden><i /><span /><i /></div>
         </div>
         <div className={`${styles.endpoint} ${styles.arrival}`}>
           <span className={styles.caption}>رسیدن</span>
