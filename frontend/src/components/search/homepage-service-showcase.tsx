@@ -106,7 +106,7 @@ function PopularHotels({ cards, title }: { cards: ShowcaseCard[]; title: string 
 }
 
 const transportKinds = {
-  flight: { title: "پروازهای موجود", label: "پرواز", icon: PlaneIcon },
+  flight: { title: "پرترددترین مقصدها", label: "پرواز", icon: PlaneIcon },
   train: { title: "قطارهای موجود", label: "قطار", icon: TrainIcon },
   bus: { title: "سرویس‌های اتوبوس", label: "اتوبوس", icon: BusIcon },
 };

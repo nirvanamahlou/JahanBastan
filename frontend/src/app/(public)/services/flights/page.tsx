@@ -141,7 +141,7 @@ function PublishedFlightRoutes({ flights }: { flights: ErpFlightRate[] }) {
 
   return (
     <section aria-labelledby="published-flight-routes" className="mb-8">
-      <h2 className="mb-4 text-xl font-black text-brand" id="published-flight-routes">پروازهای موجود</h2>
+      <h2 className="mb-4 text-xl font-black text-brand" id="published-flight-routes">پرترددترین مقصدها</h2>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {[...routes.entries()].map(([key, { flight, href }]) => (
           <Link className="rounded-xl border border-brand/15 bg-white p-4 shadow-sm hover:border-brand/50 focus-visible:outline-2 focus-visible:outline-brand" href={href} key={key}>
