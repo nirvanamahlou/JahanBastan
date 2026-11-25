@@ -4,6 +4,7 @@ import { groupCountryOffers, mergeCountryCounts, type CountryOffer } from "@/lib
 import { HomepageServiceShowcase, type ShowcaseCard, type ShowcasePanel } from "@/components/search/homepage-service-showcase";
 import { HomepageSearchGuide, HomepageSearchProvider } from "@/components/search/homepage-search-guide";
 import { HomepageHero } from "@/components/search/homepage-hero";
+import { HomepagePromos } from "@/components/search/homepage-tour-promos";
 import type { ErpFlightRate } from "@/components/content/erp-flight-result-card";
 import type { TransportSearchOptions } from "@/components/search/travel-search";
 import { apiGet, PUBLIC_API_BASE_URL } from "@/lib/api/client";
@@ -457,6 +458,7 @@ export default async function HomePage() {
         tourTransportOptions={tourTransportOptions}
       />
 
+      <HomepagePromos settings={settings?.socialLinks} />
       <HomepageServiceShowcase panels={showcasePanels} />
       <HomepageSearchGuide content={Object.fromEntries(Object.entries(settings?.socialLinks ?? {}).filter(([key]) => key.startsWith("searchGuide")))} />
     </div>

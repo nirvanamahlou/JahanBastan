@@ -294,7 +294,7 @@ export function SettingsForm({ initialSettings }: { initialSettings: ManagedSite
       <fieldset className="space-y-4 rounded-2xl border border-border bg-surface p-5 lg:col-span-2">
         <legend className="px-2 text-xl font-black">بنر تبلیغاتی پایین فیلتر صفحه اصلی</legend>
         <p className="text-sm leading-7 text-muted">
-          این بنر زیر چهار مزیت پایین فیلتر صفحه اصلی نمایش داده می‌شود. تصویر افقی بارگذاری کنید، عنوان و مسیر مقصد را وارد کنید؛ برای نمونه می‌توانید آن را به تورهای تابستان ۱۴۰۵ وصل کنید.
+          عنوان، تصویر و مسیر این بنر در اولین جایگاه از سه بنر کوچک زیر جست‌وجوی صفحهٔ اصلی نمایش داده می‌شوند.
         </p>
         <div className="grid gap-4 sm:grid-cols-2">
           <Input
