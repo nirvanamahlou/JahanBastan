@@ -5,7 +5,7 @@ from decimal import Decimal
 from secrets import token_hex
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, selectinload
 
@@ -25,8 +25,20 @@ from app.models import (
 )
 from app.models.checkout import BookingStatusEvent
 from app.repositories.agencies import AgencyRepository
+from app.repositories.customer_commerce import CustomerCommerceRepository
+from app.schemas.account import CartItemCreate
 from app.services.currency import exchange_rates_from_links, item_total_to_toman
 from app.services.tour_availability import is_departure_bookable
+
+
+class DirectPriceChanged(ValueError):
+    def __init__(self, total: Decimal | None) -> None:
+        self.total = total
+        super().__init__("قیمت تور تغییر کرده است. مبلغ جدید را بررسی و تأیید کنید.")
+
+
+class DirectRequestMismatch(ValueError):
+    pass
 
 
 class HotelUnavailableError(ValueError):
@@ -438,6 +450,61 @@ class BookingRepository:
                 )
                 raise HotelUnavailableError(alternatives)
 
+    async def find_direct_replay(
+        self, customer_id: int, request_key: str, digest: str
+    ) -> BookingRequest | None:
+        # Serialize concurrent submissions even before an order row exists.
+        await self.session.execute(
+            select(
+                func.pg_advisory_xact_lock(
+                    func.hashtextextended(f"direct-tour:{customer_id}:{request_key}", 0)
+                )
+            )
+        )
+        booking = await self.session.scalar(
+            select(BookingRequest)
+            .options(*self._options())
+            .where(
+                BookingRequest.customer_id == customer_id,
+                BookingRequest.direct_request_key == request_key,
+            )
+        )
+        if booking is not None and booking.direct_request_digest != digest:
+            raise DirectRequestMismatch("این شناسه به درخواست دیگری اختصاص دارد.")
+        return booking
+
+    async def _direct_tour_cart(
+        self, customer_id: int, selection: CartItemCreate
+    ) -> CustomerCart:
+        # Isolate a direct purchase from other items in the customer's active cart.
+        cart = CustomerCart(customer_id=customer_id, status="abandoned")
+        self.session.add(cart)
+        await self.session.flush()
+        commerce = CustomerCommerceRepository(self.session)
+        assert selection.tour_id is not None and selection.tour_departure_id is not None
+        if selection.combined_departure_price_id is not None:
+            item = await commerce.add_combined_tour(
+                customer_id,
+                selection.tour_id,
+                selection.tour_departure_id,
+                selection.combined_departure_price_id,
+                selection.room_selection,
+                cart_id=cart.id,
+            )
+        else:
+            assert selection.tour_hotel_price_id is not None
+            item = await commerce.add_tour(
+                customer_id,
+                selection.tour_id,
+                selection.tour_departure_id,
+                selection.tour_hotel_price_id,
+                selection.room_selection,
+                cart_id=cart.id,
+            )
+        if item is None:
+            raise ValueError("هتل انتخابی دیگر با این نرخ در دسترس نیست.")
+        return cart
+
     async def create_from_cart(
         self,
         customer_id: int,
@@ -447,20 +514,22 @@ class BookingRepository:
         terms_accepted: bool = False,
         terms_version: str = "checkout-1405-01",
         discount_code: str | None = None,
-        direct_cart_id: int | None = None,
+        tour_selection: CartItemCreate | None = None,
+        direct_request_key: str | None = None,
+        direct_request_digest: str | None = None,
+        accepted_total_irt: int | None = None,
     ) -> BookingRequest:
-        cart_record = await self.session.scalar(
-            select(CustomerCart)
-            .where(
-                CustomerCart.customer_id == customer_id,
-                (
-                    CustomerCart.id == direct_cart_id
-                    if direct_cart_id is not None
-                    else CustomerCart.status == "active"
-                ),
+        if tour_selection is not None:
+            cart_record = await self._direct_tour_cart(customer_id, tour_selection)
+        else:
+            cart_record = await self.session.scalar(
+                select(CustomerCart)
+                .where(
+                    CustomerCart.customer_id == customer_id,
+                    CustomerCart.status == "active",
+                )
+                .with_for_update()
             )
-            .with_for_update()
-        )
         if cart_record is None:
             raise ValueError("cart is empty")
         cart = list(
@@ -488,6 +557,9 @@ class BookingRepository:
         if not passenger_details:
             raise ValueError("passenger details are required before creating a booking")
         settings = await self.session.get(SiteSetting, 1)
+        if tour_selection is not None:
+            links = settings.social_links if settings else {}
+            terms_version = links.get("checkoutTermsVersion", "checkout-1405-01")
         rates = exchange_rates_from_links(settings.social_links if settings else {})
         item_totals = [item_total_to_toman(item, rates) for item in cart]
         directly_quotable = all(
@@ -532,8 +604,12 @@ class BookingRepository:
             discount_amount = min(raw_discount, total)
             code.used_count += 1
             total -= discount_amount
+        if accepted_total_irt is not None and total != accepted_total_irt:
+            raise DirectPriceChanged(total)
         hold_expires_at = datetime.now(UTC) + timedelta(minutes=30)
         booking = BookingRequest(
+            direct_request_key=direct_request_key,
+            direct_request_digest=direct_request_digest,
             booking_number=f"JB-{token_hex(6).upper()}",
             customer_id=customer_id,
             total_amount=total,

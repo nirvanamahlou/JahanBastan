@@ -1,5 +1,7 @@
 """Customer booking creation, document download, and admin approval endpoints."""
 
+import hashlib
+import json
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from io import BytesIO
@@ -14,11 +16,15 @@ from app.api.dependencies.auth import (
     DatabaseSession,
     TrustedOrigin,
 )
-from app.models import CustomerCart, PaymentIntent, PaymentStatus, SiteSetting
+from app.models import PaymentIntent, PaymentStatus, SiteSetting
 from app.models.checkout import BookingStatusEvent
 from app.repositories.agencies import AgencyRepository
-from app.repositories.bookings import BookingRepository, HotelUnavailableError
-from app.repositories.customer_commerce import CustomerCommerceRepository
+from app.repositories.bookings import (
+    BookingRepository,
+    DirectPriceChanged,
+    DirectRequestMismatch,
+    HotelUnavailableError,
+)
 from app.repositories.operations import OperationsRepository
 from app.schemas.booking import (
     AdminBookingRead,
@@ -70,33 +76,18 @@ async def create_booking(
 ) -> BookingRead:
     await require_online_sales_enabled(session)
     try:
-        direct_cart_id = None
-        terms_version = payload.terms_version
-        if payload.tour_selection is not None:
-            selection = payload.tour_selection
-            settings = await session.get(SiteSetting, 1)
-            links = settings.social_links if settings else {}
-            terms_version = links.get("checkoutTermsVersion", "checkout-1405-01")
-            # This snapshot is created and converted in one transaction, separately
-            # from any active cart the customer already has.
-            snapshot = CustomerCart(customer_id=customer.id, status="abandoned")
-            session.add(snapshot)
-            await session.flush()
-            commerce = CustomerCommerceRepository(session)
-            if selection.combined_departure_price_id is not None:
-                item = await commerce.add_combined_tour(
-                    customer.id, selection.tour_id or 0, selection.tour_departure_id or 0,
-                    selection.combined_departure_price_id, selection.room_selection, cart_id=snapshot.id,
-                )
-            else:
-                item = await commerce.add_tour(
-                    customer.id, selection.tour_id or 0, selection.tour_departure_id or 0,
-                    selection.tour_hotel_price_id or 0, selection.room_selection, cart_id=snapshot.id,
-                )
-            if item is None:
-                raise ValueError("هتل انتخابی دیگر با این نرخ در دسترس نیست.")
-            direct_cart_id = snapshot.id
-        booking = await BookingRepository(session).create_from_cart(
+        repository = BookingRepository(session)
+        key = str(payload.direct_request_key) if payload.direct_request_key else None
+        digest = None
+        if key is not None:
+            canonical = json.dumps(
+                payload.model_dump(mode="json"), sort_keys=True, separators=(",", ":")
+            )
+            digest = hashlib.sha256(canonical.encode()).hexdigest()
+            replay = await repository.find_direct_replay(customer.id, key, digest)
+            if replay is not None:
+                return BookingRead.model_validate(replay)
+        booking = await repository.create_from_cart(
             customer.id,
             payload.customer_note,
             [
@@ -108,9 +99,12 @@ async def create_booking(
             ],
             payment_method=payload.payment_method,
             terms_accepted=payload.terms_accepted,
-            terms_version=terms_version,
+            terms_version=payload.terms_version,
             discount_code=payload.discount_code,
-            direct_cart_id=direct_cart_id,
+            tour_selection=payload.tour_selection,
+            accepted_total_irt=payload.accepted_total_irt,
+            direct_request_key=key,
+            direct_request_digest=digest,
         )
         await OperationsRepository(session).create_notification(
             customer.id,
@@ -123,6 +117,22 @@ async def create_booking(
             link="/account/operations/",
         )
         await session.commit()
+    except DirectPriceChanged as exc:
+        await session.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "code": "price_changed",
+                "message": str(exc),
+                "finalTotalIrt": str(exc.total) if exc.total is not None else None,
+            },
+        ) from exc
+    except DirectRequestMismatch as exc:
+        await session.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail={"code": "request_key_conflict", "message": str(exc)},
+        ) from exc
     except HotelUnavailableError as exc:
         await session.rollback()
         raise HTTPException(
