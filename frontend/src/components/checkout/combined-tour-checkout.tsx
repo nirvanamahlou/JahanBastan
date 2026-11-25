@@ -5,11 +5,16 @@ import { Suspense, useState } from "react";
 
 import { AccountForm } from "@/components/account-form";
 import { PassengerCheckoutModal, type PassengerCheckoutData } from "@/components/passenger-checkout-modal";
+import { TourPriceBreakdown } from "@/components/content/tour-price-breakdown";
+import type { TourPriceSummary } from "@/lib/currency-conversion";
 import { Dialog } from "@/components/ui/dialog";
 import { PUBLIC_API_BASE_URL } from "@/lib/api/client";
 import { getTourPassengerCounts } from "@/lib/tour-passenger-counts";
 
 type Props = {
+  priceSummary: TourPriceSummary;
+  country?: string | null;
+  lastTravelDay?: string | null;
   combinedDeparturePriceId?: number;
   tourHotelPriceId?: number;
   departureId: number;
@@ -18,7 +23,7 @@ type Props = {
   tourId: number;
 };
 
-export function CombinedTourCheckout({ combinedDeparturePriceId, departureId, onClose, roomSelection, tourHotelPriceId, tourId }: Props) {
+export function CombinedTourCheckout({ country, lastTravelDay, priceSummary, combinedDeparturePriceId, departureId, onClose, roomSelection, tourHotelPriceId, tourId }: Props) {
   const [passengers, setPassengers] = useState<PassengerCheckoutData[]>([]);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [signIn, setSignIn] = useState(false);
@@ -82,10 +87,11 @@ export function CombinedTourCheckout({ combinedDeparturePriceId, departureId, on
         </Suspense>
       ) : (
         <div className="space-y-3">
-          <PassengerCheckoutModal inline fixedPassengerCounts={counts} open={!passengers.length}
+          <PassengerCheckoutModal inline lastTravelDay={lastTravelDay} requiresPassport={!!country?.trim() && !/^(ایران|ايران|iran|irn|ir)$/i.test(country.trim())} fixedPassengerCounts={counts} open={!passengers.length}
             onClose={onClose} onComplete={setPassengers} />
           {passengers.length ? (
             <div className="space-y-3">
+              <TourPriceBreakdown summary={priceSummary} />
               <button type="button" className="text-sm font-bold text-brand underline" onClick={() => setPassengers([])}>ویرایش اطلاعات مسافران</button>
               <label className="flex items-center gap-2 text-sm">
                 <input type="checkbox" checked={termsAccepted} onChange={(event) => setTermsAccepted(event.target.checked)} />

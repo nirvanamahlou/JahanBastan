@@ -47,6 +47,7 @@ type JalaliDateRangeInputProps = {
   initialReturn?: string | null;
   initialTripType?: TripType;
   omitInitialTripType?: boolean;
+  allowAllTripTypes?: boolean;
   showTripType?: boolean;
   stackTripType?: boolean;
   dateLabels?: { departure: string; return: string; field?: string };
@@ -62,6 +63,7 @@ export function JalaliDateRangeInput({
   initialReturn = null,
   initialTripType = "round_trip",
   omitInitialTripType = false,
+  allowAllTripTypes = false,
   showTripType = true,
   stackTripType = false,
   dateLabels,
@@ -143,10 +145,10 @@ export function JalaliDateRangeInput({
     setOpen(true);
   }
 
-  function changeTripType(nextTripType: TripType) {
-    setTripTypeChosen(true);
-    setTripType(nextTripType);
-    if (nextTripType === "one_way") {
+  function changeTripType(nextTripType: TripType | "all") {
+    setTripTypeChosen(nextTripType !== "all");
+    setTripType(nextTripType === "all" ? "one_way" : nextTripType);
+    if (nextTripType !== "round_trip") {
       setReturnDate(null);
       setSelectionStep("departure");
     }
@@ -178,9 +180,15 @@ export function JalaliDateRangeInput({
           style={stackTripType ? { gridTemplateColumns: "minmax(0, 1fr)" } : undefined}
         >
           {showTripType ? (
-          <div className={`grid w-full min-w-0 grid-cols-2 overflow-hidden rounded-xl p-1 shadow-inner ${controlTheme} ${controlSize} ${stackTripType ? "order-1" : ""}`} data-trip-type aria-label="نوع سفر">
-            <button aria-pressed={tripType === "one_way"} className={`h-full min-h-0 min-w-0 rounded-lg px-1.5 text-center text-xs font-black leading-5 whitespace-normal transition ${tripType === "one_way" ? "bg-accent/70 text-brand shadow-sm" : "text-muted hover:bg-sky-50/80 hover:text-brand"}`} onClick={() => changeTripType("one_way")} type="button">یک‌طرفه</button>
-            <button aria-pressed={tripType === "round_trip"} className={`h-full min-h-0 min-w-0 rounded-lg px-1.5 text-center text-xs font-black leading-5 whitespace-normal transition ${tripType === "round_trip" ? "bg-accent/70 text-brand shadow-sm" : "text-muted hover:bg-sky-50/80 hover:text-brand"}`} onClick={() => changeTripType("round_trip")} type="button">رفت و برگشت</button>
+          <div className={`grid w-full min-w-0 ${allowAllTripTypes ? "grid-cols-3" : "grid-cols-2"} overflow-hidden rounded-xl p-1 shadow-inner ${controlTheme} ${controlSize} ${stackTripType ? "order-1" : ""}`} data-trip-type aria-label="نوع سفر">
+            {(["all", "one_way", "round_trip"] as const).filter((type) => allowAllTripTypes || type !== "all").map((type) => {
+              const selected = type === "all" ? !tripTypeChosen : tripTypeChosen && tripType === type;
+              return (
+                <button key={type} aria-pressed={selected} className={`h-full min-h-0 min-w-0 rounded-lg px-1.5 text-center text-xs font-black leading-5 whitespace-normal transition ${selected ? "bg-accent/70 text-brand shadow-sm" : "text-muted hover:bg-sky-50/80 hover:text-brand"}`} onClick={() => changeTripType(type)} type="button">
+                  {{ all: "همه", one_way: "یک‌طرفه", round_trip: "رفت و برگشت" }[type]}
+                </button>
+              );
+            })}
           </div>
         ) : null}
           <div data-date-values className={`grid w-full min-w-0 flex-1 ${tripType === "round_trip" ? compact ? "grid-cols-[minmax(3.75rem,1fr)_minmax(3.75rem,1fr)]" : "grid-cols-[minmax(4.75rem,1fr)_minmax(4.75rem,1fr)]" : "grid-cols-1"} overflow-hidden rounded-xl ${controlTheme} text-right shadow-sm ${controlSize} ${stackTripType ? "order-2 mt-1" : ""}`}>

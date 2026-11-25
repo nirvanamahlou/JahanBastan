@@ -164,8 +164,9 @@ export default async function FlightsPage({ searchParams }: { searchParams: Prom
   const originAirport = getValue(raw.originAirport);
   const destination = getValue(raw.destination);
   const departureFrom = getValue(raw.departureFrom);
-  const browseCountry = Boolean(country && !getValue(raw.tripType));
-  const tripType = getValue(raw.tripType) === "one_way" ? "one_way" : "round_trip";
+  const requestedTripType = getValue(raw.tripType);
+  const browseAllTripTypes = !requestedTripType && !getValue(raw.departureTo);
+  const tripType = browseAllTripTypes || requestedTripType === "one_way" ? "one_way" : "round_trip";
   // A stale return date must never influence a one-way search.
   const departureTo = tripType === "round_trip" ? getValue(raw.departureTo) : "";
   const provider = getValue(raw.provider);
@@ -201,14 +202,14 @@ export default async function FlightsPage({ searchParams }: { searchParams: Prom
   if (destination) query.set("destination", destination);
   if (departureFrom) query.set("departureFrom", departureFrom);
   if (departureTo) query.set("departureTo", departureTo);
-  if (!browseCountry) query.set("tripType", tripType);
+  if (!browseAllTripTypes) query.set("tripType", tripType);
   if (flightClass) query.set("flightClass", flightClass);
   if (flightScope) query.set("flightScope", flightScope);
   if (flightNumber) query.set("flightNumber", flightNumber);
   if (featured) query.set("featured", "true");
 
   const emptyFlightPayload = { items: [] as Flight[], total: 0 };
-  const erpQuery = new URLSearchParams(browseCountry ? undefined : { tripType });
+  const erpQuery = new URLSearchParams(browseAllTripTypes ? undefined : { tripType });
   if (origin) erpQuery.set("origin", origin);
   if (destination) erpQuery.set("destination", destination);
   if (departureFrom) erpQuery.set("departureDate", departureFrom);
@@ -220,7 +221,7 @@ export default async function FlightsPage({ searchParams }: { searchParams: Prom
   const hasDateStripSearch = shouldShowResults;
   const needsNearbyFlights = hasDateStripSearch && Boolean(departureFrom);
   const returnQuery = new URLSearchParams(query);
-  const shouldLoadReturnTickets = shouldShowResults && !browseCountry && tripType === "round_trip" && Boolean(origin && destination);
+  const shouldLoadReturnTickets = shouldShowResults && !browseAllTripTypes && tripType === "round_trip" && Boolean(origin && destination);
   if (shouldLoadReturnTickets) {
     returnQuery.delete("country");
     returnQuery.set("origin", destination);
@@ -279,7 +280,7 @@ export default async function FlightsPage({ searchParams }: { searchParams: Prom
           direction: "outbound" as const,
           useReturnLeg: false,
         })),
-        ...(!browseCountry && tripType === "round_trip"
+        ...(!browseAllTripTypes && tripType === "round_trip"
           ? payload.items
               .filter(
                 (flight) =>
@@ -377,7 +378,15 @@ export default async function FlightsPage({ searchParams }: { searchParams: Prom
     return !featured && matchesRanges(erpMetrics(flight));
   };
   const flightTickets = allFlightTickets.filter(({ flight, useReturnLeg }) => matchesNativeFilters(flight, useReturnLeg));
-  const visibleErpFlights = erpFlights.filter(matchesErpFilters);
+  const scopeOf = (leg: ErpFlightRate | NonNullable<ErpFlightRate["return_leg"]>) => {
+    const originCountry = countryForFlight(leg.origin);
+    const arrivalCountry = countryForFlight(leg.destination);
+    return leg.international ?? (originCountry && arrivalCountry ? originCountry !== arrivalCountry : null);
+  };
+  const visibleErpFlights = erpFlights.filter(matchesErpFilters).map(flight => ({
+    ...flight, international: scopeOf(flight),
+    return_leg: flight.return_leg ? { ...flight.return_leg, international: scopeOf(flight.return_leg) } : null,
+  }));
   const erpScope = erpFlights.filter(erpInCountry);
   const airlineChoices = [...new Set([...erpScope.flatMap((flight) => [flight.carrier, flight.return_leg?.carrier]), ...allFlightTickets.map(({ flight }) => flight.providerCompany), ...chosenAirlines]
     .filter((name): name is string => Boolean(name && !name.includes("|"))))].sort((a, b) => a.localeCompare(b, "fa"));
@@ -390,7 +399,7 @@ export default async function FlightsPage({ searchParams }: { searchParams: Prom
     for (const name of names) if (name) minAirlinePrices.set(name, Math.min(price, minAirlinePrices.get(name) ?? price));
   }
   const showStops = Boolean(maxStops) || allFlightTickets.some(({ flight }) => flight.stopsCount !== null);
-  const chooseErpRoundTrip = !browseCountry && tripType === "round_trip" && Boolean(origin && destination);
+  const chooseErpRoundTrip = !browseAllTripTypes && tripType === "round_trip" && Boolean(origin && destination);
   const availableDates = new Set<string>();
   if (hasDateStripSearch) {
     const today = tehranDate.format(new Date());
@@ -403,9 +412,9 @@ export default async function FlightsPage({ searchParams }: { searchParams: Prom
       availableDates.add(tehranDate.format(new Date(flight.departure)));
     }
   }
-  const hasFilters = Boolean(country || origin || originAirport || destination || departureFrom || departureTo || tripType === "one_way" || provider || flightClass || flightScope || flightNumber || maxStops || featured || Object.values(facetParams).some(Boolean));
+  const hasFilters = Boolean(country || origin || originAirport || destination || departureFrom || departureTo || requestedTripType || provider || flightClass || flightScope || flightNumber || maxStops || featured || Object.values(facetParams).some(Boolean));
   const alternateTripType = tripType === "one_way" ? "round_trip" : "one_way";
-  const alternateTrip = !browseCountry && origin && destination && departureFrom
+  const alternateTrip = !browseAllTripTypes && origin && destination && departureFrom
     ? erpCatalog.some((flight) =>
         Boolean(flight.return_leg) === (alternateTripType === "round_trip") &&
         flight.origin === origin &&
@@ -438,7 +447,7 @@ export default async function FlightsPage({ searchParams }: { searchParams: Prom
                 <legend>مسیر و تاریخ</legend>
                 <CountryCityFields key={country + destination} id="flight" countries={countries.items} country={country} city={destination} cities={flightDestinationChoices.map((item) => ({ title: item.label, value: item.label, country: providerPayload.items.find((flight) => flight.destinationName === item.label)?.country || countryForFlight(item.label) }))} />
                 <SearchableRouteSelect className={control} defaultValue={origin} id="flight-origin" label="مبدأ" name="origin" options={flightOriginChoices} placeholder="شهر مبدأ" />
-                <JalaliDateRangeInput key={`${departureFrom}/${departureTo}/${tripType}/${browseCountry}`} stackTripType omitInitialTripType={browseCountry} initialDeparture={departureFrom || null} initialReturn={departureTo || null} initialTripType={tripType} />
+                <JalaliDateRangeInput key={`${departureFrom}/${departureTo}/${tripType}/${browseAllTripTypes}`} stackTripType allowAllTripTypes omitInitialTripType={browseAllTripTypes} initialDeparture={departureFrom || null} initialReturn={departureTo || null} initialTripType={tripType} />
                 </fieldset>
                 {flightScope ? <input name="flightScope" type="hidden" value={flightScope} /> : null}
                 <FlightAirlineFilter key={`${airlines}/${sameAirline}`} options={airlineChoices.map((name) => ({ name, minPrice: minAirlinePrices.get(name) ?? null }))} selected={[...chosenAirlines]} provider={provider} sameAirline={sameAirline} showSameAirline={sameAirline || erpScope.some((flight) => flight.return_leg && flight.return_leg.carrier !== flight.carrier)} />
@@ -463,7 +472,7 @@ export default async function FlightsPage({ searchParams }: { searchParams: Prom
                   <p className="mt-1 text-sm text-muted">{(flightTickets.length + visibleErpFlights.length).toLocaleString("fa-IR")} مورد پیدا شد{departureFrom ? ` · ${formatPersianDate(departureFrom)}` : ""}</p>
                 </div>
                 <LiveFlightForm>
-                  {Object.entries({ country, origin, originAirport, destination, departureFrom, departureTo, tripType: browseCountry ? "" : tripType, provider, flightClass, flightScope, flightNumber, ...facetParams, maxStops, featured: featured ? "true" : "", ...passengerQuery, showResults: "1" }).filter(([, value]) => value).map(([key, value]) => <input key={key} name={key} type="hidden" value={value} />)}
+                  {Object.entries({ country, origin, originAirport, destination, departureFrom, departureTo, tripType: browseAllTripTypes ? "" : tripType, provider, flightClass, flightScope, flightNumber, ...facetParams, maxStops, featured: featured ? "true" : "", ...passengerQuery, showResults: "1" }).filter(([, value]) => value).map(([key, value]) => <input key={key} name={key} type="hidden" value={value} />)}
                   <select aria-label="مرتب‌سازی پروازها" className={`${control} min-w-40`} defaultValue={sort} id="flight-results-sort" name="sort">
                     <option value="recommended">پیشنهادی</option>
                     <option value="price-asc">ارزان‌ترین</option>
@@ -472,7 +481,7 @@ export default async function FlightsPage({ searchParams }: { searchParams: Prom
                   </select>
                 </LiveFlightForm>
               </div>
-              <TransportDateStrip availableDates={availableDates} pathname="/services/flights/" selectedDate={departureFrom} searchParams={{ country, origin, originAirport, destination, departureTo, tripType: browseCountry ? "" : tripType, provider, flightClass, flightScope, flightNumber, ...facetParams, maxStops, sort, featured: featured ? "true" : "", ...passengerQuery, showResults: "1" }} />
+              <TransportDateStrip availableDates={availableDates} pathname="/services/flights/" selectedDate={departureFrom} searchParams={{ country, origin, originAirport, destination, departureTo, tripType: browseAllTripTypes ? "" : tripType, provider, flightClass, flightScope, flightNumber, ...facetParams, maxStops, sort, featured: featured ? "true" : "", ...passengerQuery, showResults: "1" }} />
               {!flightTickets.length && !visibleErpFlights.length && alternateTrip ? (
                 <div className="rounded-xl border border-brand/15 bg-brand/5 p-4 text-sm">
                   <p>برای این مسیر و تاریخ، بلیت {alternateTripType === "round_trip" ? "رفت‌وبرگشت" : "یک‌طرفه"} موجود است.</p>
@@ -481,7 +490,7 @@ export default async function FlightsPage({ searchParams }: { searchParams: Prom
                   </Link>
                 </div>
               ) : null}
-              <TicketSelectionProvider kind="flight" roundTrip={!browseCountry && tripType === "round_trip" && flightTickets.length > 0}>
+              <TicketSelectionProvider kind="flight" roundTrip={!browseAllTripTypes && tripType === "round_trip" && flightTickets.length > 0}>
                 <div className="mt-5 space-y-4">
                   {chooseErpRoundTrip ? (
                     <ErpRoundTripPicker

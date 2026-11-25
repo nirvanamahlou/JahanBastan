@@ -5,7 +5,7 @@ import { type ReactNode, useEffect, useState } from "react";
 import { formatCurrency } from "@/lib/currency";
 import { DeparturePicker } from "./departure-picker";
 import { formatPersianDate } from "@/lib/persian-date";
-import { isTourDepartureBookable, tourDepartureUnavailableLabel, type TourDepartureAvailability } from "@/lib/tour-departure-availability";
+import { setTourDepartureUrl, isTourDepartureBookable, tourDepartureUnavailableLabel, type TourDepartureAvailability } from "@/lib/tour-departure-availability";
 
 export type TourDepartureCalendarItem = TourDepartureAvailability & {
   id: number;
@@ -36,7 +36,7 @@ export function TourDepartureCalendar({
     : [];
   const dates = available.length ? available : fallback;
   const bookableDates = dates.filter(isTourDepartureBookable);
-  const selectedDeparture = dates.find((departure) => departure.id === selectedDepartureId) ?? bookableDates[0];
+  const selectedDeparture = selectedDepartureId === null ? bookableDates[0] : dates.find((departure) => departure.id === selectedDepartureId && isTourDepartureBookable(departure));
 
   useEffect(() => {
     const sync = (event: Event) => setSelectedDepartureId((event as CustomEvent<{ departureId: number }>).detail.departureId);
@@ -48,7 +48,7 @@ export function TourDepartureCalendar({
     const departure = bookableDates.find((date) => date.id === departureId);
     if (!departure) return;
     setSelectedDepartureId(departureId);
-    window.history.replaceState(null, "", "#tour-dates");
+    setTourDepartureUrl(departureId, "#tour-dates");
     window.dispatchEvent(
       new CustomEvent("tour-departure-selected", { detail: { departureId, showHotels: Boolean(departure.canBook) } }),
     );
@@ -104,6 +104,7 @@ export function TourDepartureCalendar({
         })}
       </ul>
       )}
+      {selectedDepartureId !== null && !selectedDeparture && bookableDates.length > 0 && <p role="status" className="mt-3 text-sm text-muted">تاریخ انتخاب‌شده قابل رزرو نیست. یک تاریخ دیگر انتخاب کنید.</p>}
       {!bookableDates.length ? <p className="mt-5 rounded-xl bg-surface-muted p-4 text-sm font-bold text-muted" role="status">در حال حاضر هیچ تاریخ قابل رزروی برای این تور وجود ندارد.</p> : null}
       {selectedDeparture ? (
         <div className="mt-3 space-y-2 border-t border-border pt-3" id="selected-departure-flights" role="region" aria-label={`پروازهای ${selectedDeparture.departureDate ? formatPersianDate(selectedDeparture.departureDate) : selectedDeparture.label}`}>

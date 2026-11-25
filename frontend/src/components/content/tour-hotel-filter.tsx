@@ -16,9 +16,10 @@ import { useOnlineSalesEnabled } from "@/components/online-sales-provider";
 import { CloseIcon, SearchIcon } from "@/components/layout/site-icons";
 import { PUBLIC_API_BASE_URL } from "@/lib/api/client";
 import { formatCurrency } from "@/lib/currency";
-import { toToman, type ExchangeRates } from "@/lib/currency-conversion";
+import { TourPriceBreakdown } from "./tour-price-breakdown";
+import { summarizeTourPrice, toToman, type ExchangeRates } from "@/lib/currency-conversion";
 import { isFinalLocalTourPrice } from "@/lib/tour-price-currency";
-import { isTourDepartureBookable, type TourDepartureAvailability } from "@/lib/tour-departure-availability";
+import { hasAvailableHotelRoom, isTourDepartureBookable, setTourDepartureUrl, tourReturnDate, type TourDepartureAvailability } from "@/lib/tour-departure-availability";
 
 type RoomSelection = {
   double: number;
@@ -80,6 +81,7 @@ export type TourBookingDeparture = TourDepartureAvailability & {
   id: number;
   label: string;
   departureDate: string | null;
+  returnDate?: string | null;
   priceAmount: string | null;
   nights: number | null;
   currency: string;
@@ -162,10 +164,10 @@ export function TourHotelFilter({
   isInstallmentAvailable: boolean;
 }) {
   const availableDates = useMemo(
-    () => departures.filter((item) => item.departureDate && item.hotelPrices.length && isTourDepartureBookable(item)),
+    () => departures.filter((item) => item.departureDate && item.hotelPrices.some(hasAvailableHotelRoom) && isTourDepartureBookable(item)),
     [departures],
   );
-  const [departureId, setDepartureId] = useState<number | null>(initialDepartureId ?? availableDates[0]?.id ?? null);
+  const [departureId, setDepartureId] = useState<number | null>(initialDepartureId ?? null);
   const [hotelId, setHotelId] = useState<number | "all">("all");
   const [regionFilter, setRegionFilter] = useState("all");
   const [stars, setStars] = useState<number | "all">("all");
@@ -188,16 +190,20 @@ export function TourHotelFilter({
   useEffect(() => {
     const selectDeparture = (event: Event) => {
       const departureIdFromEvent = (event as CustomEvent<{ departureId?: number }>).detail?.departureId;
-      if (!departureIdFromEvent || !availableDates.some((item) => item.id === departureIdFromEvent)) return;
+      if (!departureIdFromEvent) return;
       setDepartureId(departureIdFromEvent);
       setHotelId("all");
       setRegionFilter("all");
     };
     window.addEventListener("tour-departure-selected", selectDeparture);
-    return () => window.removeEventListener("tour-departure-selected", selectDeparture);
-  }, [availableDates]);
+    window.addEventListener("tour-hotels-duration-selected", selectDeparture);
+    return () => {
+      window.removeEventListener("tour-departure-selected", selectDeparture);
+      window.removeEventListener("tour-hotels-duration-selected", selectDeparture);
+    };
+  }, []);
 
-  const selectedDeparture = availableDates.find((item) => item.id === departureId) ?? availableDates[0] ?? null;
+  const selectedDeparture = departureId === null ? availableDates[0] : availableDates.find((item) => item.id === departureId);
   const activeDepartureId = selectedDeparture?.id ?? null;
   const packageOffers = useMemo<DatedHotelOffer[]>(
     () =>
@@ -300,11 +306,10 @@ export function TourHotelFilter({
       <div className="space-y-3">
         <aside className="rounded-2xl border border-border bg-white p-3 text-center">
           <h2 className="font-black text-brand">روزهای برگزاری تور</h2>
+          {!selectedDeparture && <p role="status" className="mb-2 text-sm text-muted">برای تاریخ انتخاب‌شده هتل قابل رزروی موجود نیست. یک تاریخ دیگر انتخاب کنید.</p>}
           <DeparturePicker options={availableDates} selected={selectedDeparture} available={isTourDepartureBookable} onSelect={(id) => {
+            setTourDepartureUrl(id);
             window.dispatchEvent(new CustomEvent("tour-hotels-duration-selected", { detail: { departureId: id } }));
-            setDepartureId(id);
-            setHotelId("all");
-            setRegionFilter("all");
           }} />
         </aside>
       </div>
@@ -354,15 +359,14 @@ export function TourHotelFilter({
               : [];
             const canSelectRoom = availableRooms.some(room => isBaseRoom(room.key));
             const roomCount = selection.double + selection.single;
-            const selectionTotal = rooms.reduce<number | null>((total, room) => {
-              if (total === null || !selection[room.key]) return total;
-              const roomAmount = tourPriceToToman(String(offer[room.price]), String(offer[room.currency] ?? offer.packageCurrency), exchangeRates);
-              const [flight, currency] = roomFlight(offer, room.key);
-              const flightAmount = Number(flight) > 0 ? tourPriceToToman(flight, currency, exchangeRates) : 0;
-              if (roomAmount === null || flightAmount === null) return null;
-              const passengerFactor = room.key === "double" ? 2 : 1;
-              return total + (roomAmount * passengerFactor + flightAmount * passengerFactor) * selection[room.key];
-            }, 0);
+            const priceSummary = summarizeTourPrice(rooms.flatMap((room) => {
+              const quantity = selection[room.key] * (room.key === "double" ? 2 : 1);
+              const roomCurrency = String(offer[room.currency] ?? offer.packageCurrency);
+              const parts = [{ amount: String(offer[room.price]), currency: tourLocalCurrency(roomCurrency), quantity }];
+              const [flight, flightCurrency] = roomFlight(offer, room.key);
+              if (Number(flight) > 0) parts.push({ amount: flight, currency: tourLocalCurrency(flightCurrency), quantity });
+              return parts;
+            }), exchangeRates);
             return (
               <article className={`${hotelStyles.hotelCardAccent} min-w-0 overflow-hidden rounded-2xl border border-border bg-surface shadow-[0_8px_24px_rgba(16,39,71,.08)]`} key={offer.id}>
                 <TourHotelPresentation name={offer.hotel.name} href={`/hotels/${offer.hotel.slug}/?tour=${encodeURIComponent(tourSlug)}`}
@@ -395,7 +399,7 @@ export function TourHotelFilter({
                   </div>} />
                 {canSelectRoom && roomCount > 0 ? (
                   <div className={hotelStyles.inlineBooking} data-inline-hotel-booking>
-                    <p className="text-xs font-bold text-brand">جمع قابل پرداخت: {selectionTotal === null ? "نیازمند محاسبهٔ نرخ ارز" : formatCurrency(selectionTotal, "IRT")}</p>
+                    <TourPriceBreakdown summary={priceSummary} />
                     {onlineSalesEnabled ? (
                       <button className="account-primary min-h-10 w-full rounded-lg bg-brand px-3 text-xs font-bold text-white disabled:opacity-50 sm:w-auto"
                         disabled={Object.values(selection).reduce((total, value) => total + value, selection.double) > 20}
@@ -406,7 +410,7 @@ export function TourHotelFilter({
                   </div>
                 ) : !canSelectRoom ? <p className={hotelStyles.bookingUnavailable}>{!offer.isAvailable || offer.capacityRemaining === 0 ? "تکمیل ظرفیت" : "استعلام قیمت و ظرفیت"}</p> : null}
                 {checkoutOfferId === offer.id && roomCount > 0 && canSelectRoom ? (
-                  <CombinedTourCheckout departureId={offer.departure.id} onClose={() => setCheckoutOfferId(null)}
+                  <CombinedTourCheckout country={country} lastTravelDay={offer.departure.departureDate ? tourReturnDate(offer.departure.departureDate, offer.departure.returnDate ?? null, offer.departure.nights) ?? offer.departure.departureDate : null} priceSummary={priceSummary} departureId={offer.departure.id} onClose={() => setCheckoutOfferId(null)}
                     roomSelection={selection} tourHotelPriceId={offer.id} tourId={tourId} />
                 ) : null}
               </article>

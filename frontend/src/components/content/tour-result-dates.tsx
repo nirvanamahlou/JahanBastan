@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { type ReactNode, useRef, useState } from "react";
 import { PUBLIC_API_BASE_URL } from "@/lib/api/client";
+import { hasBookableTourPackage, tourReturnDate } from "@/lib/tour-departure-availability";
+import type { PublicCombinedPackage } from "@/types/combined-pricing";
 import { formatCurrency } from "@/lib/currency";
 import { formatPersianDate } from "@/lib/persian-date";
 import { CalendarIcon } from "@/components/layout/site-icons";
@@ -15,7 +17,7 @@ type Range = {
   nights?: number | null;
   price: string | null;
 };
-type Departure = {
+type Departure = Parameters<typeof hasBookableTourPackage>[0] & {
   id: number;
   departureDate: string | null;
   returnDate: string | null;
@@ -38,36 +40,38 @@ export function TourResultDates({
   const [ranges, setRanges] = useState<Range[] | null>(null);
   const [loading, setLoading] = useState(false);
   const pending = useRef(false);
+  const [failed, setFailed] = useState(false);
 
   async function loadDates() {
     if (!slug || ranges || pending.current) return;
     pending.current = true;
     setLoading(true);
+    setFailed(false);
     try {
       const response = await fetch(`${PUBLIC_API_BASE_URL}/tours/${encodeURIComponent(slug)}`, {
         signal: AbortSignal.timeout(8000),
       });
-      if (!response.ok) return;
-      const data: { departures?: Departure[] } = await response.json();
+      if (!response.ok) throw new Error("Could not load tour dates");
+      const data: { departures?: Departure[]; combinedPackages?: PublicCombinedPackage[] } = await response.json();
       const unique = new Map<string, Range>();
       for (const item of data.departures ?? []) {
-        if (!item.departureDate) continue;
+        if (!item.departureDate || !hasBookableTourPackage(item, data.combinedPackages)) continue;
         const price = item.priceAmount ? formatCurrency(item.priceAmount, item.currency) : null;
         const key = String(item.id);
         if (!unique.has(key)) {
-          unique.set(key, { departureId: item.id, departureDate: item.departureDate, returnDate: item.returnDate, nights: item.nights, price });
+          unique.set(key, { departureId: item.id, departureDate: item.departureDate, returnDate: tourReturnDate(item.departureDate, item.returnDate, item.nights), nights: item.nights, price });
         }
       }
       setRanges([...unique.values()].sort((a, b) => a.departureDate.localeCompare(b.departureDate)));
     } catch {
-      // Keep the catalogue date visible if the details request is unavailable.
+      setFailed(true);
     } finally {
       pending.current = false;
       setLoading(false);
     }
   }
 
-  const visible = ranges?.length ? ranges : fallback ? [fallback] : [];
+  const visible = slug ? ranges ?? [] : fallback ? [fallback] : [];
   return (
     <details className={styles.dateDisclosure} onToggle={(event) => {
       if (event.currentTarget.open) void loadDates();
@@ -81,6 +85,8 @@ export function TourResultDates({
       </summary>
       <div className={styles.dateBody}>
         {loading && <p role="status">در حال دریافت تاریخ‌ها…</p>}
+        {failed && <p role="status">دریافت تاریخ‌ها انجام نشد. <button type="button" className="underline" onClick={() => void loadDates()}>تلاش دوباره</button></p>}
+        {ranges?.length === 0 && <p role="status">در حال حاضر تاریخ قابل رزروی برای این تور وجود ندارد.</p>}
         {visible.length ? <>
           <p className={styles.dateHeading}>بازه‌های سفر</p>
           <ul className={styles.dateRanges}>
@@ -109,7 +115,7 @@ export function TourResultDates({
               );
             })}
           </ul>
-        </> : !loading && <Link className={styles.dateLink} href={href}>مشاهده جزئیات تور ←</Link>}
+        </> : !loading && (!slug || failed || ranges !== null) && <Link className={styles.dateLink} href={href}>مشاهده جزئیات تور ←</Link>}
       </div>
     </details>
   );
