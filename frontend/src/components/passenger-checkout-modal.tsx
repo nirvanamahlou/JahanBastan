@@ -5,7 +5,17 @@ import { createPortal } from "react-dom";
 
 import { JalaliDateInput } from "@/components/admin/jalali-date-input";
 import { SiteSelect } from "@/components/ui/site-select";
+import { PUBLIC_API_BASE_URL } from "@/lib/api/client";
+import { invalidateCustomerSession, readCustomerSession } from "@/lib/customer-session";
 import type { PassengerCounts } from "@/lib/tour-passenger-counts";
+
+const buyerNameRequired = "نام و نام خانوادگی خریدار را کامل وارد کنید.";
+
+function validBuyerName(value: string) {
+  const parts = value.trim().split(/\s+/u);
+  return parts.length >= 2 && parts.join(" ") !== "کاربر جهان باستان" &&
+    parts.every(part => /\p{L}/u.test(part));
+}
 
 type PassengerKind = "adult" | "child" | "infant";
 
@@ -204,6 +214,17 @@ const subscribeToHydration = () => () => undefined;
   const [passengers, setPassengers] = useState<PassengerCheckoutData[]>([
     emptyPassenger("adult"),
   ]);
+  const [accountBuyerName, setAccountBuyerName] = useState<string | null>(null);
+  useEffect(() => {
+    if (!open || buyerContact || context === "flight") return;
+    let active = true;
+    void readCustomerSession().then(async response => {
+      if (!response.ok) return;
+      const { user } = await response.json();
+      if (active) setAccountBuyerName(value => value ?? user?.fullName ?? "");
+    }).catch(() => undefined);
+    return () => { active = false; };
+  }, [open, buyerContact, context]);
   const [history, setHistory] = useState<PassengerHistory[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -381,7 +402,11 @@ const subscribeToHydration = () => () => undefined;
       setNotice("تعداد بزرگسالان و کودکان از ظرفیت پرواز بیشتر است.");
       return;
     }
-    if (buyerContact && (buyerContact.fullName.trim().length < 2 || !buyerContact.buyerMobile.trim() || !buyerContact.address.trim())) {
+    if (!validBuyerName(buyerContact?.fullName ?? accountBuyerName ?? "")) {
+      setNotice(buyerNameRequired);
+      return;
+    }
+    if (buyerContact && (!buyerContact.buyerMobile.trim() || !buyerContact.address.trim())) {
       setNotice("نام کامل، شماره همراه و نشانی خریدار را وارد کنید.");
       return;
     }
@@ -394,6 +419,14 @@ const subscribeToHydration = () => () => undefined;
     try {
       await checkFlightCapacity?.(passengers.map(person => person.birthDate));
       await saveBuyerContact?.();
+      if (!buyerContact && context !== "flight") {
+        const response = await fetch(`${PUBLIC_API_BASE_URL}/account/me`, {
+          method: "PATCH", credentials: "include", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ fullName: accountBuyerName?.trim() }),
+        });
+        if (!response.ok) throw new Error("ذخیرهٔ نام خریدار انجام نشد.");
+        invalidateCustomerSession();
+      }
       const saved: PassengerCheckoutData[] = [];
       for (const passenger of passengers) {
         let current = passenger;
@@ -518,6 +551,14 @@ const subscribeToHydration = () => () => undefined;
             </>
           ) : (
             <>
+              {!buyerContact && context !== "flight" && (
+                <label className="grid gap-1.5 text-sm font-bold text-brand">
+                  نام و نام خانوادگی خریدار
+                  <input autoComplete="name" required maxLength={120} disabled={busy}
+                    className="min-h-11 rounded-xl border border-border px-3"
+                    value={accountBuyerName ?? ""} onChange={event => setAccountBuyerName(event.target.value)} />
+                </label>
+              )}
               {buyerContact && onBuyerContactChange && (
                 <fieldset className={`grid min-w-0 border border-border bg-white ${inline ? "gap-2.5 rounded-xl p-3 sm:grid-cols-3" : "grid-cols-[repeat(auto-fit,minmax(min(100%,12rem),1fr))] gap-4 rounded-2xl p-4"}`}>
                   <legend className={`px-2 font-black text-brand ${inline ? "text-sm" : ""}`}>اطلاعات خریدار</legend>

@@ -441,7 +441,7 @@ async def verify_sms_login(
         phone_digits = payload.phone.removeprefix("+")
         user = await repository.create(
             email=f"phone-{phone_digits}@jahanbastan.ir",
-            full_name="کاربر جهان باستان",
+            full_name="",
             password_hash=hash_password(generate_session_token()),
         )
         user.phone = payload.phone

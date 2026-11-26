@@ -11,6 +11,7 @@ from uuid import UUID
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.buyer_name import BUYER_NAME_REQUIRED, valid_buyer_name
 from app.integrations.avina import AvinaClient, AvinaError, avina_client
 from app.models import CustomerUser, ErpFlightCheckout
 from app.repositories.erp_checkout import ErpCheckoutRepository
@@ -160,6 +161,8 @@ class ErpFlightCheckoutService:
         existing = await self.repository.get(key)
         if existing is not None:
             return await self._resume(existing, customer_id, customer_data, fingerprint)
+        if not valid_buyer_name(customer.full_name):
+            raise HTTPException(422, BUYER_NAME_REQUIRED)
         if require_review and not quote_version:
             raise HTTPException(409, "ابتدا مبلغ و اطلاعات مسافران را بررسی کنید.")
         if flight is None or flight.product_ids != product_ids:
@@ -277,6 +280,12 @@ class ErpFlightCheckoutService:
             raise HTTPException(
                 409, "idempotency key was used with different checkout data"
             )
+        if (
+            row.erp_payload is None
+            and (row.state in {"received", "preparing"} or row.error_retryable)
+            and not valid_buyer_name(customer_data.get("fullName", ""))
+        ):
+            raise HTTPException(422, BUYER_NAME_REQUIRED)
         return await self._drive(row.id, customer_id, customer_data)
 
     async def read(self, checkout_id: UUID, customer_id: int) -> ErpFlightCheckoutRead:
@@ -411,7 +420,7 @@ class ErpFlightCheckoutService:
             f"{external_id}-buyer",
             _person_payload(
                 first_name=names[0],
-                last_name=names[1] if len(names) > 1 else "مسافر",
+                last_name=names[1],
                 birth_date=customer["birthDate"],
                 national_id=customer["nationalCode"],
                 role="customer",

@@ -16,6 +16,7 @@ from app.api.dependencies.auth import (
     DatabaseSession,
     TrustedOrigin,
 )
+from app.core.buyer_name import BUYER_NAME_REQUIRED, valid_buyer_name
 from app.models import PaymentIntent, PaymentStatus, SiteSetting
 from app.models.checkout import BookingStatusEvent
 from app.repositories.agencies import AgencyRepository
@@ -87,6 +88,8 @@ async def create_booking(
             replay = await repository.find_direct_replay(customer.id, key, digest)
             if replay is not None:
                 return BookingRead.model_validate(replay)
+        if not valid_buyer_name(customer.full_name):
+            raise ValueError(BUYER_NAME_REQUIRED)
         booking = await repository.create_from_cart(
             customer.id,
             payload.customer_note,

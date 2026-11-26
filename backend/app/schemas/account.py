@@ -15,6 +15,7 @@ from pydantic import (
 )
 from pydantic.alias_generators import to_camel
 
+from app.core.buyer_name import customer_display_name
 from app.schemas.support import SupportMessageRead
 
 
@@ -187,6 +188,11 @@ class CustomerAccount(AccountSchema):
     bank_account_number: str | None = None
     bank_card_last4: str | None = None
     created_at: datetime
+
+    @field_validator("full_name")
+    @classmethod
+    def hide_legacy_name(cls, value: str) -> str:
+        return customer_display_name(value)
 
 
 class CustomerAuthentication(AccountSchema):
