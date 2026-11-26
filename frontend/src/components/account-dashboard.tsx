@@ -440,9 +440,8 @@ export function AccountDashboard() {
         {!checkout && active === "trips" ? (
           <section className="space-y-5">
             <h1 className="text-2xl font-black text-brand">سفرهای من</h1>
-            {dashboard.cartItems.some(item => item.itemType === "tour") && <Link className="inline-flex rounded-xl bg-brand px-4 py-2 text-white" href="/tours/resume/">ادامه خرید تور</Link>}
             {orders && orders.length > 0 && <OrderList onRemove={removeOrder} orders={orders} />}
-            {!dashboard.cartItems.some(item => item.itemType === "tour") && orders?.length === 0 && <EmptyState title="هنوز سفری ثبت نشده است" description="پس از ثبت سفارش، سفر شما اینجا نمایش داده می‌شود." />}
+            {orders?.length === 0 && <EmptyState title="هنوز توری خریداری نکرده‌اید" description="پس از خرید تور، مشخصات آن را اینجا می‌بینید." />}
           </section>
         ) : null}
         {active === "passengers" ? (
