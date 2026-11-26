@@ -6,7 +6,7 @@ import { SearchIcon } from "@/components/layout/site-icons";
 import { toToman, type ExchangeRates } from "@/lib/currency-conversion";
 import { useState } from "react";
 import { HotelAmenities } from "@/components/content/hotel-amenities";
-import { HotelLocationMap } from "@/components/content/hotel-location-map";
+import { hotelMapSearchUrl } from "@/components/content/hotel-location-map";
 import { TourHotelPresentation } from "@/components/content/tour-hotel-presentation";
 import hotelStyles from "@/components/content/tour-hotel-presentation.module.css";
 import { hotelImages, labels, priceText, type Departure } from "./catalog";
@@ -157,8 +157,9 @@ export function AvinaHotelSelection({ tour, exchangeRates }: { tour: Departure &
         return <article key={hotel.id} className="min-w-0 overflow-hidden rounded-[1.75rem] border border-[#ffd1e3] bg-white shadow-[0_16px_40px_rgba(241,43,117,.10)]">
           <TourHotelPresentation name={hotel.name} images={hotelImages(hotel)}
             href={hotel.profileSlug ? "/hotels/" + encodeURIComponent(hotel.profileSlug) + "/" : undefined}
-            location={[city, hotel.city?.country.name].filter(Boolean).join("، ")}
-            stars={hotel.starRating} summary={hotel.description} facilities={facilities}
+            locationHref={hotelMapSearchUrl({ name: hotel.englishName || hotel.name, address: hotel.address, region: hotel.region,
+              destination: city, country: hotel.city?.country.name, latitude: hotel.latitude, longitude: hotel.longitude })}
+            stars={hotel.starRating}
             badges={tour.previewOnly ? <span className="rounded-xl bg-surface-muted px-3 py-2 text-xs font-bold">پیش‌نمایش</span> : null}
             amenities={<HotelAmenities description={facilities} region={hotel.region ?? null} roomType="" serviceType={hotel.serviceLevel || ""} variant="tour-card" />}
             rates={<>
@@ -168,9 +169,7 @@ export function AvinaHotelSelection({ tour, exchangeRates }: { tour: Departure &
                   انتخاب اتاق و ادامه خرید
                 </Link>
               )}
-            </>}
-            locationMap={<HotelLocationMap compact name={hotel.englishName || hotel.name} address={hotel.address} region={hotel.region}
-              destination={city} country={hotel.city?.country.name} latitude={hotel.latitude} longitude={hotel.longitude} />} />
+            </>} />
         </article>;
       })}
       {!visible.length && <p role="status" className="rounded-xl border p-5 text-muted">هتلی با این فیلترها پیدا نشد.</p>}

@@ -8,17 +8,14 @@ type Props = {
   name: string;
   href?: string;
   images: string[];
-  location: string;
+  locationHref: string;
   stars?: number;
-  summary?: string | null;
-  facilities?: string | null;
   badges: ReactNode;
   amenities: ReactNode;
   rates?: ReactNode;
-  locationMap?: ReactNode;
 };
 
-export function TourHotelPresentation({ name, href, images, location, stars, summary, facilities, badges, amenities, rates, locationMap }: Props) {
+export function TourHotelPresentation({ name, href, images, locationHref, stars, badges, amenities, rates }: Props) {
   return (
     <div className={styles.presentation} data-standalone-hotel>
       <div className={styles.media}>
@@ -32,21 +29,10 @@ export function TourHotelPresentation({ name, href, images, location, stars, sum
             <span>{stars?.toLocaleString("fa-IR")} ستاره</span>
           </span>}
         </div>
-        {location && <p className={styles.location}>{location}</p>}
+        <a className={styles.location} href={locationHref} target="_blank" rel="noreferrer">لوکیشن</a>
         {badges && <div className={styles.badges}>{badges}</div>}
         {amenities && <div className={styles.amenities}>{amenities}</div>}
-        {(summary || facilities || href || locationMap) && <div className={styles.hotelActions}>
-          {href && <Link href={href}>جزئیات هتل <span aria-hidden="true">←</span></Link>}
-          {(summary || facilities) && <details>
-            <summary>دربارهٔ هتل و امکانات</summary>
-            {summary && <p>{summary}</p>}
-            {facilities && facilities !== summary && <p>{facilities}</p>}
-          </details>}
-          {locationMap && <details>
-            <summary>نقشه هتل</summary>
-            {locationMap}
-          </details>}
-        </div>}
+
       </div>
       {rates && <div className={styles.prices}>{rates}</div>}
     </div>

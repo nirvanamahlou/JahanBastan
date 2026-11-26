@@ -1,7 +1,7 @@
 .presentation {
   display: grid;
-  gap: .65rem 1rem;
-  padding: .8rem;
+  gap: .5rem 1rem;
+  padding: .65rem .8rem;
 }
 
 .media { min-width: 0; }
@@ -9,7 +9,8 @@
 .hotelHeading { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .65rem; }
 .hotelHeading h3 { margin: 0; font-size: 1.02rem; font-weight: 800; overflow-wrap: anywhere; }
 .rating { display: inline-flex; flex-wrap: wrap; align-items: center; gap: .3rem; color: var(--muted); font-size: .63rem; }
-.location { margin: .24rem 0 0; color: var(--muted); font-size: .72rem; }
+.location { display: inline-block; margin-top: .2rem; padding: .12rem 0; color: var(--accent-strong); font-size: .7rem; font-weight: 700; }
+.location:hover { text-decoration: underline; }
 .badges { display: flex; flex-wrap: wrap; align-items: center; gap: .28rem; margin-top: .32rem; }
 .badges > * { min-height: 1.45rem; padding-inline: .38rem; font-size: .59rem; }
 .amenities { margin-top: .35rem; }
@@ -27,14 +28,6 @@
 }
 .amenities li > span:first-child { width: .9rem; height: .9rem; background: transparent; }
 .amenities li svg { width: .72rem; height: .72rem; }
-.hotelActions { display: flex; flex-wrap: wrap; align-items: baseline; gap: .22rem .65rem; margin-top: .36rem; }
-.hotelActions details { min-width: 0; }
-.hotelActions details[open] { flex-basis: 100%; }
-.hotelActions summary { width: fit-content; cursor: pointer; }
-.hotelActions :is(a, summary) { min-height: 1.55rem; color: var(--accent-strong); font-size: .65rem; font-weight: 700; }
-.hotelActions a { display: inline-flex; align-items: center; gap: .24rem; }
-.hotelActions details p { margin-top: .25rem; color: var(--muted); font-size: .68rem; line-height: 1.8; }
-
 .gallery { display: grid; gap: .3rem; }
 .galleryStage {
   position: relative;
@@ -81,7 +74,7 @@
 .galleryThumb img { object-fit: cover; }
 .galleryThumb[aria-pressed="true"] { border-color: var(--accent-strong); box-shadow: inset 0 0 0 1px var(--accent-strong); }
 .gallery :is(button):focus-visible,
-.hotelActions :is(a, summary):focus-visible { outline: 2px solid var(--accent-strong); outline-offset: 2px; }
+.location:focus-visible { outline: 2px solid var(--accent-strong); outline-offset: 2px; }
 
 .rateGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 6rem), 1fr)); gap: .34rem; }
 .rateTile {
@@ -167,7 +160,7 @@
     align-items: start;
   }
   .prices { grid-column: 1 / -1; }
-  .galleryStage { aspect-ratio: 1.55; }
+  .galleryStage { aspect-ratio: 1.85; }
 }
 @media (max-width: 679px) {
   .presentation { padding: .6rem; gap: .55rem; }

@@ -9,7 +9,7 @@ import hotelStyles from "./tour-hotel-presentation.module.css";
 import { useEffect, useMemo, useState } from "react";
 
 import { HotelAmenities } from "@/components/content/hotel-amenities";
-import { HotelLocationMap } from "@/components/content/hotel-location-map";
+import { hotelMapSearchUrl } from "@/components/content/hotel-location-map";
 import { SiteSelect } from "@/components/ui/site-select";
 import { CombinedTourCheckout } from "@/components/checkout/combined-tour-checkout";
 import { useOnlineSalesEnabled } from "@/components/online-sales-provider";
@@ -371,9 +371,8 @@ export function TourHotelFilter({
               <article className={`${hotelStyles.hotelCardAccent} min-w-0 overflow-hidden rounded-2xl border border-border bg-surface shadow-[0_8px_24px_rgba(16,39,71,.08)]`} key={offer.id}>
                 <TourHotelPresentation name={offer.hotel.name} href={`/hotels/${offer.hotel.slug}/?tour=${encodeURIComponent(tourSlug)}`}
                   images={[...new Set([offer.hotel.imageId,...(offer.hotel.galleryImageIds ?? [])])].filter(Boolean).map(id => `${PUBLIC_API_BASE_URL}/media/${id}`)}
-                  location={[offer.hotel.region,destination,country].filter(Boolean).join("، ")}
-                  locationMap={<HotelLocationMap address={offer.hotel.address} compact country={country} destination={destination} name={offer.hotel.name} region={offer.hotel.region} />}
-                  stars={offer.hotel.starRating} summary={offer.hotel.summary} facilities={offer.hotel.amenitiesDescription}
+                  locationHref={hotelMapSearchUrl({ address: offer.hotel.address, country, destination, name: offer.hotel.name, region: offer.hotel.region })}
+                  stars={offer.hotel.starRating}
                   amenities={<HotelAmenities description={offer.hotel.amenitiesDescription} region={offer.hotel.region} roomType={offer.roomType} serviceType={offer.serviceType} variant="tour-card" />} badges={offer.isBasePackage ? <span className="inline-flex items-center rounded-lg bg-brand-soft px-2 py-1 text-xs font-bold text-brand">هتل پایه پکیج</span> : null}
                   rates={<div className={hotelStyles.rateGrid} aria-label="نرخ‌های اتاق و مسافر">
                     {showRooms.map((room) => {
