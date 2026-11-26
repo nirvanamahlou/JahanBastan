@@ -63,14 +63,15 @@ export function ErpFlightOrders({
   if (cart && !problem && visibleOrders?.length === 0) return empty ?? null;
 
   return (
-    <section className="min-w-0 rounded-2xl border border-border bg-surface p-4" aria-label={cart ? "پروازهای ثبت‌شده" : "درخواست‌های پرواز آوینا"}>
-      <h2 className="font-bold text-brand">{cart ? "پروازهای ثبت‌شده" : "درخواست‌های پرواز آوینا"}</h2>
+    <section className="min-w-0 rounded-2xl border border-border bg-surface p-4" aria-label={cart ? "پروازهای ثبت‌شده" : "درخواست‌های پرواز"}>
+      <h2 className="font-bold text-brand">{cart ? "پروازهای ثبت‌شده" : "درخواست‌های پرواز"}</h2>
       {problem ? <p className="mt-2 text-sm text-muted">دریافت درخواست‌ها انجام نشد.</p> : null}
       {!problem && !orders ? <p className="mt-2 text-sm text-muted">در حال دریافت درخواست‌ها…</p> : null}
       {orders?.length === 0 && !pending ? <p className="mt-2 text-sm text-muted">هنوز درخواست پروازی برای این حساب ثبت نشده است.</p> : null}
-      {visibleOrders?.length ? <ul className="mt-2 min-w-0 overflow-x-auto divide-y divide-border">
+      {visibleOrders?.length ? <ul className={cart ? "mt-2 min-w-0 overflow-x-auto divide-y divide-border" : "mt-3 grid min-w-0 gap-4"}>
         {visibleOrders.map((order) => (
-          <li key={order.id} className={cart ? "flex min-w-max items-center justify-between gap-3 whitespace-nowrap py-3 text-sm" : "flex flex-wrap items-center justify-between gap-2 py-3 text-sm"}>
+          <li key={order.id} className={cart ? "flex min-w-max items-center justify-between gap-3 whitespace-nowrap py-3 text-sm" : "flex min-w-0 flex-wrap items-center gap-3 rounded-2xl border border-border bg-white p-4 text-sm"}>
+            {!cart && <AccountFlightLegs orderId={order.id} />}
             <strong>{order.routeLabel || "درخواست پرواز"}</strong>
             {order.contractNumber ? <bdi>شماره قرارداد {order.contractNumber}</bdi> : null}
             <span className="text-muted">{formatPersianDateTime(order.createdAt)}</span>
@@ -79,7 +80,7 @@ export function ErpFlightOrders({
             <Link className="inline-flex min-h-11 items-center rounded-xl bg-brand px-4 font-bold text-white" href={`/payment/waiting/?flight=${encodeURIComponent(order.id)}`}>{!cart && order.state === "draft" && order.contractNumber ? "ادامه خرید و وضعیت پرداخت" : "پیگیری سفارش"}</Link>
             {onSelect && <button type="button" className="min-h-11 rounded-xl bg-brand px-4 font-bold text-white" onClick={() => onSelect(order, !!order.contractNumber && !["تسویه در آوینا تأیید شد", "لغوشده در آوینا"].includes(statuses[order.id]))}>جزئیات</button>}
             {order.state === "draft" && order.contractNumber ? (
-              <button type="button" disabled={statuses[order.id] === "در حال بررسی…"} className={cart ? "inline-flex min-h-11 items-center rounded-xl bg-brand px-4 font-bold text-white hover:bg-brand-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:opacity-60" : "font-bold text-brand underline"} onClick={() => void checkSettlement(order)}>بررسی وضعیت تسویه</button>
+              <button type="button" disabled={statuses[order.id] === "در حال بررسی…"} className="inline-flex min-h-11 items-center rounded-xl bg-brand px-4 font-bold text-white hover:bg-brand-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:opacity-60" onClick={() => void checkSettlement(order)}>بررسی وضعیت تسویه</button>
             ) : null}
             {pending?.key === order.id && order.state !== "draft" && order.state !== "cancelled" && <Link className="font-bold text-brand underline" href="#flight-request-recovery">پیگیری درخواست</Link>}
           </li>
@@ -87,6 +88,32 @@ export function ErpFlightOrders({
       </ul> : null}
     </section>
   );
+}
+
+function AccountFlightLegs({ orderId }: { orderId: string }) {
+  const [legs, setLegs] = useState<FlightTimelineLeg[] | null>(null);
+  useEffect(() => {
+    const controller = new AbortController();
+    async function load() {
+      try {
+        const response = await fetch(`${PUBLIC_API_BASE_URL}/account/erp-flight-checkouts/${encodeURIComponent(orderId)}/details`, {
+          credentials: "include", cache: "no-store", signal: controller.signal,
+        });
+        if (!response.ok) throw new Error("flight details");
+        const details: Details = await response.json();
+        setLegs(details.legs ?? []);
+      } catch {
+        if (!controller.signal.aborted) setLegs([]);
+      }
+    }
+    void load();
+    return () => controller.abort();
+  }, [orderId]);
+  return <div className="grid w-full min-w-0 gap-2">
+    {legs?.map((leg, index) => <FlightTimeline key={index} leg={leg} label={index ? "پرواز برگشت" : "پرواز رفت"} detailed />)}
+    {!legs && <p role="status" className="text-sm text-muted">در حال دریافت مشخصات پرواز…</p>}
+    {legs?.length === 0 && <p className="text-sm text-muted">جزئیات مسیر در دسترس نیست.</p>}
+  </div>;
 }
 
 type Details = {
