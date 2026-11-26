@@ -321,3 +321,45 @@
 .hotelGalleryRight { right: .35rem; }
 .hotelGalleryLeft:focus-visible, .hotelGalleryRight:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 @media (min-width: 1024px) { .hotelListFilters { position: sticky; top: 1rem; max-height: calc(100dvh - 2rem); overflow-y: auto; overscroll-behavior: contain; } }
+
+.dateDisclosure > summary .countryResultMain {
+  border-radius: .84rem .84rem 0 0;
+  background: #193957;
+  color: #fff;
+}
+
+.dateDisclosure > summary .tourInformation :is(h2, strong) { color: #fff; }
+.dateDisclosure > summary .tourInformation :is(p, .price > span, .facts span) { color: #e0eafa; }
+
+.dateDisclosure > summary .tourInformation .facts > div {
+  grid-template-columns: auto minmax(0, 1fr);
+  justify-items: start;
+  align-items: center;
+  gap: .12rem .38rem;
+  padding: .35rem .45rem;
+  background: #ffffff14;
+  text-align: start;
+}
+
+.dateDisclosure > summary .tourInformation .facts > div > svg {
+  grid-row: span 2;
+  width: 1rem;
+  height: 1rem;
+  padding: 0;
+  background: transparent;
+  color: #dce9fb;
+}
+
+.dateDisclosure .dateRanges {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, max(14rem, calc((100% - .96rem) / 3))), 1fr));
+}
+
+.dateDisclosure .dateRange { height: 100%; }
+.dateDisclosure .dateRange:hover,
+.dateDisclosure .dateRange:focus-visible { background: #eaf2fc; }
+
+@media (max-width: 600px) {
+  .dateDisclosure > summary .tourInformation .facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
