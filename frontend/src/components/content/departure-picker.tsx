@@ -12,9 +12,10 @@ type Option = {
   nights?: number | null;
 };
 
-export function DeparturePicker<T extends Option>({ options, selected, onSelect, available, plain = false }: {
+export function DeparturePicker<T extends Option>({ options, selected, onSelect, available, plain = false, sidebar = false }: {
   options: T[];
   plain?: boolean;
+  sidebar?: boolean;
   selected?: T | null;
   onSelect: (id: number) => void;
   available: (item: T) => boolean;
@@ -27,7 +28,7 @@ export function DeparturePicker<T extends Option>({ options, selected, onSelect,
     else groups.set(key(item), [item]);
   }
   return (
-    <div className="mt-3 grid grid-cols-[repeat(auto-fit,minmax(min(100%,13rem),1fr))] gap-3 text-center">
+    <div className={sidebar ? "mt-2 grid max-h-52 gap-2 overflow-y-auto pe-1 text-center" : "mt-3 grid grid-cols-[repeat(auto-fit,minmax(min(100%,13rem),1fr))] gap-3 text-center"}>
       {Array.from(groups).sort(([a], [b]) => a.localeCompare(b)).map(([date, items]) => (
         <fieldset key={date} className={`min-w-0 rounded-2xl border border-border p-2.5 ${plain ? "bg-white" : "bg-surface-muted"}`}>
           <legend className="mx-auto px-2 text-center text-sm font-black text-brand">
@@ -36,7 +37,7 @@ export function DeparturePicker<T extends Option>({ options, selected, onSelect,
           <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,5.5rem),1fr))] gap-2">
             {[...items].sort((a,b) => (a.nights ?? 0) - (b.nights ?? 0)).map(item => (
               <button type="button" key={item.id} disabled={!available(item)} aria-pressed={selected?.id === item.id}
-                className={`grid min-h-16 content-center gap-1 rounded-xl border border-border bg-white px-2 py-2 text-center text-brand enabled:hover:border-brand focus-visible:outline-2 focus-visible:outline-brand aria-pressed:border-brand disabled:opacity-50 ${plain ? "aria-pressed:ring-1 aria-pressed:ring-brand" : "aria-pressed:bg-brand aria-pressed:text-white"}`}
+                className={`grid content-center gap-1 rounded-xl border border-border bg-white px-2 py-2 text-center text-brand enabled:hover:border-brand focus-visible:outline-2 focus-visible:outline-brand aria-pressed:border-brand disabled:opacity-50 ${sidebar ? "min-h-12 text-sm" : "min-h-16"} ${plain ? "aria-pressed:ring-1 aria-pressed:ring-brand" : "aria-pressed:bg-brand aria-pressed:text-white"}`}
                 onClick={() => onSelect(item.id)}>
                 <strong>{item.nights ? item.nights.toLocaleString("fa-IR") + " شب" : item.label}</strong>
                 <span className="text-xs">{Number(item.priceAmount) > 0 && item.priceAmount ? "اقامت از " + formatCurrency(item.priceAmount, item.currency) : "استعلام قیمت"}</span>

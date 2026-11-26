@@ -303,19 +303,16 @@ export function TourHotelFilter({
 
   return (
     <section className="scroll-mt-24 space-y-5" id="tour-booking">
-      <div className="space-y-3">
-        <aside className="rounded-2xl border border-border bg-white p-3 text-center">
-          <h2 className="font-black text-brand">روزهای برگزاری تور</h2>
-          {!selectedDeparture && <p role="status" className="mb-2 text-sm text-muted">برای تاریخ انتخاب‌شده هتل قابل رزروی موجود نیست. یک تاریخ دیگر انتخاب کنید.</p>}
-          <DeparturePicker options={availableDates} selected={selectedDeparture} available={isTourDepartureBookable} onSelect={(id) => {
-            setTourDepartureUrl(id);
-            window.dispatchEvent(new CustomEvent("tour-hotels-duration-selected", { detail: { departureId: id } }));
-          }} />
-        </aside>
-      </div>
-
       <div className="grid gap-5 lg:grid-cols-[16rem_minmax(0,1fr)]">
         <aside aria-label="فیلترهای هتل" className="h-fit min-w-0 rounded-[1.75rem] border border-[#ffd1e3] bg-gradient-to-b from-white to-[#fff6fa] p-3 shadow-[0_16px_40px_rgba(241,43,117,.09)] lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:overscroll-contain">
+          <section aria-labelledby="tour-departure-filter" className="mb-3 rounded-xl border border-border bg-white p-2.5">
+            <h2 id="tour-departure-filter" className="text-sm font-black text-brand">روزهای برگزاری تور</h2>
+            {!selectedDeparture && <p role="status" className="mb-2 text-sm text-muted">برای تاریخ انتخاب‌شده هتل قابل رزروی موجود نیست. یک تاریخ دیگر انتخاب کنید.</p>}
+            <DeparturePicker sidebar options={availableDates} selected={selectedDeparture} available={isTourDepartureBookable} onSelect={(id) => {
+              setTourDepartureUrl(id);
+              window.dispatchEvent(new CustomEvent("tour-hotels-duration-selected", { detail: { departureId: id } }));
+            }} />
+          </section>
           <div className="flex items-center justify-between border-b border-[#ffd7e6] pb-2.5"><h2 className="flex items-center gap-1.5 text-[.78rem] font-black text-brand"><span className="grid size-6 place-items-center rounded-xl bg-[#ffe3ee] text-[#f12b75]">☷</span>فیلترها</h2><button className="rounded-lg bg-[#fff0f6] px-2 py-1 text-xs font-bold text-[#e6236c]" onClick={() => { setHotelId("all"); setRegionFilter("all"); setStars("all"); setAvailableOnly(false); setInstallmentOnly(false); setQuery(""); setMinimumTotal(""); setMaximumTotal(""); }} type="button">پاک کردن</button></div>
           <label className="mt-3 grid min-w-0 gap-1.5 text-[.7rem] font-bold text-brand">جستجوی نام هتل<span className="relative block min-w-0"><SearchIcon className="pointer-events-none absolute end-3 top-1/2 size-4 -translate-y-1/2 text-[#e6236c]" /><input aria-label="جستجوی نام هتل در تور" autoComplete="off" className="box-border min-h-9 w-full min-w-0 rounded-xl border border-[#ffc7dc] bg-white px-3 ps-10 text-[.7rem] font-bold text-brand outline-none transition placeholder:text-muted focus:border-[#f12b75] focus:ring-4 focus:ring-[#ffdbe9]" dir="auto" onChange={(event) => setQuery(event.target.value)} placeholder="نام هتل را وارد کنید" type="search" value={query} />{query ? <button aria-label="پاک کردن جستجوی هتل" className="absolute start-2 top-1/2 grid size-7 -translate-y-1/2 place-items-center rounded-lg text-muted transition hover:bg-[#fff0f6] hover:text-[#e6236c]" onClick={() => setQuery("")} type="button"><CloseIcon className="size-4" /></button> : null}</span></label>
           <div className="mt-3 grid gap-1.5 text-[.7rem] font-bold text-brand"><span>هتل</span><SiteSelect className="min-h-9! text-[.7rem]!" ariaLabel="هتل" id="tour-hotel-filter" onValueChange={(nextValue) => setHotelId(nextValue === "all" ? "all" : Number(nextValue))} options={[{ label: "همه هتل‌ها", value: "all" }, ...hotels.map((hotel) => ({ label: hotel.name, value: String(hotel.id) }))]} searchable value={String(hotelId)} /></div>
