@@ -8,7 +8,7 @@ import { PUBLIC_API_BASE_URL } from "@/lib/api/client";
 type Item = { itemType: string; titleSnapshot: string };
 type Booking = { id: number; bookingNumber: string; items: Item[]; status: string };
 const ticketTypes = new Set(["flight", "train", "bus"]);
-const action = "inline-flex min-h-11 items-center rounded-xl bg-brand px-4 font-bold text-white";
+const action = "inline-flex min-h-10 items-center rounded-lg border border-border px-3 text-sm font-bold text-brand hover:bg-surface-muted";
 
 export function AccountTickets({ cartItems }: { cartItems: Item[] }) {
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -33,10 +33,10 @@ export function AccountTickets({ cartItems }: { cartItems: Item[] }) {
   }, []);
   const drafts = cartItems.filter(item => ticketTypes.has(item.itemType));
   return <section className="grid min-w-0 gap-4 text-brand">
-    <h2 className="text-xl font-black">بلیط‌های من</h2>
+    <h1 className="border-b border-border pb-2 text-lg font-black sm:text-xl">بلیط‌های من</h1>
     <ErpFlightOrders />
     {state === "error" && <p role="alert">دریافت رزروها انجام نشد. صفحه را دوباره باز کنید.</p>}
-    {(drafts.length > 0 || bookings.length > 0) && <section className="grid gap-3 rounded-2xl border border-border bg-white p-4">
+    {(drafts.length > 0 || bookings.length > 0) && <section className="grid gap-2 rounded-xl border border-border bg-surface p-3 text-sm">
       <h3 className="font-bold">رزروهای بلیط</h3>
       {drafts.length > 0 && <div className="grid justify-items-start gap-2">
         <strong>بلیط‌های در حال خرید</strong><p>{drafts.map(item => item.titleSnapshot).join("، ")}</p>

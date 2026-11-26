@@ -384,8 +384,31 @@ export function AccountDashboard() {
   }
 
   return (
-    <div className="mx-auto grid max-w-7xl gap-5 lg:grid-cols-[230px_minmax(0,1fr)]" dir="rtl">
-      <aside className="h-fit rounded-2xl border border-border bg-white p-2 shadow-sm lg:sticky lg:top-24"><div className="border-b border-border px-3 py-4"><p className="font-black text-brand">پنل کاربری</p><p className="mt-1 truncate text-xs text-muted" dir="ltr">{dashboard.user.email}</p></div><nav className="mt-2" aria-label="بخش‌های پنل کاربری">{navItems.map((item) => <Link aria-current={active === item.id ? "page" : undefined} href={`/account/?tab=${item.id}`} scroll={false} className={`flex min-h-11 w-full items-center justify-between rounded-xl px-3 text-right text-sm font-bold transition ${active === item.id ? "bg-brand text-white" : "text-brand hover:bg-surface-muted"}`} key={item.id}><span>{item.label}</span><span aria-hidden>{item.icon}</span></Link>)}</nav><button className="mt-2 flex min-h-11 w-full items-center justify-between rounded-xl border border-red-200 px-3 text-sm font-bold text-red-700" onClick={() => void logout()} type="button"><span>خروج از حساب کاربری</span><span aria-hidden>↩</span></button></aside>
+    <div className="mx-auto grid max-w-[1160px] items-start gap-4 lg:grid-cols-[12.5rem_minmax(0,1fr)]" dir="rtl">
+      <aside className="min-w-0 rounded-xl border border-border bg-surface p-2 lg:sticky lg:top-24">
+        <div className="border-b border-border px-2.5 py-2">
+          <p className="text-sm font-bold text-brand">پنل کاربری</p>
+          <p className="mt-0.5 truncate text-xs text-muted" dir="auto">{dashboard.user.fullName}</p>
+        </div>
+        <nav className="mt-2 grid grid-cols-2 gap-0.5 lg:grid-cols-1" aria-label="بخش‌های پنل کاربری">
+          {navItems.map(item => (
+            <Link
+              aria-current={active === item.id ? "page" : undefined}
+              className={`flex min-h-10 min-w-0 items-center gap-2 rounded-lg px-2 py-1.5 text-xs transition sm:text-sm ${active === item.id ? "bg-brand-soft font-bold text-brand" : "text-muted hover:bg-surface-muted hover:text-brand"}`}
+              href={`/account/?tab=${item.id}`}
+              key={item.id}
+              scroll={false}
+            >
+              <span className="w-4 shrink-0 text-center" aria-hidden>{item.icon}</span>
+              <span>{item.label}</span>
+            </Link>
+          ))}
+        </nav>
+        <button className="mt-2 flex min-h-10 w-full items-center gap-2 rounded-lg border-t border-border px-2 text-sm text-red-700 hover:bg-red-50" onClick={() => void logout()} type="button">
+          <span aria-hidden className="w-4 text-center">↩</span>
+          خروج از حساب کاربری
+        </button>
+      </aside>
       <main className="min-w-0 space-y-5">
         {notice ? <p role="status" aria-live="polite" aria-atomic="true" className="rounded-xl bg-brand/10 px-4 py-3 text-sm font-bold text-brand">{notice}</p> : null}
         {active === "profile" ? (

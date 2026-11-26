@@ -63,26 +63,30 @@ export function ErpFlightOrders({
   if (cart && !problem && visibleOrders?.length === 0) return empty ?? null;
 
   return (
-    <section className="min-w-0 rounded-2xl border border-border bg-surface p-4" aria-label={cart ? "پروازهای ثبت‌شده" : "درخواست‌های پرواز"}>
+    <section className={cart ? "min-w-0 rounded-2xl border border-border bg-surface p-4" : "min-w-0"} aria-label={cart ? "پروازهای ثبت‌شده" : "درخواست‌های پرواز"}>
       <h2 className="font-bold text-brand">{cart ? "پروازهای ثبت‌شده" : "درخواست‌های پرواز"}</h2>
       {problem ? <p className="mt-2 text-sm text-muted">دریافت درخواست‌ها انجام نشد.</p> : null}
       {!problem && !orders ? <p className="mt-2 text-sm text-muted">در حال دریافت درخواست‌ها…</p> : null}
       {orders?.length === 0 && !pending ? <p className="mt-2 text-sm text-muted">هنوز درخواست پروازی برای این حساب ثبت نشده است.</p> : null}
-      {visibleOrders?.length ? <ul className={cart ? "mt-2 min-w-0 overflow-x-auto divide-y divide-border" : "mt-3 grid min-w-0 gap-4"}>
+      {visibleOrders?.length ? <ul className={cart ? "mt-2 min-w-0 overflow-x-auto divide-y divide-border" : "mt-2 grid min-w-0 gap-3"}>
         {visibleOrders.map((order) => (
-          <li key={order.id} className={cart ? "flex min-w-max items-center justify-between gap-3 whitespace-nowrap py-3 text-sm" : "flex min-w-0 flex-wrap items-center gap-3 rounded-2xl border border-border bg-white p-4 text-sm"}>
+          <li key={order.id} className={cart ? "flex min-w-max items-center justify-between gap-3 whitespace-nowrap py-3 text-sm" : "grid min-w-0 gap-2.5 rounded-xl border border-border bg-surface p-3 text-sm"}>
+            <div className={cart ? "contents" : "flex flex-wrap items-center gap-x-3 gap-y-1"}>
+              <strong className="text-brand">{order.routeLabel || "درخواست پرواز"}</strong>
+              {order.contractNumber ? <bdi>شماره قرارداد {order.contractNumber}</bdi> : null}
+              <span className="text-muted">{formatPersianDateTime(order.createdAt)}</span>
+              {!order.contractNumber && <small className="w-full break-all text-muted">شناسهٔ پیگیری <bdi>{order.id}</bdi></small>}
+              <span aria-live="polite" className={cart ? undefined : "rounded-full bg-brand-soft px-2 py-0.5 text-xs font-bold text-brand"}>{statuses[order.id] || (order.state === "cancelled" ? "لغوشده در آوینا" : order.state === "draft" ? "درخواست ثبت شده" : order.state === "failed" ? "ثبت انجام نشد" : "در حال ثبت")}</span>
+            </div>
             {!cart && <AccountFlightLegs orderId={order.id} />}
-            <strong>{order.routeLabel || "درخواست پرواز"}</strong>
-            {order.contractNumber ? <bdi>شماره قرارداد {order.contractNumber}</bdi> : null}
-            <span className="text-muted">{formatPersianDateTime(order.createdAt)}</span>
-            {!order.contractNumber && <small className="w-full break-all text-muted">شناسهٔ پیگیری <bdi>{order.id}</bdi></small>}
-            <span aria-live="polite">{statuses[order.id] || (order.state === "cancelled" ? "لغوشده در آوینا" : order.state === "draft" ? "درخواست ثبت شده" : order.state === "failed" ? "ثبت انجام نشد" : "در حال ثبت")}</span>
-            <Link className="inline-flex min-h-11 items-center rounded-xl bg-brand px-4 font-bold text-white" href={`/payment/waiting/?flight=${encodeURIComponent(order.id)}`}>{!cart && order.state === "draft" && order.contractNumber ? "ادامه خرید و وضعیت پرداخت" : "پیگیری سفارش"}</Link>
-            {onSelect && <button type="button" className="min-h-11 rounded-xl bg-brand px-4 font-bold text-white" onClick={() => onSelect(order, !!order.contractNumber && !["تسویه در آوینا تأیید شد", "لغوشده در آوینا"].includes(statuses[order.id]))}>جزئیات</button>}
-            {order.state === "draft" && order.contractNumber ? (
-              <button type="button" disabled={statuses[order.id] === "در حال بررسی…"} className="inline-flex min-h-11 items-center rounded-xl bg-brand px-4 font-bold text-white hover:bg-brand-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:opacity-60" onClick={() => void checkSettlement(order)}>بررسی وضعیت تسویه</button>
-            ) : null}
-            {pending?.key === order.id && order.state !== "draft" && order.state !== "cancelled" && <Link className="font-bold text-brand underline" href="#flight-request-recovery">پیگیری درخواست</Link>}
+            <div className={cart ? "contents" : "flex flex-wrap items-center gap-2 border-t border-border pt-2"}>
+              <Link className={cart ? "inline-flex min-h-11 items-center rounded-xl bg-brand px-4 font-bold text-white" : "inline-flex min-h-10 items-center rounded-lg bg-brand px-3 text-xs font-bold text-white sm:text-sm"} href={`/payment/waiting/?flight=${encodeURIComponent(order.id)}`}>{!cart && order.state === "draft" && order.contractNumber ? "ادامه خرید و وضعیت پرداخت" : "پیگیری سفارش"}</Link>
+              {onSelect && <button type="button" className="min-h-11 rounded-xl bg-brand px-4 font-bold text-white" onClick={() => onSelect(order, !!order.contractNumber && !["تسویه در آوینا تأیید شد", "لغوشده در آوینا"].includes(statuses[order.id]))}>جزئیات</button>}
+              {order.state === "draft" && order.contractNumber ? (
+                <button type="button" disabled={statuses[order.id] === "در حال بررسی…"} className={cart ? "min-h-11 rounded-xl bg-brand px-4 font-bold text-white disabled:opacity-60" : "min-h-10 rounded-lg border border-border px-3 text-xs font-bold text-brand hover:bg-surface-muted disabled:opacity-60 sm:text-sm"} onClick={() => void checkSettlement(order)}>بررسی وضعیت تسویه</button>
+              ) : null}
+              {pending?.key === order.id && order.state !== "draft" && order.state !== "cancelled" && <Link className="font-bold text-brand underline" href="#flight-request-recovery">پیگیری درخواست</Link>}
+            </div>
           </li>
         ))}
       </ul> : null}
@@ -109,8 +113,8 @@ function AccountFlightLegs({ orderId }: { orderId: string }) {
     void load();
     return () => controller.abort();
   }, [orderId]);
-  return <div className="grid w-full min-w-0 gap-2">
-    {legs?.map((leg, index) => <FlightTimeline key={index} leg={leg} label={index ? "پرواز برگشت" : "پرواز رفت"} detailed />)}
+  return <div className={legs?.length === 2 ? "grid min-w-0 gap-3 sm:grid-cols-2" : "grid min-w-0 gap-2"}>
+    {legs?.map((leg, index) => <FlightTimeline compact key={index} leg={leg} label={index ? "پرواز برگشت" : "پرواز رفت"} detailed />)}
     {!legs && <p role="status" className="text-sm text-muted">در حال دریافت مشخصات پرواز…</p>}
     {legs?.length === 0 && <p className="text-sm text-muted">جزئیات مسیر در دسترس نیست.</p>}
   </div>;
