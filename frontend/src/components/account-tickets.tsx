@@ -35,11 +35,9 @@ export function AccountTickets({ cartItems }: { cartItems: Item[] }) {
   return <section className="grid min-w-0 gap-4 text-brand">
     <h2 className="text-xl font-black">بلیط‌های من</h2>
     <ErpFlightOrders />
-    <section className="grid gap-3 rounded-2xl border border-border bg-white p-4">
+    {state === "error" && <p role="alert">دریافت رزروها انجام نشد. صفحه را دوباره باز کنید.</p>}
+    {(drafts.length > 0 || bookings.length > 0) && <section className="grid gap-3 rounded-2xl border border-border bg-white p-4">
       <h3 className="font-bold">رزروهای بلیط</h3>
-      {state === "loading" && <p role="status">در حال دریافت رزروها…</p>}
-      {state === "error" && <p role="alert">دریافت رزروها انجام نشد. صفحه را دوباره باز کنید.</p>}
-      {state === "ready" && !bookings.length && !drafts.length && <p>رزرو دیگری ثبت نشده است.</p>}
       {drafts.length > 0 && <div className="grid justify-items-start gap-2">
         <strong>بلیط‌های در حال خرید</strong><p>{drafts.map(item => item.titleSnapshot).join("، ")}</p>
         <Link className={action} href="/account/?tab=tickets&checkout=1">ادامه خرید بلیط</Link>
@@ -48,6 +46,6 @@ export function AccountTickets({ cartItems }: { cartItems: Item[] }) {
         <div><strong>{row.items.map(item => item.titleSnapshot).join("، ")}</strong><p>شماره رزرو <bdi>{row.bookingNumber}</bdi></p></div>
         <Link className={action} href={`/payment/waiting/?booking=${row.id}`}>{row.status === "approved" ? "ادامه پرداخت" : "مشاهده بلیط و وضعیت سفارش"}</Link>
       </article>)}
-    </section>
+    </section>}
   </section>;
 }
