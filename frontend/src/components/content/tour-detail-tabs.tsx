@@ -6,7 +6,7 @@ export type TourSection = "overview" | "dates" | "hotels" | "documents";
 
 const items: Array<{ id: TourSection; label: string; hash: string }> = [
   { id: "overview", label: "معرفی تور", hash: "tour-overview" },
-  { id: "dates", label: "تاریخ برگزاری و پروازها", hash: "tour-dates" },
+  { id: "dates", label: "اطلاعات پرواز", hash: "tour-dates" },
   { id: "hotels", label: "هتل‌ها و قیمت‌ها", hash: "tour-booking" },
   { id: "documents", label: "مدارک و قوانین", hash: "tour-documents" },
 ];

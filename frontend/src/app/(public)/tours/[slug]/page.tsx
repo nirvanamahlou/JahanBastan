@@ -484,12 +484,8 @@ export default async function TourPage({ params, searchParams }: Props) {
               id: departure.id,
               label: departure.label,
               departureDate: departure.departureDate,
-              nights: departure.nights,
               bookingStatus: departure.bookingStatus,
               capacityRemaining: departure.capacityRemaining,
-              priceAmount: departure.priceAmount,
-              currency: departure.currency,
-              canBook: hasBookableTourPackage(departure, item.combinedPackages),
               flightDetails: hasDepartureFlightDetails(departure) ? <TourFlightTickets departures={[departure]} item={item} /> : null,
             }))} />
           </div>
