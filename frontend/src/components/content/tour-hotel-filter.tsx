@@ -13,7 +13,6 @@ import { hotelMapSearchUrl } from "@/components/content/hotel-location-map";
 import { SiteSelect } from "@/components/ui/site-select";
 import { CombinedTourCheckout } from "@/components/checkout/combined-tour-checkout";
 import { useOnlineSalesEnabled } from "@/components/online-sales-provider";
-import { CloseIcon, SearchIcon } from "@/components/layout/site-icons";
 import { PUBLIC_API_BASE_URL } from "@/lib/api/client";
 import { formatCurrency } from "@/lib/currency";
 import { TourPriceBreakdown } from "./tour-price-breakdown";
@@ -124,15 +123,6 @@ function roomQuantityLimit(selection: RoomSelection, key: keyof RoomSelection, c
   return capacity === null ? 20 : Math.min(20, capacity - roomCount + selection[key]);
 }
 
-function normalizeHotelQuery(value: string) {
-  return value
-    .trim()
-    .toLocaleLowerCase("fa-IR")
-    .replace(/[يى]/g, "ی")
-    .replace(/ك/g, "ک")
-    .replace(/\s+/g, " ");
-}
-
 function formatPriceRangeLabel(value: number) {
   if (value >= 1_000_000) {
     return `${(value / 1_000_000).toLocaleString("fa-IR", { maximumFractionDigits: 1 })} میلیون تومان`;
@@ -168,12 +158,10 @@ export function TourHotelFilter({
     [departures],
   );
   const [departureId, setDepartureId] = useState<number | null>(initialDepartureId ?? null);
-  const [hotelId, setHotelId] = useState<number | "all">("all");
   const [regionFilter, setRegionFilter] = useState("all");
   const [stars, setStars] = useState<number | "all">("all");
   const [availableOnly, setAvailableOnly] = useState(false);
   const [installmentOnly, setInstallmentOnly] = useState(false);
-  const [query, setQuery] = useState("");
   const [minimumTotal, setMinimumTotal] = useState("");
   const [maximumTotal, setMaximumTotal] = useState("");
   const [visibleOfferCount, setVisibleOfferCount] = useState(INITIAL_VISIBLE_OFFERS);
@@ -192,7 +180,6 @@ export function TourHotelFilter({
       const departureIdFromEvent = (event as CustomEvent<{ departureId?: number }>).detail?.departureId;
       if (!departureIdFromEvent) return;
       setDepartureId(departureIdFromEvent);
-      setHotelId("all");
       setRegionFilter("all");
     };
     window.addEventListener("tour-departure-selected", selectDeparture);
@@ -228,20 +215,11 @@ export function TourHotelFilter({
     [availableDates, exchangeRates],
   );
   const offers = useMemo(() => {
-    const normalizedQuery = normalizeHotelQuery(query);
     return packageOffers.filter((offer) => {
       const matchesDeparture = offer.departure.id === activeDepartureId;
-      const matchesHotel = hotelId === "all" || offer.hotel.id === hotelId;
       const hotelRegion = offer.hotel.region?.trim() || null;
       const matchesRegion = regionFilter === "all" || hotelRegion === regionFilter;
       const matchesStars = stars === "all" || offer.hotel.starRating === stars;
-      const matchesQuery =
-        !normalizedQuery ||
-        [offer.hotel.name, offer.hotel.region, offer.roomType, offer.serviceType]
-          .filter(Boolean)
-          .some((value) =>
-            normalizeHotelQuery(value!).includes(normalizedQuery),
-          );
       const total = hotelOfferTotalToToman(offer, exchangeRates);
       const minimum = Number(minimumTotal) || 0;
       const maximum = Number(maximumTotal) || Number.POSITIVE_INFINITY;
@@ -251,16 +229,11 @@ export function TourHotelFilter({
       ) && offer.isAvailable && (offer.capacityRemaining === null || offer.capacityRemaining > 0);
       const matchesAvailability = !availableOnly || hasAvailableRoom;
       const matchesInstallment = !installmentOnly || isInstallmentAvailable;
-      return matchesDeparture && matchesHotel && matchesRegion && matchesStars && matchesQuery && matchesPrice && matchesAvailability && matchesInstallment;
+      return matchesDeparture && matchesRegion && matchesStars && matchesPrice && matchesAvailability && matchesInstallment;
     });
-  }, [availableOnly, activeDepartureId, exchangeRates, hotelId, installmentOnly, isInstallmentAvailable, maximumTotal, minimumTotal, packageOffers, query, regionFilter, stars]);
+  }, [availableOnly, activeDepartureId, exchangeRates, installmentOnly, isInstallmentAvailable, maximumTotal, minimumTotal, packageOffers, regionFilter, stars]);
   const visibleOffers = offers.slice(0, visibleOfferCount);
 
-  const hotels = useMemo(() => {
-    const map = new Map<number, Hotel>();
-    packageOffers.forEach((offer) => map.set(offer.hotel.id, offer.hotel));
-    return [...map.values()];
-  }, [packageOffers]);
   const regions = useMemo(
     () =>
       [...new Set(
@@ -313,9 +286,7 @@ export function TourHotelFilter({
               window.dispatchEvent(new CustomEvent("tour-hotels-duration-selected", { detail: { departureId: id } }));
             }} />
           </section>
-          <div className="flex items-center justify-between border-b border-border pb-2.5"><h2 className="flex items-center gap-1.5 text-[.78rem] font-black text-brand">فیلترها</h2><button className="rounded-lg bg-surface-muted px-2 py-1 text-xs font-bold text-brand" onClick={() => { setHotelId("all"); setRegionFilter("all"); setStars("all"); setAvailableOnly(false); setInstallmentOnly(false); setQuery(""); setMinimumTotal(""); setMaximumTotal(""); }} type="button">پاک کردن</button></div>
-          <label className="mt-3 grid min-w-0 gap-1.5 text-sm font-bold text-brand">جستجوی نام هتل<span className="relative block min-w-0"><SearchIcon className="pointer-events-none absolute end-3 top-1/2 size-4 -translate-y-1/2 text-brand" /><input aria-label="جستجوی نام هتل در تور" autoComplete="off" className="box-border min-h-9 w-full min-w-0 rounded-xl border border-border bg-white px-3 ps-10 text-sm font-bold text-brand outline-none transition placeholder:text-muted focus:border-brand focus:ring-4 focus:ring-brand/10" dir="auto" onChange={(event) => setQuery(event.target.value)} placeholder="نام هتل را وارد کنید" type="search" value={query} />{query ? <button aria-label="پاک کردن جستجوی هتل" className="absolute start-2 top-1/2 grid size-7 -translate-y-1/2 place-items-center rounded-lg text-muted transition hover:bg-surface-muted hover:text-brand" onClick={() => setQuery("")} type="button"><CloseIcon className="size-4" /></button> : null}</span></label>
-          <div className="mt-3 grid gap-1.5 text-sm font-bold text-brand"><span>هتل</span><SiteSelect className="min-h-9! text-[.7rem]!" ariaLabel="هتل" id="tour-hotel-filter" onValueChange={(nextValue) => setHotelId(nextValue === "all" ? "all" : Number(nextValue))} options={[{ label: "همه هتل‌ها", value: "all" }, ...hotels.map((hotel) => ({ label: hotel.name, value: String(hotel.id) }))]} searchable value={String(hotelId)} /></div>
+          <div className="flex items-center justify-between border-b border-border pb-2.5"><h2 className="flex items-center gap-1.5 text-[.78rem] font-black text-brand">فیلترها</h2><button className="rounded-lg bg-surface-muted px-2 py-1 text-xs font-bold text-brand" onClick={() => { setRegionFilter("all"); setStars("all"); setAvailableOnly(false); setInstallmentOnly(false); setMinimumTotal(""); setMaximumTotal(""); }} type="button">پاک کردن</button></div>
           <div className="mt-3 grid gap-1.5 text-sm font-bold text-brand"><span>منطقه هتل</span><SiteSelect className="min-h-9! text-[.7rem]!" ariaLabel="منطقه هتل" id="tour-region-filter" onValueChange={setRegionFilter} options={[{ label: "همه مناطق", value: "all" }, ...regions.map((region) => ({ label: region, value: region }))]} value={regionFilter} /></div>
           <fieldset className="mt-3.5 border-t border-border pt-2.5">
             <legend className="text-[.7rem] font-black text-brand">بازه قیمت نهایی (تومان)</legend>
