@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 export type TourSection = "overview" | "dates" | "hotels" | "documents";
 
@@ -27,6 +27,7 @@ export function TourDetailTabs({ sections }: { sections: TourSection[] }) {
   const defaultSection = sections.includes("hotels")
     ? "hotels"
     : (visibleItems[0]?.id ?? "overview");
+  const tabsRef = useRef<HTMLElement>(null);
   const [active, setActive] = useState<TourSection>(defaultSection);
   const [showHotelsUnderDates, setShowHotelsUnderDates] = useState(false);
 
@@ -47,6 +48,14 @@ export function TourDetailTabs({ sections }: { sections: TourSection[] }) {
     };
   }, [defaultSection, sections, visibleItems]);
 
+  useEffect(() => {
+    if (defaultSection !== "hotels" || window.location.hash) return;
+    const frame = window.requestAnimationFrame(() => {
+      tabsRef.current?.scrollIntoView({ block: "start", behavior: "instant" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [defaultSection]);
+
   function select(section: TourSection, hash: string) {
     setActive(section);
     window.history.replaceState(null, "", `#${hash}`);
@@ -54,7 +63,7 @@ export function TourDetailTabs({ sections }: { sections: TourSection[] }) {
 
   return (
     <>
-      <nav data-inline-tour-hotels={active === "dates" && showHotelsUnderDates ? "true" : undefined} aria-label="بخش‌های تور" className="mt-6 flex gap-2 overflow-x-auto rounded-2xl border border-border bg-white p-2 shadow-sm" role="tablist">
+      <nav ref={tabsRef} data-inline-tour-hotels={active === "dates" && showHotelsUnderDates ? "true" : undefined} aria-label="بخش‌های تور" className="mt-6 flex scroll-mt-24 gap-2 overflow-x-auto rounded-2xl border border-border bg-white p-2 shadow-sm" role="tablist">
         {visibleItems.map((item) => (
           <button
             aria-controls={item.hash}
