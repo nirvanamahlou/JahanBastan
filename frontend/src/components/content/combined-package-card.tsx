@@ -35,13 +35,13 @@ function CombinedPackagePrice({
   children?: ReactNode;
 }) {
   return (
-    <div className="flex min-w-0 flex-col rounded-lg border border-border bg-white p-1.5 text-center">
+    <div className="flex min-w-0 flex-col rounded-xl border border-border bg-white p-1.5 text-center">
       <p className="text-xs text-muted">{label}</p>
-      <strong className="mb-1 mt-0.5 block text-sm text-brand">
+      <strong className="mb-1 mt-0.5 block text-xs leading-snug text-brand">
         {formatCurrency(price, currency)}
       </strong>
       {addFlight && flightPrice !== null && Number(flightPrice) > 0 ? (
-        <span className="mb-1 block text-sm font-bold text-brand">
+        <span className="mb-1 block text-xs font-bold leading-snug text-brand">
           + {supplement ? "" : "پرواز "}{formatCurrency(flightPrice, flightCurrency)}
         </span>
       ) : null}
