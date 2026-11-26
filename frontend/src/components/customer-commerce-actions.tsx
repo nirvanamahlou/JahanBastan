@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { PUBLIC_API_BASE_URL } from "@/lib/api/client";
 import { addGuestCartIntent, notifyCartUpdated, type GuestCartPayload } from "@/lib/guest-cart";
@@ -25,11 +25,6 @@ type CartAddButtonProps = {
   className?: string;
   buttonClassName?: string;
 };
-
-function signInUrl(nextPath?: string) {
-  const next = nextPath ?? window.location.pathname + window.location.search;
-  return "/account/?next=" + encodeURIComponent(next);
-}
 
 function saveForGuest(payload: GuestCartPayload, router: ReturnType<typeof useRouter>) {
   addGuestCartIntent(payload, document.title || "انتخاب سفر");
@@ -181,49 +176,5 @@ export function FlightCartAddButton({
       {state === "added" ? <CartFinalizationNotice href="/account/?tab=tickets&checkout=1" /> : null}
       {state === "error" ? <p className="text-xs text-red-700">افزودن هر دو بلیط ناموفق بود. دوباره تلاش کنید.</p> : null}
     </div>
-  );
-}
-
-export function SaveTourButton({ tourId, className = "" }: { tourId: number; className?: string }) {
-  const [saved, setSaved] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
-
-  useEffect(() => {
-    let active = true;
-    fetch(PUBLIC_API_BASE_URL + "/account/saved-tours", { credentials: "include" })
-      .then((response) => response.ok ? response.json() : [])
-      .then((items: { tourId: number }[]) => {
-        if (active) setSaved(items.some((item) => item.tourId === tourId));
-      })
-      .catch(() => undefined);
-    return () => { active = false; };
-  }, [tourId]);
-
-  async function toggle() {
-    setLoading(true);
-    const response = await fetch(PUBLIC_API_BASE_URL + "/account/saved-tours/" + tourId, {
-      method: saved ? "DELETE" : "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-    }).catch(() => null);
-    if (response?.status === 401) {
-      router.push(signInUrl());
-      return;
-    }
-    if (response?.ok) setSaved((value) => !value);
-    setLoading(false);
-  }
-
-  return (
-    <button
-      aria-pressed={saved}
-      className={"min-h-11 rounded-xl border border-white/40 bg-white/90 px-3 py-2 text-sm font-bold text-brand shadow-sm transition hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:opacity-60 " + className}
-      disabled={loading}
-      onClick={() => void toggle()}
-      type="button"
-    >
-      {saved ? "♥ ذخیره‌شده" : "♡ علاقه‌مندی"}
-    </button>
   );
 }

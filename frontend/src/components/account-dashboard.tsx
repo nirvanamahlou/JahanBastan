@@ -56,7 +56,6 @@ type Agency = {
   reviewNote: string | null;
 };
 type CartItem = { itemType: string; id: number; titleSnapshot: string; priceAmount: string | null; currency: string | null };
-type SavedTour = { id: number; tourId: number; title: string; slug: string; priceAmount: string | null; currency: string | null };
 type OrderServiceItem = { title: string; details: string | null };
 type Order = {
   id: number;
@@ -77,15 +76,14 @@ type SupportMessage = { id: number; senderType: "customer" | "bot" | "admin"; bo
 type SupportRequest = { id: number; subject: string; message: string; status: string; createdAt: string; messages: SupportMessage[] };
 type AvailabilityAlert = { id: number; serviceType: string; origin: string; destination: string; departureDate: string; isActive: boolean };
 type Insurance = { id: number; provider: string; policyNumber: string; coverageTitle: string; coverageAmount: string | null; currency: string; startDate: string; endDate: string; status: "active" | "pending" | "expired" | "cancelled"; createdAt: string };
-type Dashboard = { user: Account; wallet: Wallet; agency: Agency | null; cartItems: CartItem[]; savedTours: SavedTour[]; recentOrders: Order[] };
-type Section = "tickets" | "profile" | "trips" | "passengers" | "insurance" | "favorites" | "visa" | "support" | "alerts" | "wallet";
+type Dashboard = { user: Account; wallet: Wallet; agency: Agency | null; cartItems: CartItem[]; recentOrders: Order[] };
+type Section = "tickets" | "profile" | "trips" | "passengers" | "insurance" | "visa" | "support" | "alerts" | "wallet";
 
 const navItems: Array<{ id: Section; label: string; icon: string }> = [
   { id: "profile", label: "حساب کاربری", icon: "◉" },
   { id: "tickets", label: "بلیط‌های من", icon: "✈" },
   { id: "trips", label: "سفرهای من", icon: "◫" },
   { id: "passengers", label: "لیست مسافران", icon: "♙" },
-  { id: "favorites", label: "علاقه‌مندی‌ها", icon: "♡" },
   { id: "visa", label: "درخواست ویزا", icon: "▣" },
   { id: "support", label: "درخواست پشتیبانی", icon: "◔" },
   { id: "wallet", label: "موجودی و اعتبار من", icon: "¤" },
@@ -355,11 +353,6 @@ export function AccountDashboard() {
     if (response?.ok) { event.currentTarget.reset(); await loadSection("support"); }
   }
 
-  async function removeSavedTour(tourId: number) {
-    const response = await request(`/account/saved-tours/${tourId}`, { method: "DELETE" });
-    if (response?.ok) await loadDashboard();
-  }
-
   async function removeOrder(order: Order) {
     const label = order.source === "booking" ? "رزرو" : "پرداخت";
     if (!window.confirm(`${label} از فهرست سفرهای شما پنهان شود؟ اطلاعات مالی و پشتیبانی حذف نمی‌شود.`)) return;
@@ -528,7 +521,6 @@ export function AccountDashboard() {
             {insurances.length ? <ul className="grid gap-3 md:grid-cols-2">{insurances.map((insurance) => <li className="rounded-2xl border border-border bg-white p-4" key={insurance.id}><div className="flex items-start justify-between gap-3"><div><span className="rounded-full bg-brand/10 px-2 py-1 text-xs font-black text-brand">{insuranceStatusLabels[insurance.status]}</span><h2 className="mt-3 font-black text-brand">{insurance.provider}</h2><p className="mt-1 text-sm text-muted" dir="ltr">{insurance.policyNumber}</p></div><button className="text-sm font-bold text-red-700" onClick={() => void deleteInsurance(insurance.id)} type="button">حذف</button></div><dl className="mt-4 grid gap-2 text-sm sm:grid-cols-2"><div><dt className="text-muted">پوشش</dt><dd className="font-bold text-brand">{insurance.coverageTitle}</dd></div><div><dt className="text-muted">سقف پوشش</dt><dd className="font-bold text-brand">{insurance.coverageAmount ? formatCurrency(insurance.coverageAmount, insurance.currency) : "ثبت نشده"}</dd></div><div><dt className="text-muted">شروع</dt><dd className="font-bold text-brand">{persianDate(insurance.startDate)}</dd></div><div><dt className="text-muted">پایان</dt><dd className="font-bold text-brand">{persianDate(insurance.endDate)}</dd></div></dl></li>)}</ul> : <EmptyState title="بیمه‌نامه‌ای ثبت نشده است" description="پس از دریافت بیمه سفر، اطلاعات آن را از فرم بالا ثبت کنید." />}
           </section>
         ) : null}
-        {active === "favorites" ? <section><h1 className="text-2xl font-black text-brand">علاقه‌مندی‌ها</h1><p className="mt-1 text-sm text-muted">تورهای ذخیره‌شدهٔ شما.</p>{dashboard.savedTours.length ? <ul className="mt-5 grid gap-3 md:grid-cols-2">{dashboard.savedTours.map((tour) => <li className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-white p-4" key={tour.id}><div><Link className="font-black text-brand" href={`/tours/${tour.slug}/`}>{tour.title}</Link><p className="mt-1 text-sm text-muted">{tour.priceAmount && tour.currency ? formatCurrency(tour.priceAmount, tour.currency) : "استعلام قیمت"}</p></div><button className="text-sm font-bold text-red-700" onClick={() => void removeSavedTour(tour.tourId)} type="button">حذف</button></li>)}</ul> : <div className="mt-5"><EmptyState title="علاقه‌مندی ندارید" description="در صفحه هر تور، آن را به علاقه‌مندی‌ها اضافه کنید." /></div>}</section> : null}
         {active === "visa" ? <VisaApplicationsPanel /> : null}
         {active === "support" ? <section className="space-y-5"><header><h1 className="text-2xl font-black text-brand">درخواست پشتیبانی</h1><p className="mt-1 text-sm text-muted">موضوع و جزئیات درخواست خود را ثبت کنید؛ پاسخ در همین بخش قابل پیگیری است.</p></header><form className="space-y-3 rounded-2xl border border-border bg-white p-5" onSubmit={saveSupportRequest}><InputField label="موضوع" minLength={3} maxLength={160} name="subject" required /><label className="grid gap-1.5 text-sm font-bold text-brand"><FieldLabel label="پیام" required /><textarea className="min-h-28 rounded-xl border border-border p-3 font-normal outline-none focus:border-brand focus:ring-2 focus:ring-brand/15" maxLength={4000} minLength={10} name="message" required /></label><button className="min-h-11 rounded-xl bg-brand px-5 text-sm font-black text-white" type="submit">ثبت درخواست</button></form>{supportRequests.length ? <ul className="space-y-3">{supportRequests.map((item) => <li className="rounded-2xl border border-border bg-white p-4" key={item.id}><div className="flex justify-between gap-3"><h3 className="font-black text-brand">{item.subject}</h3><span className="text-xs font-bold text-muted">{item.status === "open" ? "باز" : item.status === "closed" ? "بسته" : "در حال بررسی"}</span></div><div className="mt-3 space-y-2">{item.messages?.length ? item.messages.map((entry) => <div className={`max-w-[90%] rounded-xl px-3 py-2 text-sm leading-7 ${entry.senderType === "customer" ? "mr-auto bg-brand text-white" : "ml-auto border border-pink-200 bg-pink-50 text-brand"}`} key={entry.id}><strong className="mb-1 block text-[11px]">{entry.senderType === "admin" ? "پشتیبان" : entry.senderType === "bot" ? "پاسخ خودکار" : "شما"}</strong><p className="whitespace-pre-line">{entry.body}</p></div>) : <p className="whitespace-pre-line text-sm leading-7 text-muted">{item.message}</p>}</div></li>)}</ul> : <EmptyState title="درخواست پشتیبانی ندارید" description="برای پیگیری خرید یا دریافت راهنمایی، یک درخواست جدید ثبت کنید." />}</section> : null}
         {active === "alerts" ? <section><h1 className="text-2xl font-black text-brand">اعلان‌ها</h1><p className="mt-1 text-sm text-muted">درخواست‌های اطلاع‌رسانیِ موجودی بلیت شما.</p>{alerts.length ? <ul className="mt-5 space-y-3">{alerts.map((alert) => <li className="rounded-2xl border border-border bg-white p-4" key={alert.id}><strong className="text-brand">{alert.origin} ← {alert.destination}</strong><p className="mt-1 text-sm text-muted">{alert.serviceType} · {persianDate(alert.departureDate)} · {alert.isActive ? "فعال" : "غیرفعال"}</p></li>)}</ul> : <div className="mt-5"><EmptyState title="اعلان فعالی ندارید" description="از صفحه نتایج بلیت، گزینه اطلاع از موجودی را فعال کنید." /></div>}</section> : null}

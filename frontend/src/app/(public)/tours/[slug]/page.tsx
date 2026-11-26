@@ -472,7 +472,7 @@ export default async function TourPage({ params, searchParams }: Props) {
                   <span className="text-white/70">از {item.ratingCount.toLocaleString("fa-IR")} نظر</span>
                 </p>
               ) : null}
-        actions={<TourActions tourId={item.id} showBookingAction={hasHotels} slug={item.slug} title={item.title} />} />
+        actions={<TourActions showBookingAction={hasHotels} slug={item.slug} title={item.title} />} />
 
       <Container className={`-mt-4 relative z-10 pb-14 ${tourStyles.profileContent}`} data-scroll-reveal-skip>
         <TourProfileFacts facts={facts} />
