@@ -549,10 +549,10 @@ const subscribeToHydration = () => () => undefined;
                   </strong>
                 </div>
               ) : null}
-              <div className={`border border-amber-200 bg-amber-50 text-sm text-amber-950 ${inline ? "rounded-xl px-3 py-2 leading-relaxed" : "rounded-2xl p-4 leading-7"}`}>
+              {!inline && <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-7 text-amber-950">
                 {requiresPassport ? "برای این سفر گذرنامهٔ معتبر الزامی است." : "در صورت ثبت گذرنامه، اعتبار آن بررسی می‌شود."}
                 {" "}تاریخ انقضای گذرنامه باید {new Intl.DateTimeFormat("fa-IR-u-ca-persian", { dateStyle: "medium" }).format(new Date(minimumExpiry + "T12:00:00"))} یا بعد از آن باشد.
-              </div>
+              </div>}
               <div className={inline ? "space-y-3" : "space-y-4"}>
                 {passengers.map((passenger, index) => (
                   <article className={`border border-border bg-white ${inline ? "rounded-xl p-3" : "rounded-2xl p-4 sm:p-5"}`} key={index}>

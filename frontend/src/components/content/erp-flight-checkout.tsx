@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Suspense, useEffect, useEffectEvent, useRef, useState } from "react";
 
 import { AccountForm } from "@/components/account-form";
+import { FlightCheckoutSteps } from "@/components/content/flight-checkout-steps";
 import { FlightTimeline, type ErpFlightRate } from "@/components/content/erp-flight-result-card";
 import {
   PassengerCheckoutModal,
@@ -75,7 +76,6 @@ function apiMessage(body: unknown) {
 }
 
 type Phase = "loading" | "auth" | "passengers" | "review" | "resume" | "blocked";
-const steps = ["اطلاعات مسافران", "بازبینی و تأیید", "پیگیری درخواست"];
 
 export function ErpFlightCheckout({ flight, passengerCounts, resultsHref }: {
   flight: ErpFlightRate;
@@ -335,11 +335,7 @@ export function ErpFlightCheckout({ flight, passengerCounts, resultsHref }: {
   const activeStep = phase === "review" || phase === "resume" ? 1 : 0;
   return (
     <div className="grid gap-3" data-flight-checkout>
-      <ol aria-label="مراحل خرید پرواز" className="grid grid-cols-3 gap-2 rounded-xl border border-border bg-surface p-2 text-center text-xs sm:text-sm">
-        {steps.map((label, index) => (
-          <li key={label} aria-current={activeStep === index ? "step" : undefined} className={activeStep === index ? "rounded-lg bg-brand-soft px-1 py-2 font-bold text-brand" : "px-1 py-2 text-muted"}>{label}</li>
-        ))}
-      </ol>
+      <FlightCheckoutSteps current={activeStep} />
       <section className="rounded-xl border border-border bg-surface px-3 py-2 sm:px-4" aria-label="پرواز انتخاب‌شده">
         <h2 className="mb-1.5 text-sm font-bold text-brand">پرواز انتخاب‌شده</h2>
         <div className={legs.length > 1 ? "grid gap-3 sm:grid-cols-2" : ""}>
