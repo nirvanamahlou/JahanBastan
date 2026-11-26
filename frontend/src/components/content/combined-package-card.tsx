@@ -100,6 +100,7 @@ export function CombinedPackageCard({ item, tourId, departureId, capacityRemaini
           );
           const cover = images[0] ?? null;
           const board = assignment.boardType?.trim();
+          const roomType = assignment.roomType?.trim();
           return (
             <article className={`overflow-hidden rounded-xl border border-border bg-white ${item.hotels.length === 3 && hotelIndex === 2 ? "col-span-2" : ""}`} key={`${assignment.hotel.slug}-${hotelIndex}`}>
               <Link aria-label={`مشاهده جزئیات ${assignment.hotel.name}`} className="group block" href={`/hotels/${assignment.hotel.slug}/`}>
@@ -121,10 +122,10 @@ export function CombinedPackageCard({ item, tourId, departureId, capacityRemaini
                       <svg aria-hidden="true" className="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M4 3v4a3 3 0 0 0 6 0V3M7 3v18m10 0V3c4 2 4 7 0 8" /></svg>
                       سرویس <b>{board || "اعلام نشده"}</b>
                     </span>
-                    <span className="inline-flex items-center gap-1 rounded-md border border-border bg-surface-muted px-1.5 py-1">
+                    {roomType && <span className="inline-flex items-center gap-1 rounded-md border border-border bg-surface-muted px-1.5 py-1">
                       <BedIcon aria-hidden="true" className="size-4 shrink-0" />
-                      نوع اتاق <b>{assignment.roomType?.trim() || "اعلام نشده"}</b>
-                    </span>
+                      نوع اتاق <b>{roomType}</b>
+                    </span>}
                   </div>
                 </div>
               </Link>
