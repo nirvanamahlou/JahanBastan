@@ -191,7 +191,7 @@ function toDateInput(date: Date) {
   return date.toISOString().slice(0, 10);
 }
 
-export function TravelCheckout({ selection }: { selection?: { itemId: number; passengers: PassengerCheckoutData[] } } = {}) {
+export function TravelCheckout({ selection, tourPurchase = false }: { tourPurchase?: boolean; selection?: { itemId: number; passengers: PassengerCheckoutData[] } } = {}) {
   const initialSelection = useRef(selection);
   const [items, setItems] = useState<CartItem[] | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -662,7 +662,7 @@ export function TravelCheckout({ selection }: { selection?: { itemId: number; pa
                   <div className="mt-3 grid gap-2 sm:grid-cols-2">
                     {guestItems.map((item) => <p className="rounded-xl bg-white px-3 py-2 text-sm font-bold text-brand" key={`${item.itemType}-${item.addedAt}`}>{item.label}</p>)}
                   </div>
-                  {signedIn ? <button type="button" className="mt-4 min-h-11 rounded-xl bg-accent px-4 font-black text-brand" onClick={() => void load()}>تلاش دوباره برای انتقال</button> : <Link className="mt-4 inline-flex min-h-11 items-center rounded-xl bg-accent px-4 font-black text-brand" href="/account/?next=%2Faccount%2F%3Ftab%3Dtrips%26checkout%3D1">ورود و انتقال سفارش</Link>}
+                  {signedIn ? <button type="button" className="mt-4 min-h-11 rounded-xl bg-accent px-4 font-black text-brand" onClick={() => void load()}>تلاش دوباره برای انتقال</button> : <Link className="mt-4 inline-flex min-h-11 items-center rounded-xl bg-accent px-4 font-black text-brand" href="/account/?next=%2Ftours%2Fresume%2F">ورود و انتقال سفارش</Link>}
                 </section>
               ) : null}
               {items.map((item) => {
@@ -692,7 +692,7 @@ export function TravelCheckout({ selection }: { selection?: { itemId: number; pa
                 </article>
                 );
               })}
-              <ErpFlightOrders cart onSelect={(order, payable) => { setFlightStep(3); setLastFlightStep(3); setFlight({ order, payable }); }} empty={!items.length && !guestItems.length ? <div className="rounded-2xl border border-dashed border-border bg-white p-10 text-center"><p>سفارش ناتمامی ندارید.</p><Link className="mt-4 inline-flex rounded-xl bg-brand px-5 py-3 font-black text-white" href="/tours/">مشاهده تورها</Link></div> : undefined} />
+              {!tourPurchase && <ErpFlightOrders cart onSelect={(order, payable) => { setFlightStep(3); setLastFlightStep(3); setFlight({ order, payable }); }} empty={!items.length && !guestItems.length ? <div className="rounded-2xl border border-dashed border-border bg-white p-10 text-center"><p>سفارش ناتمامی ندارید.</p><Link className="mt-4 inline-flex rounded-xl bg-brand px-5 py-3 font-black text-white" href="/tours/">مشاهده تورها</Link></div> : undefined} />}
             </section>
             {items.length > 0 && <aside className="h-fit rounded-2xl border border-border bg-white p-5 lg:sticky lg:top-24">
               <h2 className="text-xl font-black text-brand">خلاصه سفر</h2>
@@ -841,7 +841,7 @@ export function TravelCheckout({ selection }: { selection?: { itemId: number; pa
           </section>
         ) : null}
 
-        {!flight && bookings.length ? <section className="rounded-3xl border border-border bg-white p-6"><h2 className="text-xl font-black text-brand">سفارش‌های اخیر</h2><div className="mt-4 grid gap-2">{bookings.slice(0, 5).map((row) => <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-surface-muted p-4" key={row.id}><div><strong className="block text-brand" dir="ltr">{row.bookingNumber}</strong><span className="text-xs text-muted">{row.paymentMethod === "installment" ? "اقساطی" : "نقدی"} · {row.status}</span></div><div className="flex flex-wrap items-center gap-3"><span className="font-black">{money(row.totalAmount, row.currency)}</span><Link href={`/payment/waiting/?booking=${row.id}`} className="font-bold text-brand underline">وضعیت سفارش و پرداخت</Link></div></div>)}</div></section> : null}
+        {!tourPurchase && !flight && bookings.length ? <section className="rounded-3xl border border-border bg-white p-6"><h2 className="text-xl font-black text-brand">سفارش‌های اخیر</h2><div className="mt-4 grid gap-2">{bookings.slice(0, 5).map((row) => <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-surface-muted p-4" key={row.id}><div><strong className="block text-brand" dir="ltr">{row.bookingNumber}</strong><span className="text-xs text-muted">{row.paymentMethod === "installment" ? "اقساطی" : "نقدی"} · {row.status}</span></div><div className="flex flex-wrap items-center gap-3"><span className="font-black">{money(row.totalAmount, row.currency)}</span><Link href={`/payment/waiting/?booking=${row.id}`} className="font-bold text-brand underline">وضعیت سفارش و پرداخت</Link></div></div>)}</div></section> : null}
       </div>
     </>
   );

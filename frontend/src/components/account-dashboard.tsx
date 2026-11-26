@@ -150,7 +150,7 @@ export function AccountDashboard() {
   const [dashboard, setDashboard] = useState<Dashboard | null>(null);
   const query = useSearchParams();
   const tab = query.get("tab");
-  const checkout = query.get("checkout") === "1" && (tab === "trips" || tab === "tickets");
+  const checkout = query.get("checkout") === "1" && tab === "tickets";
   const active = navItems.find(item => item.id === tab)?.id ?? "profile";
   const [loading, setLoading] = useState(true);
   const [notice, setNotice] = useState("");
@@ -196,8 +196,13 @@ export function AccountDashboard() {
       if (response?.ok) setInsurances(await response.json() as Insurance[]);
     }
     if (section === "trips") {
-      const response = await request("/account/orders");
-      if (response?.ok) setOrders(await response.json() as Order[]);
+      const [response, bookings] = await Promise.all([request("/account/orders"), request("/account/bookings")]);
+      if (response?.ok && bookings?.ok) {
+        const records: { id: number; items: { itemType: string }[] }[] = await bookings.json();
+        const tours = new Set(records.filter(row => row.items.some(item => item.itemType === "tour")).map(row => row.id));
+        const history: Order[] = await response.json();
+        setOrders(history.filter(order => order.source === "booking" && tours.has(order.id)));
+      }
       else setNotice("دریافت سفارش‌ها انجام نشد. صفحه را دوباره باز کنید.");
     }
     if (section === "support") {
@@ -435,7 +440,7 @@ export function AccountDashboard() {
         {!checkout && active === "trips" ? (
           <section className="space-y-5">
             <h1 className="text-2xl font-black text-brand">سفرهای من</h1>
-            {dashboard.cartItems.some(item => item.itemType === "tour") && <section className="grid justify-items-start gap-2 rounded-xl border p-4"><strong>سفرهای در حال خرید</strong><p>{dashboard.cartItems.filter(item => item.itemType === "tour").map(item => item.titleSnapshot).join("، ")}</p><Link className="rounded-xl bg-brand px-4 py-2 text-white" href="/account/?tab=trips&checkout=1">ادامه خرید سفر</Link></section>}
+            {dashboard.cartItems.some(item => item.itemType === "tour") && <Link className="inline-flex rounded-xl bg-brand px-4 py-2 text-white" href="/tours/resume/">ادامه خرید تور</Link>}
             {orders && orders.length > 0 && <OrderList onRemove={removeOrder} orders={orders} />}
             {!dashboard.cartItems.some(item => item.itemType === "tour") && orders?.length === 0 && <EmptyState title="هنوز سفری ثبت نشده است" description="پس از ثبت سفارش، سفر شما اینجا نمایش داده می‌شود." />}
           </section>

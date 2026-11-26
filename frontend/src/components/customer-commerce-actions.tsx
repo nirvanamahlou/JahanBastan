@@ -33,7 +33,7 @@ function signInUrl(nextPath?: string) {
 
 function saveForGuest(payload: GuestCartPayload, router: ReturnType<typeof useRouter>) {
   addGuestCartIntent(payload, document.title || "انتخاب سفر");
-  router.push(payload.itemType === "tour" ? "/account/?tab=trips&checkout=1" : "/account/?tab=tickets&checkout=1");
+  router.push(payload.itemType === "tour" ? "/tours/resume/" : "/account/?tab=tickets&checkout=1");
 }
 
 function CartFinalizationNotice({ href }: { href: string }) {
@@ -121,7 +121,7 @@ export function CartAddButton({
         {!onlineSalesEnabled ? "تماس حاصل فرمایید" : state === "loading" ? "در حال افزودن…" : state === "added" ? successLabel : idleLabel}
       </button>
       {state === "added" ? (
-        <CartFinalizationNotice href={requiresPassengerDetails ? "/account/?tab=tickets&checkout=1" : "/account/?tab=trips&checkout=1"} />
+        <CartFinalizationNotice href={requiresPassengerDetails ? "/account/?tab=tickets&checkout=1" : "/tours/resume/"} />
       ) : null}
       {state === "error" ? <p className="text-center text-xs text-red-700">ثبت انتخاب انجام نشد. دوباره تلاش کنید.</p> : null}
     </div>
