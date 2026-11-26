@@ -1,5 +1,6 @@
 "use client";
 
+import { AccountTickets } from "@/components/account-tickets";
 import { TripCard } from "@/components/trip-card";
 
 
@@ -53,7 +54,7 @@ type Agency = {
   currency: string;
   reviewNote: string | null;
 };
-type CartItem = { id: number; titleSnapshot: string; priceAmount: string | null; currency: string | null };
+type CartItem = { itemType: string; id: number; titleSnapshot: string; priceAmount: string | null; currency: string | null };
 type SavedTour = { id: number; tourId: number; title: string; slug: string; priceAmount: string | null; currency: string | null };
 type OrderServiceItem = { title: string; details: string | null };
 type Order = {
@@ -76,10 +77,11 @@ type SupportRequest = { id: number; subject: string; message: string; status: st
 type AvailabilityAlert = { id: number; serviceType: string; origin: string; destination: string; departureDate: string; isActive: boolean };
 type Insurance = { id: number; provider: string; policyNumber: string; coverageTitle: string; coverageAmount: string | null; currency: string; startDate: string; endDate: string; status: "active" | "pending" | "expired" | "cancelled"; createdAt: string };
 type Dashboard = { user: Account; wallet: Wallet; agency: Agency | null; cartItems: CartItem[]; savedTours: SavedTour[]; recentOrders: Order[] };
-type Section = "profile" | "trips" | "passengers" | "insurance" | "favorites" | "visa" | "support" | "alerts" | "wallet";
+type Section = "tickets" | "profile" | "trips" | "passengers" | "insurance" | "favorites" | "visa" | "support" | "alerts" | "wallet";
 
 const navItems: Array<{ id: Section; label: string; icon: string }> = [
   { id: "profile", label: "حساب کاربری", icon: "◉" },
+  { id: "tickets", label: "بلیط‌های من", icon: "✈" },
   { id: "trips", label: "سفرهای من", icon: "◫" },
   { id: "passengers", label: "لیست مسافران", icon: "♙" },
   { id: "favorites", label: "علاقه‌مندی‌ها", icon: "♡" },
@@ -426,6 +428,7 @@ export function AccountDashboard() {
             </form>
           </section>
         ) : null}
+        {active === "tickets" && <AccountTickets cartItems={dashboard.cartItems} />}
         {active === "trips" ? (
           <section className="space-y-5">
             <h1 className="text-2xl font-black text-brand">سفرهای من</h1>

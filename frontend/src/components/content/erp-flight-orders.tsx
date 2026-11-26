@@ -76,7 +76,7 @@ export function ErpFlightOrders({
             <span className="text-muted">{formatPersianDateTime(order.createdAt)}</span>
             {!order.contractNumber && <small className="w-full break-all text-muted">شناسهٔ پیگیری <bdi>{order.id}</bdi></small>}
             <span aria-live="polite">{statuses[order.id] || (order.state === "cancelled" ? "لغوشده در آوینا" : order.state === "draft" ? "درخواست ثبت شده" : order.state === "failed" ? "ثبت انجام نشد" : "در حال ثبت")}</span>
-            <Link className="inline-flex min-h-11 items-center rounded-xl bg-brand px-4 font-bold text-white" href={`/payment/waiting/?flight=${encodeURIComponent(order.id)}`}>پیگیری سفارش</Link>
+            <Link className="inline-flex min-h-11 items-center rounded-xl bg-brand px-4 font-bold text-white" href={`/payment/waiting/?flight=${encodeURIComponent(order.id)}`}>{!cart && order.state === "draft" && order.contractNumber ? "ادامه خرید و وضعیت پرداخت" : "پیگیری سفارش"}</Link>
             {onSelect && <button type="button" className="min-h-11 rounded-xl bg-brand px-4 font-bold text-white" onClick={() => onSelect(order, !!order.contractNumber && !["تسویه در آوینا تأیید شد", "لغوشده در آوینا"].includes(statuses[order.id]))}>جزئیات</button>}
             {order.state === "draft" && order.contractNumber ? (
               <button type="button" disabled={statuses[order.id] === "در حال بررسی…"} className={cart ? "inline-flex min-h-11 items-center rounded-xl bg-brand px-4 font-bold text-white hover:bg-brand-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:opacity-60" : "font-bold text-brand underline"} onClick={() => void checkSettlement(order)}>بررسی وضعیت تسویه</button>

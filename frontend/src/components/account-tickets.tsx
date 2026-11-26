@@ -1,0 +1,53 @@
+"use client";
+
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { ErpFlightOrders } from "@/components/content/erp-flight-orders";
+import { PUBLIC_API_BASE_URL } from "@/lib/api/client";
+
+type Item = { itemType: string; titleSnapshot: string };
+type Booking = { id: number; bookingNumber: string; items: Item[]; status: string };
+const ticketTypes = new Set(["flight", "train", "bus"]);
+const action = "inline-flex min-h-11 items-center rounded-xl bg-brand px-4 font-bold text-white";
+
+export function AccountTickets({ cartItems }: { cartItems: Item[] }) {
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [state, setState] = useState<"loading" | "ready" | "error">("loading");
+  useEffect(() => {
+    const controller = new AbortController();
+    async function load() {
+      try {
+        const response = await fetch(PUBLIC_API_BASE_URL + "/account/bookings", {
+          credentials: "include", cache: "no-store", signal: controller.signal,
+        });
+        if (!response.ok) throw new Error("bookings");
+        const rows: Booking[] = await response.json();
+        setBookings(rows.filter(row => row.items.length > 0 && row.items.every(item => ticketTypes.has(item.itemType))));
+        setState("ready");
+      } catch {
+        if (!controller.signal.aborted) setState("error");
+      }
+    }
+    void load();
+    return () => controller.abort();
+  }, []);
+  const drafts = cartItems.filter(item => ticketTypes.has(item.itemType));
+  return <section className="grid min-w-0 gap-4 text-brand">
+    <h2 className="text-xl font-black">بلیط‌های من</h2>
+    <ErpFlightOrders />
+    <section className="grid gap-3 rounded-2xl border border-border bg-white p-4">
+      <h3 className="font-bold">رزروهای بلیط</h3>
+      {state === "loading" && <p role="status">در حال دریافت رزروها…</p>}
+      {state === "error" && <p role="alert">دریافت رزروها انجام نشد. صفحه را دوباره باز کنید.</p>}
+      {state === "ready" && !bookings.length && !drafts.length && <p>رزرو دیگری ثبت نشده است.</p>}
+      {drafts.length > 0 && <div className="grid justify-items-start gap-2">
+        <strong>در سبد خرید</strong><p>{drafts.map(item => item.titleSnapshot).join("، ")}</p>
+        <Link className={action} href="/cart/">ادامه خرید از سبد</Link>
+      </div>}
+      {bookings.map(row => <article key={row.id} className="flex flex-wrap items-center justify-between gap-3 border-t border-border py-3">
+        <div><strong>{row.items.map(item => item.titleSnapshot).join("، ")}</strong><p>شماره رزرو <bdi>{row.bookingNumber}</bdi></p></div>
+        <Link className={action} href={`/payment/waiting/?booking=${row.id}`}>{row.status === "approved" ? "ادامه پرداخت" : "مشاهده بلیط و وضعیت سفارش"}</Link>
+      </article>)}
+    </section>
+  </section>;
+}
