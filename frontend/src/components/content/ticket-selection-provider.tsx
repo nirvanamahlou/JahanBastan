@@ -181,7 +181,7 @@ export function TicketSelectionProvider({
           {inbound && outbound ? (
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-emerald-600 px-3 py-2 text-sm font-black text-white">
               <p className="flex items-center gap-2"><ArrowLeftIcon className="size-4" /> بلیت رفت و برگشت انتخاب شد؛ هر کارت را برای تغییر انتخاب کنید.</p>
-              <FlightCartAddButton className="shrink-0" idleLabel="افزودن رفت و برگشت به سبد خرید" successLabel="هر دو بلیط به سبد اضافه شد" travelServiceIds={[outbound.travelServiceId, inbound.travelServiceId]} />
+              <FlightCartAddButton className="shrink-0" idleLabel="خرید بلیط رفت‌وبرگشت" successLabel="هر دو بلیط انتخاب شد" travelServiceIds={[outbound.travelServiceId, inbound.travelServiceId]} />
             </div>
           ) : null}
         </section>

@@ -20,7 +20,7 @@ export default async function WaitingForPaymentPage({ searchParams }: { searchPa
         {order ? <OrderPaymentStatus key={order.kind + order.id} {...order} /> : <p>برای مشاهدهٔ وضعیت پرداخت، سفارش خود را از «سفرهای من» انتخاب کنید.</p>}
         <div className="flex flex-wrap gap-3">
           <Link href="/account/?tab=trips" className="inline-flex min-h-11 items-center rounded-xl bg-brand px-5 text-sm font-bold text-white">مشاهده سفرهای من</Link>
-          <Link href="/cart/" className="inline-flex min-h-11 items-center rounded-xl border border-border px-5 text-sm font-bold text-brand">بازگشت به سبد</Link>
+          <Link href="/account/?tab=tickets" className="inline-flex min-h-11 items-center rounded-xl border border-border px-5 text-sm font-bold text-brand">مشاهده بلیط‌های من</Link>
         </div>
       </div>
     </section>

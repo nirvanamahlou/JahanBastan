@@ -63,7 +63,7 @@ export function ErpFlightOrders({
   if (cart && !problem && visibleOrders?.length === 0) return empty ?? null;
 
   return (
-    <section className="min-w-0 rounded-2xl border border-border bg-surface p-4" aria-label={cart ? "پروازهای ثبت‌شده در سبد" : "درخواست‌های پرواز آوینا"}>
+    <section className="min-w-0 rounded-2xl border border-border bg-surface p-4" aria-label={cart ? "پروازهای ثبت‌شده" : "درخواست‌های پرواز آوینا"}>
       <h2 className="font-bold text-brand">{cart ? "پروازهای ثبت‌شده" : "درخواست‌های پرواز آوینا"}</h2>
       {problem ? <p className="mt-2 text-sm text-muted">دریافت درخواست‌ها انجام نشد.</p> : null}
       {!problem && !orders ? <p className="mt-2 text-sm text-muted">در حال دریافت درخواست‌ها…</p> : null}
@@ -143,7 +143,7 @@ export function FlightCartDetails({
           </div>
         </div>
         <button type="button" className="min-h-11 rounded-xl border border-border bg-white px-4 text-sm font-bold hover:bg-surface-muted" onClick={onBackToCart}>
-          بازگشت به سبد
+          بازگشت به سفارش‌ها
         </button>
       </header>
 

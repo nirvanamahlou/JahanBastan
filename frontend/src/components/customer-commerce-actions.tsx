@@ -33,7 +33,7 @@ function signInUrl(nextPath?: string) {
 
 function saveForGuest(payload: GuestCartPayload, router: ReturnType<typeof useRouter>) {
   addGuestCartIntent(payload, document.title || "انتخاب سفر");
-  router.push("/cart/?guest=1");
+  router.push(payload.itemType === "tour" ? "/account/?tab=trips&checkout=1" : "/account/?tab=tickets&checkout=1");
 }
 
 function CartFinalizationNotice({ href }: { href: string }) {
@@ -45,13 +45,13 @@ function CartFinalizationNotice({ href }: { href: string }) {
       role="status"
     >
       <p className="text-xs font-bold leading-6 text-emerald-900">
-        انتخاب شما به سبد خرید اضافه شد. برای نهایی‌کردن رزرو، مراحل سبد خرید را کامل کنید.
+        انتخاب شما ثبت شد. برای تکمیل مشخصات و نهایی‌کردن خرید ادامه دهید.
       </p>
       <Link
         className="mt-2 inline-flex min-h-10 items-center justify-center rounded-xl bg-brand px-4 text-xs font-black text-white transition hover:bg-brand/90 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent"
         href={href}
       >
-        رفتن به سبد و نهایی‌کردن
+        ادامه خرید
       </Link>
     </div>
   );
@@ -69,8 +69,8 @@ export function CartAddButton({
   combinedDeparturePriceId,
   roomSelection,
   disabled = false,
-  idleLabel = "افزودن به سبد خرید",
-  successLabel = "به سبد اضافه شد",
+  idleLabel = "انتخاب و ادامه خرید",
+  successLabel = "انتخاب شد",
   className = "",
   buttonClassName = "",
 }: CartAddButtonProps) {
@@ -121,9 +121,9 @@ export function CartAddButton({
         {!onlineSalesEnabled ? "تماس حاصل فرمایید" : state === "loading" ? "در حال افزودن…" : state === "added" ? successLabel : idleLabel}
       </button>
       {state === "added" ? (
-        <CartFinalizationNotice href={requiresPassengerDetails ? "/cart/?passengerFlow=1" : "/cart/"} />
+        <CartFinalizationNotice href={requiresPassengerDetails ? "/account/?tab=tickets&checkout=1" : "/account/?tab=trips&checkout=1"} />
       ) : null}
-      {state === "error" ? <p className="text-center text-xs text-red-700">افزودن به سبد ناموفق بود. دوباره تلاش کنید.</p> : null}
+      {state === "error" ? <p className="text-center text-xs text-red-700">ثبت انتخاب انجام نشد. دوباره تلاش کنید.</p> : null}
     </div>
   );
 }
@@ -132,8 +132,8 @@ export function FlightCartAddButton({
   travelServiceIds,
   className = "",
   buttonClassName = "",
-  idleLabel = "افزودن رفت و برگشت به سبد خرید",
-  successLabel = "هر دو بلیط به سبد اضافه شد",
+  idleLabel = "خرید بلیط رفت‌وبرگشت",
+  successLabel = "هر دو بلیط انتخاب شد",
 }: {
   travelServiceIds: number[];
   className?: string;
@@ -178,7 +178,7 @@ export function FlightCartAddButton({
       >
         {!onlineSalesEnabled ? "تماس حاصل فرمایید" : state === "loading" ? "در حال افزودن…" : state === "added" ? successLabel : idleLabel}
       </button>
-      {state === "added" ? <CartFinalizationNotice href="/cart/?passengerFlow=1" /> : null}
+      {state === "added" ? <CartFinalizationNotice href="/account/?tab=tickets&checkout=1" /> : null}
       {state === "error" ? <p className="text-xs text-red-700">افزودن هر دو بلیط ناموفق بود. دوباره تلاش کنید.</p> : null}
     </div>
   );

@@ -41,8 +41,8 @@ export function AccountTickets({ cartItems }: { cartItems: Item[] }) {
       {state === "error" && <p role="alert">دریافت رزروها انجام نشد. صفحه را دوباره باز کنید.</p>}
       {state === "ready" && !bookings.length && !drafts.length && <p>رزرو دیگری ثبت نشده است.</p>}
       {drafts.length > 0 && <div className="grid justify-items-start gap-2">
-        <strong>در سبد خرید</strong><p>{drafts.map(item => item.titleSnapshot).join("، ")}</p>
-        <Link className={action} href="/cart/">ادامه خرید از سبد</Link>
+        <strong>بلیط‌های در حال خرید</strong><p>{drafts.map(item => item.titleSnapshot).join("، ")}</p>
+        <Link className={action} href="/account/?tab=tickets&checkout=1">ادامه خرید بلیط</Link>
       </div>}
       {bookings.map(row => <article key={row.id} className="flex flex-wrap items-center justify-between gap-3 border-t border-border py-3">
         <div><strong>{row.items.map(item => item.titleSnapshot).join("، ")}</strong><p>شماره رزرو <bdi>{row.bookingNumber}</bdi></p></div>

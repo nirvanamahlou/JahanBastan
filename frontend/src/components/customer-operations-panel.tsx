@@ -309,9 +309,9 @@ export function CustomerOperationsPanel() {
           </div>
           {onlineSalesEnabled ? <Link
             className="inline-flex min-h-11 items-center rounded-xl border border-brand px-4 py-2 text-sm font-black text-brand transition hover:bg-brand hover:text-white"
-            href="/cart/"
+            href="/account/?tab=trips"
           >
-            سبد و پیگیری کامل
+            پیگیری سفرهای من
           </Link> : null}
         </div>
 

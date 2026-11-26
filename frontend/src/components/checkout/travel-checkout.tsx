@@ -123,8 +123,8 @@ function apiErrorMessage(body: unknown, fallback: string) {
   }
   return fallback;
 }
-const flightSteps = ["مرور سبد", "اطلاعات مسافران", "درخواست ثبت‌شده", "تأیید نهایی"];
-const steps = ["مرور سبد", "اطلاعات مسافران", "ثبت درخواست", "مدارک", "تأیید نهایی"];
+const flightSteps = ["مرور سفارش", "اطلاعات مسافران", "درخواست ثبت‌شده", "تأیید نهایی"];
+const steps = ["مرور سفارش", "اطلاعات مسافران", "ثبت درخواست", "مدارک", "تأیید نهایی"];
 const cartStatusLabels: Record<string, string> = {
   active: "قیمت و ظرفیت بررسی شده",
   price_changed: "تغییر قیمت",
@@ -248,7 +248,7 @@ export function TravelCheckout({ selection }: { selection?: { itemId: number; pa
       setItems([]);
       setNotice(
         savedGuestItems.length
-          ? "انتخاب شما در سبد مهمان محفوظ است؛ برای نهایی‌کردن رزرو وارد حساب شوید و مراحل سبد خرید را کامل کنید."
+          ? "انتخاب شما در سفارش مهمان محفوظ است؛ برای نهایی‌کردن رزرو وارد حساب شوید و مراحل سفارش را کامل کنید."
           : "برای دریافت قیمت و ظرفیت و ثبت درخواست رزرو وارد حساب کاربری شوید.",
       );
       return;
@@ -294,7 +294,7 @@ export function TravelCheckout({ selection }: { selection?: { itemId: number; pa
       if (results.includes("retry")) {
         setNotice("انتقال بعضی انتخاب‌ها کامل نشد. می‌توانید دوباره تلاش کنید.");
       } else if (results.includes("transferred")) {
-        setNotice("انتخاب‌ها به سبد حساب شما منتقل شدند.");
+        setNotice("انتخاب‌ها به سفارش حساب شما منتقل شدند.");
       }
     }
     setItems(nextItems);
@@ -305,7 +305,7 @@ export function TravelCheckout({ selection }: { selection?: { itemId: number; pa
         setPassengers(selected.passengers);
         setStep(2);
       } else {
-        setNotice("سبد شما شامل انتخاب‌های دیگری است. پیش از ادامه، موارد سبد و تعداد مسافران را بررسی کنید.");
+        setNotice("سفارش شما شامل انتخاب‌های دیگری است. پیش از ادامه، موارد سفارش و تعداد مسافران را بررسی کنید.");
       }
     }
     setBookings(bookingResponse.ok ? ((await bookingResponse.json()) as Booking[]) : []);
@@ -435,7 +435,7 @@ export function TravelCheckout({ selection }: { selection?: { itemId: number; pa
     if (!total || !configuration) {
       setNotice(incompletePriceItems.length
         ? "برای محاسبه اقساط، قیمت هتل و پرواز باید نهایی باشد و برای دلار/یورو نرخ تبدیل در تنظیمات مدیریت ثبت شده باشد."
-        : "مبلغ نهایی سبد خرید هنوز مشخص نشده است.");
+        : "مبلغ نهایی سفارش هنوز مشخص نشده است.");
       return;
     }
     if (!firstDueDate) {
@@ -610,7 +610,7 @@ export function TravelCheckout({ selection }: { selection?: { itemId: number; pa
 
 
   if (items === null) {
-    return <div className="rounded-3xl border border-border bg-white p-12 text-center">در حال دریافت سبد خرید…</div>;
+    return <div className="rounded-3xl border border-border bg-white p-12 text-center">در حال دریافت سفارش…</div>;
   }
 
   return (
@@ -657,12 +657,12 @@ export function TravelCheckout({ selection }: { selection?: { itemId: number; pa
             <section className="min-w-0 space-y-3">
               {guestItems.length ? (
                 <section className="rounded-2xl border border-dashed border-pink-300 bg-pink-50 p-4">
-                  <h2 className="font-black text-brand">سبد مهمان ({guestItems.length.toLocaleString("fa-IR")} انتخاب)</h2>
-                  <p className="mt-1 text-sm leading-7 text-muted">این انتخاب‌ها روی همین دستگاه محفوظ‌اند؛ با ورود، قیمت و ظرفیت آن‌ها بررسی و به سبد شما منتقل می‌شود.</p>
+                  <h2 className="font-black text-brand">سفارش مهمان ({guestItems.length.toLocaleString("fa-IR")} انتخاب)</h2>
+                  <p className="mt-1 text-sm leading-7 text-muted">این انتخاب‌ها روی همین دستگاه محفوظ‌اند؛ با ورود، قیمت و ظرفیت آن‌ها بررسی و به سفارش شما منتقل می‌شود.</p>
                   <div className="mt-3 grid gap-2 sm:grid-cols-2">
                     {guestItems.map((item) => <p className="rounded-xl bg-white px-3 py-2 text-sm font-bold text-brand" key={`${item.itemType}-${item.addedAt}`}>{item.label}</p>)}
                   </div>
-                  {signedIn ? <button type="button" className="mt-4 min-h-11 rounded-xl bg-accent px-4 font-black text-brand" onClick={() => void load()}>تلاش دوباره برای انتقال</button> : <Link className="mt-4 inline-flex min-h-11 items-center rounded-xl bg-accent px-4 font-black text-brand" href="/account/?next=%2Fcart%2F">ورود و انتقال سبد</Link>}
+                  {signedIn ? <button type="button" className="mt-4 min-h-11 rounded-xl bg-accent px-4 font-black text-brand" onClick={() => void load()}>تلاش دوباره برای انتقال</button> : <Link className="mt-4 inline-flex min-h-11 items-center rounded-xl bg-accent px-4 font-black text-brand" href="/account/?next=%2Faccount%2F%3Ftab%3Dtrips%26checkout%3D1">ورود و انتقال سفارش</Link>}
                 </section>
               ) : null}
               {items.map((item) => {
@@ -692,7 +692,7 @@ export function TravelCheckout({ selection }: { selection?: { itemId: number; pa
                 </article>
                 );
               })}
-              <ErpFlightOrders cart onSelect={(order, payable) => { setFlightStep(3); setLastFlightStep(3); setFlight({ order, payable }); }} empty={!items.length && !guestItems.length ? <div className="rounded-2xl border border-dashed border-border bg-white p-10 text-center"><p>سبد خرید شما خالی است.</p><Link className="mt-4 inline-flex rounded-xl bg-brand px-5 py-3 font-black text-white" href="/tours/">مشاهده تورها</Link></div> : undefined} />
+              <ErpFlightOrders cart onSelect={(order, payable) => { setFlightStep(3); setLastFlightStep(3); setFlight({ order, payable }); }} empty={!items.length && !guestItems.length ? <div className="rounded-2xl border border-dashed border-border bg-white p-10 text-center"><p>سفارش ناتمامی ندارید.</p><Link className="mt-4 inline-flex rounded-xl bg-brand px-5 py-3 font-black text-white" href="/tours/">مشاهده تورها</Link></div> : undefined} />
             </section>
             {items.length > 0 && <aside className="h-fit rounded-2xl border border-border bg-white p-5 lg:sticky lg:top-24">
               <h2 className="text-xl font-black text-brand">خلاصه سفر</h2>
@@ -759,7 +759,7 @@ export function TravelCheckout({ selection }: { selection?: { itemId: number; pa
                     <div className="rounded-xl bg-white p-3"><span className="text-xs text-muted">سقف تأمین مالی</span><strong className="mt-1 block text-brand">{configuration ? money(configuration.maxCreditAmount, currency) : "—"}</strong></div>
                   </div>
 
-                  {incompletePriceItems.length ? <div className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm leading-7 text-amber-900">قیمت {incompletePriceItems.length.toLocaleString("fa-IR")} مورد از سبد نهایی یا قابل تبدیل نیست. برای دلار و یورو ابتدا نرخ تبدیل را در تنظیمات مدیریت ثبت کنید.</div> : null}
+                  {incompletePriceItems.length ? <div className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm leading-7 text-amber-900">قیمت {incompletePriceItems.length.toLocaleString("fa-IR")} مورد از سفارش نهایی یا قابل تبدیل نیست. برای دلار و یورو ابتدا نرخ تبدیل را در تنظیمات مدیریت ثبت کنید.</div> : null}
 
                   <div className="grid gap-4 sm:grid-cols-2">
                     <label className="grid gap-2 text-sm font-bold">پیش‌پرداخت ({currency === "IRT" ? "تومان" : currency})<input className="min-h-12 rounded-xl border border-border bg-white px-3" inputMode="numeric" min={minimumDownPayment} onChange={(event) => { setDownPayment(event.target.value); setQuote(null); }} type="number" value={downPayment} /><span className="text-xs font-normal text-muted">مانده فعلی: {total ? money(String(financedAmount), currency) : "—"}</span></label>
