@@ -147,7 +147,7 @@ export default async function ToursPage({ searchParams }: { searchParams: Promis
     const displayPrice = formattedOffers.size === 1 ? [...formattedOffers][0] : undefined;
     external.push({
       id:tour.id, slug:"departures/"+tour.id, title:tour.title, summary:tour.details?.summary || tour.description || null,
-      imageId:null, imageUrl:tour.hotels.flatMap(hotelImages)[0], destination:{title:city,country:places[0]?.country.name || ""},
+      imageId:null, imageUrl:normalize(city) === normalize("دبی") ? "/images/dubai-tour-cover.webp" : tour.hotels.flatMap(hotelImages)[0], destination:{title:city,country:places[0]?.country.name || ""},
       durationDays:Math.round((Date.parse(tour.endsOn)-Date.parse(tour.startsOn))/86400000)+1,
       departureDate:date, origin:tour.outbound.originName, priceAmount:price === null ? null : String(price), displayPrice,
       returnDate:tour.endsOn.slice(0,10),
