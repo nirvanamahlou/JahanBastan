@@ -477,7 +477,7 @@ export default async function TourPage({ params, searchParams }: Props) {
       <Container className={`-mt-4 relative z-10 pb-14 ${tourStyles.profileContent}`} data-scroll-reveal-skip>
         <TourProfileFacts facts={facts} />
 
-        <TourDetailTabs sections={tourSections} />
+        <TourDetailTabs sections={tourSections} sticky={!hasCombinedHotels} />
         {hasDates || flightDepartures.length ? (
           <div className="tour-tab-panel mt-8" data-tour-section="dates">
             <TourDepartureCalendar key={initialDepartureId} initialDepartureId={initialDepartureId} departures={item.departures.map((departure) => ({

@@ -19,7 +19,7 @@ function sectionFromHash(
   return visibleItems.find((item) => item.hash === value)?.id ?? null;
 }
 
-export function TourDetailTabs({ sections }: { sections: TourSection[] }) {
+export function TourDetailTabs({ sections, sticky = false }: { sections: TourSection[]; sticky?: boolean }) {
   const visibleItems = useMemo(
     () => items.filter((item) => sections.includes(item.id)),
     [sections],
@@ -63,12 +63,12 @@ export function TourDetailTabs({ sections }: { sections: TourSection[] }) {
 
   return (
     <>
-      <nav ref={tabsRef} data-inline-tour-hotels={active === "dates" && showHotelsUnderDates ? "true" : undefined} aria-label="بخش‌های تور" className="mt-6 flex scroll-mt-24 gap-2 overflow-x-auto rounded-2xl border border-border bg-white p-2 shadow-sm" role="tablist">
+      <nav ref={tabsRef} data-inline-tour-hotels={active === "dates" && showHotelsUnderDates ? "true" : undefined} aria-label="بخش‌های تور" className={`mt-6 flex scroll-mt-24 gap-1 overflow-x-auto rounded-xl border border-border bg-surface p-1.5 shadow-sm ${sticky ? "sticky top-[calc(4.25rem+env(safe-area-inset-top,0px)+5px)] z-30 lg:top-2" : ""}`} role="tablist">
         {visibleItems.map((item) => (
           <button
             aria-controls={item.hash}
             aria-selected={active === item.id}
-            className={`shrink-0 rounded-xl px-4 py-2.5 text-sm font-black transition ${active === item.id ? "bg-brand text-white" : "text-brand hover:bg-brand hover:text-white"}`}
+            className={`shrink-0 rounded-lg px-3 py-2 text-xs sm:text-sm font-black transition ${active === item.id ? "bg-brand text-white" : "text-brand hover:bg-brand hover:text-white"}`}
             key={item.id}
             onClick={() => select(item.id, item.hash)}
             role="tab"

@@ -723,12 +723,13 @@
   width: min(100%, 48rem);
   margin-inline: auto;
 }
-.compactOverview.overviewCard { padding: .85rem; border-radius: .85rem; }
-.compactOverview .overviewHeader { gap: .5rem; padding-bottom: .45rem; }
-.compactOverview .overviewIcon { width: 1.8rem; height: 1.8rem; border-radius: .5rem; font-size: 1rem; }
+.compactOverview.overviewCard { width: min(100%, 42rem); padding: .65rem .75rem; border-radius: .75rem; background: var(--surface); box-shadow: none; }
+.compactOverview .overviewHeader { gap: .35rem; padding-bottom: .32rem; }
+.compactOverview .overviewIcon { width: 1.45rem; height: 1.45rem; border-radius: .4rem; font-size: .8rem; }
 .compactOverview .overviewHeader p { display: none; }
 .compactOverview .overviewHeader h2 { font-size: .95rem; }
-.overviewCopy { margin-top: .55rem; color: var(--muted); font-size: .75rem; line-height: 1.85; }
+.overviewCopy { margin-top: .35rem; color: var(--muted); font-size: .75rem; line-height: 1.7; }
+.compactOverview .overviewCopy > p { margin-block: .35rem; line-height: 1.7; }
 .compactDetails .contentStack, .compactDetails.serviceGrid { gap: .55rem; }
 .compactDetails :is(.routeSection, .infoCard, .serviceCard) { padding: .65rem; border-radius: .75rem; background: var(--surface); box-shadow: none; }
 .compactDetails :is(.routeSectionHeader, .infoHeader, .serviceHeader) { gap: .45rem; padding: 0 0 .45rem; }
