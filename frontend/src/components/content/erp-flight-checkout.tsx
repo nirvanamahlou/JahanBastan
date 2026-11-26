@@ -58,7 +58,7 @@ function fareBreakdown(fares: QuoteLine[]) {
 }
 
 const flightDate = new Intl.DateTimeFormat("fa-IR", {
-  dateStyle: "full",
+  dateStyle: "long",
   timeZone: "Asia/Tehran",
 });
 const number = new Intl.NumberFormat("fa-IR");
