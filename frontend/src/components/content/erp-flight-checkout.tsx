@@ -123,8 +123,9 @@ export function ErpFlightCheckout({ flight, passengerCounts, resultsHref }: {
       return;
     }
     customerId.current = account.user.id;
+    const accountName = account.user.fullName?.trim() ?? "";
     setBuyer({
-      fullName: account.user.fullName ?? "",
+      fullName: accountName === "کاربر جهان باستان" ? "" : accountName,
       buyerMobile: account.user.buyerMobile ?? account.user.phone ?? "",
       address: account.user.address ?? "",
       landline: account.user.landline ?? "",
