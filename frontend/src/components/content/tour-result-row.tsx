@@ -7,7 +7,7 @@ import styles from "./catalog-layout.module.css";
 
 type TourDateRange = { native: boolean; departure: string | null; returning: string | null; price: string | null };
 
-export function TourResultRow({ title, slug, summary, imageUrl, destination, date, duration, airline, price, dateRanges, countryLayout = false }: { title: string; slug: string; summary: string | null; imageUrl: string | null; destination: string; date: string; duration: number | null; airline: string; price: string; dateRanges?: TourDateRange; countryLayout?: boolean }) {
+export function TourResultRow({ title, slug, imageUrl, destination, date, duration, airline, price, dateRanges, countryLayout = false }: { title: string; slug: string; imageUrl: string | null; destination: string; date: string; duration: number | null; airline: string; price: string; dateRanges?: TourDateRange; countryLayout?: boolean }) {
   const href = `/tours/${slug}/`;
   const facts = [
     { label: "تاریخ حرکت", value: date, Icon: CalendarIcon },
@@ -16,7 +16,7 @@ export function TourResultRow({ title, slug, summary, imageUrl, destination, dat
     { label: "ایرلاین", value: airline, Icon: () => <TravelSearchIcon icon="flight" strokeWidth={2} /> },
   ];
   const information = (
-    <div className={styles.tourInformation}><h2>{dateRanges ? title : <Link href={href}>{title}</Link>}</h2>{summary && <p className="mt-2 line-clamp-2">{summary}</p>}
+    <div className={styles.tourInformation}><h2>{dateRanges ? title : <Link href={href}>{title}</Link>}</h2>
       <div className={styles.facts}>{facts.map(({ label, value, Icon }) => <div key={label}><Icon /><strong className="line-clamp-2" title={value}>{value}</strong><span>{label}</span></div>)}</div>
       <div className={styles.price}><span className="text-xs font-normal text-muted">شروع قیمت از</span><strong>{price}</strong></div>
     </div>

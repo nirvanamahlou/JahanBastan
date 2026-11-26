@@ -243,7 +243,6 @@ export default async function ToursPage({ searchParams }: { searchParams: Promis
               key={tour.slug}
               title={tour.title}
               slug={tour.slug}
-              summary={tour.summary}
               imageUrl={tour.imageUrl || (tour.imageId ? `${PUBLIC_API_BASE_URL}/media/${tour.imageId}` : null)}
               destination={tour.destination?.title ?? "با استعلام"}
               date={tour.departureDate ? formatPersianDate(tour.departureDate) : "با استعلام"}
