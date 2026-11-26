@@ -63,7 +63,7 @@ export function TourDetailTabs({ sections, sticky = false }: { sections: TourSec
 
   return (
     <>
-      <nav ref={tabsRef} data-inline-tour-hotels={active === "dates" && showHotelsUnderDates ? "true" : undefined} aria-label="بخش‌های تور" className={`mt-6 flex scroll-mt-24 gap-1 overflow-x-auto rounded-xl border border-border bg-surface p-1.5 shadow-sm ${sticky ? "sticky top-[calc(4.25rem+env(safe-area-inset-top,0px)+5px)] z-30 lg:top-2" : ""}`} role="tablist">
+      <nav ref={tabsRef} data-inline-tour-hotels={active === "dates" && showHotelsUnderDates ? "true" : undefined} aria-label="بخش‌های تور" className={`mt-6 flex scroll-mt-24 gap-1 overflow-x-auto rounded-xl border border-border bg-surface p-1.5 shadow-sm ${sticky ? "sticky top-[calc(5rem+env(safe-area-inset-top,0px)+5px)] z-30 lg:top-2" : ""}`} role="tablist">
         {visibleItems.map((item) => (
           <button
             aria-controls={item.hash}
