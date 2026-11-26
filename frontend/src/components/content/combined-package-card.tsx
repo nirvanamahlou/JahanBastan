@@ -15,15 +15,6 @@ import { HotelStars } from "@/components/content/hotel-stars";
 import { PUBLIC_API_BASE_URL } from "@/lib/api/client";
 import type { PublicCombinedPackage as CombinedPackage } from "@/types/combined-pricing";
 
-const boardLabels = new Map([
-  ["RO", "فقط اقامت"],
-  ["BB", "اقامت با صبحانه"],
-  ["HB", "نیم‌پانسیون"],
-  ["FB", "پانسیون کامل"],
-  ["ALL", "آل اینکلوسیو"],
-  ["UALL", "اولترا آل اینکلوسیو"],
-]);
-
 function CombinedPackagePrice({
   label,
   price,
@@ -50,7 +41,7 @@ function CombinedPackagePrice({
         {formatCurrency(price, currency)}
       </strong>
       {addFlight && flightPrice !== null && Number(flightPrice) > 0 ? (
-        <span className="mb-1 block text-[11px] font-bold text-amber-700">
+        <span className="mb-1 block text-sm font-bold text-brand">
           + {supplement ? "" : "پرواز "}{formatCurrency(flightPrice, flightCurrency)}
         </span>
       ) : null}
@@ -112,12 +103,12 @@ export function CombinedPackageCard({ item, tourId, departureId, capacityRemaini
           return (
             <article className={`overflow-hidden rounded-xl border border-border bg-white ${item.hotels.length === 3 && hotelIndex === 2 ? "col-span-2" : ""}`} key={`${assignment.hotel.slug}-${hotelIndex}`}>
               <Link aria-label={`مشاهده جزئیات ${assignment.hotel.name}`} className="group block" href={`/hotels/${assignment.hotel.slug}/`}>
-                <div className="relative h-[76px] sm:h-[108px] overflow-hidden bg-surface-muted">
+                <div className="relative h-[68px] sm:h-[88px] overflow-hidden bg-surface-muted">
                   {cover ? <Image alt={`نمای ساختمان هتل ${assignment.hotel.name}`} className="object-cover transition duration-500 group-hover:scale-105" fill sizes="(max-width: 768px) 48vw, 550px" src={`${PUBLIC_API_BASE_URL}/media/${cover}`} /> : <span className="grid h-full place-items-center text-sm text-muted">بدون تصویر</span>}
                   <span className="absolute right-2 top-2 grid size-6 place-items-center rounded-xl bg-brand/90 font-black text-white shadow-lg">{(hotelIndex + 1).toLocaleString("fa-IR")}</span>
                   {images.length > 1 ? <span className="absolute bottom-2 left-2 rounded-full bg-black/55 px-2.5 py-1 text-xs font-black text-white backdrop-blur">{images.length.toLocaleString("fa-IR")} تصویر</span> : null}
                 </div>
-                <div className="p-2 sm:p-2.5">
+                <div className="p-2">
                   <div className="flex flex-wrap items-start justify-between gap-1">
                     <div className="min-w-0">
                       <strong className="block break-words text-xs sm:text-sm text-brand transition group-hover:text-accent-strong">{assignment.hotel.name}</strong>
@@ -125,17 +116,16 @@ export function CombinedPackageCard({ item, tourId, departureId, capacityRemaini
                     </div>
                     <HotelStars className="shrink-0" rating={assignment.hotel.starRating} />
                   </div>
-                  <div className="mt-2 flex flex-wrap gap-1 text-[11px] text-brand">
+                  <div className="mt-1 flex flex-wrap gap-1 text-[11px] text-brand">
                     <span className="inline-flex items-center gap-1 rounded-md border border-border bg-surface-muted px-1.5 py-1">
                       <svg aria-hidden="true" className="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M4 3v4a3 3 0 0 0 6 0V3M7 3v18m10 0V3c4 2 4 7 0 8" /></svg>
-                      سرویس <b>{board ? boardLabels.get(board.toUpperCase()) ?? board : "اعلام نشده"}</b>
+                      سرویس <b>{board || "اعلام نشده"}</b>
                     </span>
                     <span className="inline-flex items-center gap-1 rounded-md border border-border bg-surface-muted px-1.5 py-1">
                       <BedIcon aria-hidden="true" className="size-4 shrink-0" />
                       نوع اتاق <b>{assignment.roomType?.trim() || "اعلام نشده"}</b>
                     </span>
                   </div>
-                  <span className="mt-2 inline-flex text-xs font-bold text-brand">جزئیات هتل ←</span>
                 </div>
               </Link>
             </article>
