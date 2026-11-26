@@ -276,21 +276,21 @@ export function TourHotelFilter({
 
   return (
     <section className="scroll-mt-24 space-y-5" id="tour-booking">
-      <div className="grid gap-5 lg:grid-cols-[16rem_minmax(0,1fr)]">
-        <aside aria-label="فیلترهای هتل" className="h-fit min-w-0 bg-surface p-3 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:overscroll-contain">
-          <section aria-labelledby="tour-departure-filter" className="mb-4 border-b border-border pb-4">
-            <h2 id="tour-departure-filter" className="text-sm font-black text-brand">روزهای برگزاری تور</h2>
+      <div className="grid gap-4 lg:grid-cols-[14rem_minmax(0,1fr)]">
+        <aside aria-label="فیلترهای هتل" className="h-fit min-w-0 bg-surface p-2 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:overscroll-contain">
+          <section aria-labelledby="tour-departure-filter" className="mb-2 border-b border-border pb-2">
+            <h2 id="tour-departure-filter" className="text-xs font-black text-brand">روزهای برگزاری تور</h2>
             {!selectedDeparture && <p role="status" className="mb-2 text-sm text-muted">برای تاریخ انتخاب‌شده هتل قابل رزروی موجود نیست. یک تاریخ دیگر انتخاب کنید.</p>}
             <DeparturePicker sidebar options={availableDates} selected={selectedDeparture} available={isTourDepartureBookable} onSelect={(id) => {
               setTourDepartureUrl(id);
               window.dispatchEvent(new CustomEvent("tour-hotels-duration-selected", { detail: { departureId: id } }));
             }} />
           </section>
-          <div className="flex items-center justify-between border-b border-border pb-2.5"><h2 className="flex items-center gap-1.5 text-[.78rem] font-black text-brand">فیلترها</h2><button className="rounded-lg bg-surface-muted px-2 py-1 text-xs font-bold text-brand" onClick={() => { setRegionFilter("all"); setStars("all"); setAvailableOnly(false); setInstallmentOnly(false); setMinimumTotal(""); setMaximumTotal(""); }} type="button">پاک کردن</button></div>
-          <div className="mt-3 grid gap-1.5 text-sm font-bold text-brand"><span>منطقه هتل</span><SiteSelect className="min-h-9! text-[.7rem]!" ariaLabel="منطقه هتل" id="tour-region-filter" onValueChange={setRegionFilter} options={[{ label: "همه مناطق", value: "all" }, ...regions.map((region) => ({ label: region, value: region }))]} value={regionFilter} /></div>
-          <fieldset className="mt-3.5 border-t border-border pt-2.5">
+          <div className="flex items-center justify-between border-b border-border pb-1.5"><h2 className="flex items-center gap-1.5 text-[.78rem] font-black text-brand">فیلترها</h2><button className="rounded-lg bg-surface-muted px-2 py-1 text-xs font-bold text-brand" onClick={() => { setRegionFilter("all"); setStars("all"); setAvailableOnly(false); setInstallmentOnly(false); setMinimumTotal(""); setMaximumTotal(""); }} type="button">پاک کردن</button></div>
+          <div className="mt-2 grid gap-1 text-xs font-bold text-brand"><span>منطقه هتل</span><SiteSelect className="min-h-8! rounded-lg! text-xs!" compactMenu ariaLabel="منطقه هتل" id="tour-region-filter" onValueChange={setRegionFilter} options={[{ label: "همه مناطق", value: "all" }, ...regions.map((region) => ({ label: region, value: region }))]} value={regionFilter} /></div>
+          <fieldset className="mt-2.5 border-t border-border pt-1.5">
             <legend className="text-[.7rem] font-black text-brand">بازه قیمت نهایی (تومان)</legend>
-            <div className="relative mt-4 h-6" dir="rtl">
+            <div className="relative mt-1.5 h-6" dir="rtl">
               <span aria-hidden="true" className="absolute inset-x-0 top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-surface-muted" />
               <span aria-hidden="true" className="absolute top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-brand" style={{ left: `${100 - maximumRangePercent}%`, width: `${maximumRangePercent - minimumRangePercent}%` }} />
               <input aria-label={"\u062d\u062f\u0627\u0642\u0644 \u0642\u06cc\u0645\u062a"} className="pointer-events-none absolute inset-x-0 top-0 z-20 h-6 w-full cursor-pointer appearance-none bg-transparent [transform:scaleX(-1)] [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:size-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-brand [&::-webkit-slider-runnable-track]:h-1 [&::-webkit-slider-runnable-track]:bg-transparent [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:size-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-brand" max={priceRangeLimit} min="0" onChange={(event) => setMinimumTotal(String(Math.min(Number(event.target.value), maximumRangeValue)))} step="500000" type="range" value={minimumRangeValue} />
@@ -300,27 +300,33 @@ export function TourHotelFilter({
               <span className="min-w-0 text-right" title={formatCurrency(minimumRangeValue, "IRT")}>{formatPriceRangeLabel(minimumRangeValue)}</span>
               <span className="min-w-0 text-left" title={maximumTotal ? formatCurrency(maximumRangeValue, "IRT") : "بدون سقف"}>{maximumTotal ? formatPriceRangeLabel(maximumRangeValue) : "بدون سقف"}</span>
             </div>
-            <div className="mt-3 grid min-w-0 grid-cols-2 gap-2">
-              <input aria-label="حداقل قیمت به تومان" className="box-border w-full min-w-0 rounded-xl border border-border bg-white px-1 py-2 text-center text-[11px] tabular-nums outline-none [appearance:textfield] focus:border-brand [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" dir="ltr" inputMode="numeric" onChange={(event) => setMinimumTotal(event.target.value)} placeholder="از" type="number" value={minimumTotal} />
-              <input aria-label="حداکثر قیمت به تومان" className="box-border w-full min-w-0 rounded-xl border border-border bg-white px-1 py-2 text-center text-[11px] tabular-nums outline-none [appearance:textfield] focus:border-brand [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" dir="ltr" inputMode="numeric" onChange={(event) => setMaximumTotal(event.target.value)} placeholder="تا" type="number" value={maximumTotal} />
+            <div className="mt-1.5 grid min-w-0 grid-cols-2 gap-2">
+              <input aria-label="حداقل قیمت به تومان" className="box-border w-full min-w-0 rounded-xl border border-border bg-white px-1 py-1.5 text-center text-[11px] tabular-nums outline-none [appearance:textfield] focus:border-brand [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" dir="ltr" inputMode="numeric" onChange={(event) => setMinimumTotal(event.target.value)} placeholder="از" type="number" value={minimumTotal} />
+              <input aria-label="حداکثر قیمت به تومان" className="box-border w-full min-w-0 rounded-xl border border-border bg-white px-1 py-1.5 text-center text-[11px] tabular-nums outline-none [appearance:textfield] focus:border-brand [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" dir="ltr" inputMode="numeric" onChange={(event) => setMaximumTotal(event.target.value)} placeholder="تا" type="number" value={maximumTotal} />
             </div>
           </fieldset>
-          <fieldset className="mt-4 border-t border-border pt-2">
-            <legend className="pe-2 text-sm font-bold text-brand">ستاره هتل</legend>
-            {(["all", 5, 4, 3, 2, 1] as const).map(value => (
-              <label key={value} className="flex min-h-8 cursor-pointer items-center gap-2 text-sm text-brand">
-                <input checked={stars === value} className="size-4 accent-brand" name="tour-hotel-stars" onChange={() => setStars(value)} type="radio" />
-                {value === "all" ? "همه هتل‌ها" : `${value.toLocaleString("fa-IR")} ستاره`}
-              </label>
-            ))}
-          </fieldset>
-          <fieldset className="mt-3.5 border-t border-border pt-2.5">
+          <div className="mt-2 grid gap-1 text-xs font-bold text-brand">
+            <span>ستاره هتل</span>
+            <SiteSelect
+              ariaLabel="ستاره هتل"
+              className="min-h-8! rounded-lg! text-xs!"
+              compactMenu
+              id="tour-stars-filter"
+              onValueChange={(value) => setStars(value === "all" ? "all" : Number(value))}
+              options={[
+                { label: "همه ستاره‌ها", value: "all" },
+                ...[5, 4, 3, 2, 1].map(value => ({ label: `${value.toLocaleString("fa-IR")} ستاره`, value: String(value) })),
+              ]}
+              value={String(stars)}
+            />
+          </div>
+          <fieldset className="mt-2.5 border-t border-border pt-1.5">
             <legend className="px-1 text-[.7rem] font-black text-brand">فیلترهای تور</legend>
-            <label className="mt-3 flex cursor-pointer items-center gap-2 py-1 text-sm text-brand">
+            <label className="mt-1 flex cursor-pointer items-center gap-1.5 py-1 text-xs text-brand">
               <span>فقط تورهای موجود</span>
               <input checked={availableOnly} className="size-4 accent-brand" onChange={(event) => setAvailableOnly(event.target.checked)} type="checkbox" />
             </label>
-            <label className="mt-2 flex cursor-pointer items-center gap-2 py-1 text-sm text-brand">
+            <label className="mt-0.5 flex cursor-pointer items-center gap-1.5 py-1 text-xs text-brand">
               <span>فقط تورهای اقساطی</span>
               <input checked={installmentOnly} className="size-4 accent-brand" onChange={(event) => setInstallmentOnly(event.target.checked)} type="checkbox" />
             </label>

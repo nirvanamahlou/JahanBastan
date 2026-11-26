@@ -27,7 +27,7 @@ export function DeparturePicker<T extends Option>({ options, selected, onSelect,
       (a.departureDate ?? "").localeCompare(b.departureDate ?? "") || (a.nights ?? 0) - (b.nights ?? 0),
     );
     return (
-      <div className="mt-2 grid max-h-48 gap-1.5 overflow-y-auto p-0.5 pe-1 [scrollbar-width:thin]">
+      <div className="mt-1.5 grid max-h-36 gap-1 overflow-y-auto p-0.5 pe-1 [scrollbar-width:thin]">
         {sorted.map(item => {
           const returnDate = item.departureDate ? tourReturnDate(item.departureDate, item.returnDate ?? null, item.nights) : null;
           const nights = item.nights != null ? item.nights.toLocaleString("fa-IR") + " شب" : null;
@@ -37,7 +37,7 @@ export function DeparturePicker<T extends Option>({ options, selected, onSelect,
           return (
             <button
               aria-pressed={selected?.id === item.id}
-              className="grid min-h-10 min-w-0 gap-0.5 rounded-lg border border-border bg-white px-2 py-1.5 text-center text-brand enabled:hover:border-brand focus-visible:outline-2 focus-visible:outline-brand aria-pressed:border-brand aria-pressed:bg-brand-soft disabled:opacity-50"
+              className="grid min-h-10 min-w-0 rounded-lg border border-border bg-white px-1.5 py-1 text-center text-brand enabled:hover:border-brand focus-visible:outline-2 focus-visible:outline-brand aria-pressed:border-brand aria-pressed:bg-brand-soft disabled:opacity-50"
               disabled={!available(item)}
               key={item.id}
               onClick={() => onSelect(item.id)}
