@@ -14,6 +14,7 @@ type SiteSelectProps = {
   ariaLabel: string;
   className?: string;
   compactMenu?: boolean;
+  cardOptions?: boolean;
   defaultValue?: string;
   disabled?: boolean;
   id: string;
@@ -39,6 +40,7 @@ export function SiteSelect({
   ariaLabel,
   className = "",
   compactMenu = false,
+  cardOptions = false,
   defaultValue = "",
   disabled = false,
   id,
@@ -201,11 +203,11 @@ export function SiteSelect({
               />
             </div>
           ) : null}
-          <ul className={`${compactMenu ? "max-h-40 p-1" : "max-h-64 p-1.5"} overflow-y-auto overscroll-contain`} id={`${id}-options`} role="listbox">
+          <ul className={`${compactMenu ? "max-h-40 p-1" : "max-h-64 p-1.5"} overflow-y-auto overscroll-contain ${cardOptions ? "space-y-1.5" : ""}`} id={`${id}-options`} role="listbox">
             {visibleOptions.map((option, index) => {
               const isSelected = option.value === selectedValue;
               return (
-                <li key={`${option.value}-${option.label}`} role="presentation">
+                <li key={`${option.value}-${option.label}`} role="presentation" className={cardOptions ? "rounded-xl border border-border" : undefined}>
                   <button
                     aria-selected={isSelected}
                     className={`flex w-full items-center justify-between rounded-xl text-right transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent ${compactMenu ? "min-h-8 gap-1 px-1.5 py-1 text-xs" : "min-h-11 gap-3 px-3 py-2.5 text-sm"} ${isSelected ? "bg-brand text-white" : "text-foreground hover:bg-brand-soft hover:text-brand"}`}
@@ -216,7 +218,7 @@ export function SiteSelect({
                     type="button"
                   >
                     <span className="min-w-0">
-                      <strong className="block truncate font-bold">{option.label}</strong>
+                      <strong className={cardOptions ? "block whitespace-normal font-bold" : "block truncate font-bold"}>{option.label}</strong>
                       {option.description ? <span className={`mt-0.5 block truncate text-xs ${isSelected ? "text-white/75" : "text-muted"}`}>{option.description}</span> : null}
                     </span>
                     {isSelected ? <span aria-hidden="true" className="shrink-0">✓</span> : null}
