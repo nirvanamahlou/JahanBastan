@@ -113,16 +113,16 @@ export function CombinedPackageCard({ item, tourId, departureId, capacityRemaini
                   <div className="flex flex-wrap items-start justify-between gap-1">
                     <div className="min-w-0">
                       <strong className="block break-words text-xs sm:text-sm text-brand transition group-hover:text-accent-strong">{assignment.hotel.name}</strong>
-                      <p className="mt-1 text-xs text-muted">{assignment.nights.toLocaleString("fa-IR")} شب</p>
                     </div>
                     <HotelStars className="shrink-0" rating={assignment.hotel.starRating} />
                   </div>
-                  <div className="mt-1 flex flex-wrap gap-1 text-[11px] text-brand">
-                    <span className="inline-flex items-center gap-1 rounded-md border border-border bg-surface-muted px-1.5 py-1">
+                  <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-brand">
+                    <span className="shrink-0 text-xs text-muted">{assignment.nights.toLocaleString("fa-IR")} شب</span>
+                    <span className="inline-flex items-center gap-1 rounded-md border border-border bg-surface-muted px-1.5 py-0.5">
                       <svg aria-hidden="true" className="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M4 3v4a3 3 0 0 0 6 0V3M7 3v18m10 0V3c4 2 4 7 0 8" /></svg>
                       سرویس <b>{board || "اعلام نشده"}</b>
                     </span>
-                    {roomType && <span className="inline-flex items-center gap-1 rounded-md border border-border bg-surface-muted px-1.5 py-1">
+                    {roomType && <span className="inline-flex items-center gap-1 rounded-md border border-border bg-surface-muted px-1.5 py-0.5">
                       <BedIcon aria-hidden="true" className="size-4 shrink-0" />
                       نوع اتاق <b>{roomType}</b>
                     </span>}
