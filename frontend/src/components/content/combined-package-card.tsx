@@ -120,7 +120,7 @@ export function CombinedPackageCard({ item, tourId, departureId, capacityRemaini
                     <span className="shrink-0 text-xs text-muted">{assignment.nights.toLocaleString("fa-IR")} شب</span>
                     <span className="inline-flex items-center gap-1 rounded-md border border-border bg-surface-muted px-1.5 py-0.5">
                       <svg aria-hidden="true" className="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M4 3v4a3 3 0 0 0 6 0V3M7 3v18m10 0V3c4 2 4 7 0 8" /></svg>
-                      سرویس <b>{board || "اعلام نشده"}</b>
+                      <span className="sr-only">سرویس </span><b>{board || "اعلام نشده"}</b>
                     </span>
                     {roomType && <span className="inline-flex items-center gap-1 rounded-md border border-border bg-surface-muted px-1.5 py-0.5">
                       <BedIcon aria-hidden="true" className="size-4 shrink-0" />
