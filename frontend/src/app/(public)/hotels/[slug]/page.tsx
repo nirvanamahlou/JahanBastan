@@ -1,4 +1,3 @@
-import catalogStyles from "@/components/content/catalog-layout.module.css";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -86,15 +85,15 @@ export default async function HotelDetailPage({ params }: Props) {
         title={hotel.name}
         description={hotel.summary}
       />
-      <Container className={`${catalogStyles.catalogContainer} py-5 sm:py-8`}>
+      <Container className="!max-w-[1320px] py-4 sm:py-6">
         {images.length ? (
           <HotelImageGallery hotelName={hotel.name} imageAltText={hotel.imageAltText} imageIds={images} />
         ) : null}
-        <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,16rem)]">
+        <div className="mt-4 grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,18rem)]">
           <article className="space-y-6">
             {sections.map(([title, content]) => content ? <HotelSection content={content} key={title} title={title} /> : null)}
           </article>
-          <aside className="h-fit self-start rounded-2xl border border-border bg-surface p-5">
+          <aside className="h-fit min-w-0 self-start rounded-2xl border border-border bg-surface-muted p-4 lg:sticky lg:top-5">
             <h2 className="font-black text-brand">اطلاعات اقامت</h2>
             <dl className="mt-4 space-y-3 text-sm">
               {Object.entries({ englishName: "نام انگلیسی", chainName: "زنجیره هتل", checkInTime: "ساعت ورود", checkOutTime: "ساعت خروج", website: "وب‌سایت هتل" }).map(([key, label]) =>

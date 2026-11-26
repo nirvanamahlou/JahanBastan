@@ -72,14 +72,14 @@ export function HotelImageGallery({
   if (!activeImageId) return null;
 
   return (
-    <section aria-label={`گالری تصاویر ${hotelName}`} className="space-y-3">
-      <div className="relative aspect-[16/10] overflow-hidden rounded-2xl border border-border bg-surface-muted shadow-sm sm:rounded-3xl">
+    <section aria-label={`گالری تصاویر ${hotelName}`} className={imageIds.length > 1 ? "grid min-w-0 gap-3 lg:grid-cols-[minmax(0,1fr)_7.5rem]" : "min-w-0"}>
+      <div className="relative aspect-[16/9] max-h-[460px] min-w-0 overflow-hidden rounded-xl border border-border bg-surface-muted lg:aspect-[5/2]">
         <Image
           alt={activeIndex === 0 && imageAltText ? imageAltText : `${hotelName}، تصویر ${activeIndex + 1}`}
           className="object-cover"
           fill
           priority
-          sizes="(max-width: 768px) calc(100vw - 2rem), min(72rem, calc(100vw - 4rem))"
+          sizes="(max-width: 1023px) calc(100vw - 2rem), min(1260px, calc(100vw - 9rem))"
           src={imageUrl(activeImageId)}
         />
         <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 bg-gradient-to-t from-black/65 via-black/15 to-transparent p-4 sm:p-5">
@@ -100,7 +100,7 @@ export function HotelImageGallery({
       {imageIds.length > 1 ? (
         <div
           aria-label="تصاویر دیگر هتل"
-          className="flex snap-x gap-2 overflow-x-auto pb-1 [scrollbar-width:thin] sm:gap-3"
+          className="flex snap-x gap-2 overflow-x-auto pb-1 [scrollbar-width:thin] lg:max-h-[460px] lg:flex-col lg:overflow-x-hidden lg:overflow-y-auto lg:pb-0 sm:gap-3"
         >
           {imageIds.map((imageId, index) => {
             const isActive = index === activeIndex;
@@ -108,7 +108,7 @@ export function HotelImageGallery({
               <button
                 aria-label={`نمایش تصویر ${index + 1} از ${hotelName}`}
                 aria-pressed={isActive}
-                className={`relative aspect-[4/3] w-24 shrink-0 snap-start overflow-hidden rounded-xl border-2 bg-surface-muted transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent sm:w-32 ${
+                className={`relative aspect-[4/3] w-24 shrink-0 snap-start overflow-hidden rounded-xl border-2 bg-surface-muted transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-accent sm:w-32 lg:w-full ${
                   isActive
                     ? "border-brand opacity-100"
                     : "border-transparent opacity-70 hover:opacity-100"
