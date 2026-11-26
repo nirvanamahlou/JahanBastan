@@ -519,7 +519,7 @@ const subscribeToHydration = () => () => undefined;
           ) : (
             <>
               {buyerContact && onBuyerContactChange && (
-                <fieldset className={`grid min-w-0 border border-border bg-white ${inline ? "gap-2.5 rounded-xl p-3 sm:grid-cols-2 lg:grid-cols-5" : "grid-cols-[repeat(auto-fit,minmax(min(100%,12rem),1fr))] gap-4 rounded-2xl p-4"}`}>
+                <fieldset className={`grid min-w-0 border border-border bg-white ${inline ? "gap-2.5 rounded-xl p-3 sm:grid-cols-3" : "grid-cols-[repeat(auto-fit,minmax(min(100%,12rem),1fr))] gap-4 rounded-2xl p-4"}`}>
                   <legend className={`px-2 font-black text-brand ${inline ? "text-sm" : ""}`}>اطلاعات خریدار</legend>
                   {([
                     ["fullName", "نام کامل خریدار", "text", 120, true],
@@ -527,7 +527,7 @@ const subscribeToHydration = () => () => undefined;
                     ["address", "نشانی", "text", 1000, true],
                     ["landline", "تلفن ثابت (اختیاری)", "tel", 32, false],
                     ["postalCode", "کد پستی (اختیاری)", "text", 20, false],
-                  ] as const).map(([key, label, type, maxLength, required]) => (
+                  ] as const).filter(([key]) => !inline || (key !== "landline" && key !== "postalCode")).map(([key, label, type, maxLength, required]) => (
                     <label key={key} className={`min-w-0 font-bold text-brand ${inline ? "flex flex-col justify-between gap-1 text-xs" : "grid gap-1.5 text-sm"}`}>
                       {label}
                       <input type={type} dir={key === "postalCode" || type === "tel" ? "ltr" : undefined}

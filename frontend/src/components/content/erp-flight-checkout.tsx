@@ -414,8 +414,6 @@ export function ErpFlightCheckout({ flight, passengerCounts, resultsHref }: {
             <h3 className="font-black text-brand">اطلاعات تماس خریدار</h3>
             <p className="mt-2">{buyer.fullName}{buyer.buyerMobile && <> · <bdi>{buyer.buyerMobile}</bdi></>}</p>
             {buyer.address && <p className="mt-1 text-sm text-muted">{buyer.address}</p>}
-            {buyer.landline && <p className="mt-1 text-sm text-muted">تلفن ثابت · <bdi>{buyer.landline}</bdi></p>}
-            {buyer.postalCode && <p className="mt-1 text-sm text-muted">کد پستی · <bdi>{buyer.postalCode}</bdi></p>}
           </section>}
           {review.fares?.length ? (
             <div className="overflow-x-auto rounded-xl border border-border bg-white">
