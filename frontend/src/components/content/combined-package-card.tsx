@@ -35,10 +35,10 @@ function CombinedPackagePrice({
   return (
     <div className="flex min-w-0 flex-col rounded-xl border border-border bg-white p-1.5 text-center">
       <p className="text-xs text-muted">{label}</p>
-      <strong className="mb-1 mt-0.5 flex min-w-0 flex-wrap items-center justify-center gap-x-1 gap-y-0.5 text-xs leading-snug text-brand">
+      <strong className="mb-1 mt-0.5 flex min-w-0 flex-wrap items-center justify-center gap-x-1 gap-y-0.5 text-[.65rem] leading-snug text-brand">
         <bdi className="whitespace-nowrap">{formatCurrency(price, currency)}</bdi>
         {addFlight && flightPrice !== null && Number(flightPrice) > 0 && (
-          <span className="inline-flex items-center gap-1 whitespace-nowrap">
+          <span className="inline-flex items-center gap-0.5 whitespace-nowrap">
             <span>+</span>
             <bdi>{formatCurrency(flightPrice, flightCurrency)}</bdi>
           </span>
