@@ -255,7 +255,7 @@ export function JalaliDateRangeInput({
             <strong className="text-sm font-black">
               {selectionStep === "departure" ? labels.departure : labels.return}
             </strong>
-            <button aria-label="بستن تقویم" className="grid size-8 place-items-center rounded-full text-xl text-muted hover:bg-brand-soft" onClick={closePicker} type="button">×</button>
+            <button aria-label="بستن تقویم" className="grid size-8 min-h-0! place-items-center rounded-full text-xl text-muted hover:bg-brand-soft" onClick={closePicker} type="button">×</button>
           </header>
           <JalaliMonthYearPicker
             maxYear={maximumJalaliYear}
@@ -368,7 +368,7 @@ function MonthCalendar({
             <button
               aria-label={`${persianNumber(day)} ${JALALI_MONTH_NAMES[month.month - 1]} ${persianNumber(month.year)}${available ? "، دارای حرکت" : ""}`}
               aria-selected={endpoint}
-              className={`relative grid h-(--day-height) place-items-center rounded-lg text-sm font-semibold tabular-nums leading-none transition focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:text-slate-400 ${
+              className={`relative grid h-(--day-height) min-h-0! place-items-center rounded-lg text-sm font-semibold tabular-nums leading-none transition focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:text-slate-400 ${
                 endpoint
                   ? "bg-brand font-bold text-white"
                   : previewEndpoint
