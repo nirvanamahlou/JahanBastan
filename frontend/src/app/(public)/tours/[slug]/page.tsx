@@ -494,7 +494,7 @@ export default async function TourPage({ params, searchParams }: Props) {
         {hasHotels ? (
           <div className="tour-tab-panel mt-4" data-tour-section="hotels">
             <DatedCombinedPackages country={tourCountry} key={initialDepartureId} initialDepartureId={initialDepartureId} departures={item.departures} exchangeRates={{ usdToIrt: settings.socialLinks.exchangeRateUsdIrt, eurToIrt: settings.socialLinks.exchangeRateEurIrt }} packages={item.combinedPackages ?? []} standaloneHotels={hasStandaloneHotels} tourId={item.id} />
-            {hasStandaloneHotels ? <TourHotelFilter key={initialDepartureId} initialDepartureId={initialDepartureId} country={item.destination?.country} departures={item.departures as TourBookingDeparture[]} destination={item.destination?.title} exchangeRates={{ usdToIrt: settings.socialLinks.exchangeRateUsdIrt, eurToIrt: settings.socialLinks.exchangeRateEurIrt }} faqs={faqPayload.items} isInstallmentAvailable={item.isInstallmentAvailable} packages={[]} tourId={item.id} tourSlug={item.slug} /> : null}
+            {hasStandaloneHotels ? <TourHotelFilter key={initialDepartureId} initialDepartureId={initialDepartureId} country={item.destination?.country} departures={item.departures as TourBookingDeparture[]} destination={item.destination?.title} exchangeRates={{ usdToIrt: settings.socialLinks.exchangeRateUsdIrt, eurToIrt: settings.socialLinks.exchangeRateEurIrt }} faqs={faqPayload.items} packages={[]} tourId={item.id} tourSlug={item.slug} /> : null}
           </div>
         ) : null}
         {images.length > 1 ? (

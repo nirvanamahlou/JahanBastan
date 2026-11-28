@@ -26,7 +26,6 @@ export function TourHotelPresentation({ name, href, images, locationHref, stars,
           <h3>{href ? <Link href={href}>{name}</Link> : name}</h3>
           {Number(stars) > 0 && <span className={styles.rating}>
             <HotelStars rating={stars ?? 0} size="sm" />
-            <span>{stars?.toLocaleString("fa-IR")} ستاره</span>
           </span>}
         </div>
         <a className={styles.location} href={locationHref} target="_blank" rel="noreferrer">لوکیشن</a>

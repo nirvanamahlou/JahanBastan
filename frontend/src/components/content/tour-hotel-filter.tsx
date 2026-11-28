@@ -140,7 +140,6 @@ export function TourHotelFilter({
   country,
   exchangeRates,
   faqs,
-  isInstallmentAvailable,
 }: {
   initialDepartureId?: number;
   departures: TourBookingDeparture[];
@@ -151,7 +150,6 @@ export function TourHotelFilter({
   country?: string | null;
   exchangeRates: ExchangeRates;
   faqs?: { id: number; question: string; answer: string }[];
-  isInstallmentAvailable: boolean;
 }) {
   const availableDates = useMemo(
     () => departures.filter((item) => item.departureDate && item.hotelPrices.some(hasAvailableHotelRoom) && isTourDepartureBookable(item)),
@@ -160,8 +158,6 @@ export function TourHotelFilter({
   const [departureId, setDepartureId] = useState<number | null>(initialDepartureId ?? null);
   const [regionFilter, setRegionFilter] = useState("all");
   const [stars, setStars] = useState<number | "all">("all");
-  const [availableOnly, setAvailableOnly] = useState(false);
-  const [installmentOnly, setInstallmentOnly] = useState(false);
   const [minimumTotal, setMinimumTotal] = useState("");
   const [maximumTotal, setMaximumTotal] = useState("");
   const [visibleOfferCount, setVisibleOfferCount] = useState(INITIAL_VISIBLE_OFFERS);
@@ -224,14 +220,9 @@ export function TourHotelFilter({
       const minimum = Number(minimumTotal) || 0;
       const maximum = Number(maximumTotal) || Number.POSITIVE_INFINITY;
       const matchesPrice = (!minimum && !maximumTotal) || (total !== null && total >= minimum && total <= maximum);
-      const hasAvailableRoom = rooms.some(
-        (room) => room.key !== "infant" && Number(offer[room.price]) > 0,
-      ) && offer.isAvailable && (offer.capacityRemaining === null || offer.capacityRemaining > 0);
-      const matchesAvailability = !availableOnly || hasAvailableRoom;
-      const matchesInstallment = !installmentOnly || isInstallmentAvailable;
-      return matchesDeparture && matchesRegion && matchesStars && matchesPrice && matchesAvailability && matchesInstallment;
+      return matchesDeparture && matchesRegion && matchesStars && matchesPrice;
     });
-  }, [availableOnly, activeDepartureId, exchangeRates, installmentOnly, isInstallmentAvailable, maximumTotal, minimumTotal, packageOffers, regionFilter, stars]);
+  }, [activeDepartureId, exchangeRates, maximumTotal, minimumTotal, packageOffers, regionFilter, stars]);
   const visibleOffers = offers.slice(0, visibleOfferCount);
 
   const regions = useMemo(
@@ -286,7 +277,7 @@ export function TourHotelFilter({
               window.dispatchEvent(new CustomEvent("tour-hotels-duration-selected", { detail: { departureId: id } }));
             }} />
           </section>
-          <div className="flex items-center justify-between border-b border-border pb-1.5"><h2 className="flex items-center gap-1.5 text-[.78rem] font-black text-brand">فیلترها</h2><button className="rounded-lg bg-surface-muted px-2 py-1 text-xs font-bold text-brand" onClick={() => { setRegionFilter("all"); setStars("all"); setAvailableOnly(false); setInstallmentOnly(false); setMinimumTotal(""); setMaximumTotal(""); }} type="button">پاک کردن</button></div>
+          <div className="flex items-center justify-between border-b border-border pb-1.5"><h2 className="flex items-center gap-1.5 text-[.78rem] font-black text-brand">فیلترها</h2><button className="rounded-lg bg-surface-muted px-2 py-1 text-xs font-bold text-brand" onClick={() => { setRegionFilter("all"); setStars("all"); setMinimumTotal(""); setMaximumTotal(""); }} type="button">پاک کردن</button></div>
           <div className="mt-2 grid gap-1 text-xs font-bold text-brand"><span>منطقه هتل</span><SiteSelect className="min-h-8! rounded-lg! text-xs!" compactMenu ariaLabel="منطقه هتل" id="tour-region-filter" onValueChange={setRegionFilter} options={[{ label: "همه مناطق", value: "all" }, ...regions.map((region) => ({ label: region, value: region }))]} value={regionFilter} /></div>
           <fieldset className="mt-2.5 border-t border-border pt-1.5">
             <legend className="text-[.7rem] font-black text-brand">بازه قیمت نهایی (تومان)</legend>
@@ -320,17 +311,6 @@ export function TourHotelFilter({
               value={String(stars)}
             />
           </div>
-          <fieldset className="mt-2.5 border-t border-border pt-1.5">
-            <legend className="px-1 text-[.7rem] font-black text-brand">فیلترهای تور</legend>
-            <label className="mt-1 flex cursor-pointer items-center gap-1.5 py-1 text-xs text-brand">
-              <span>فقط تورهای موجود</span>
-              <input checked={availableOnly} className="size-4 accent-brand" onChange={(event) => setAvailableOnly(event.target.checked)} type="checkbox" />
-            </label>
-            <label className="mt-0.5 flex cursor-pointer items-center gap-1.5 py-1 text-xs text-brand">
-              <span>فقط تورهای اقساطی</span>
-              <input checked={installmentOnly} className="size-4 accent-brand" onChange={(event) => setInstallmentOnly(event.target.checked)} type="checkbox" />
-            </label>
-          </fieldset>
         </aside>
         <div className="min-w-0 space-y-4" id="tour-hotel-results">
           {visibleOffers.map((offer) => {
