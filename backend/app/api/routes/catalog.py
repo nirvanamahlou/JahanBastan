@@ -385,6 +385,7 @@ async def list_hotels(
     ),
     min_stars: int | None = Query(default=None, alias="minStars", ge=1, le=5),
     featured: bool | None = None,
+    q: str | None = Query(default=None, max_length=180),
     country: str | None = Query(default=None, max_length=100),
     passenger_count: Annotated[
         int | None, Query(alias="passengerCount", ge=1, le=20)
@@ -398,6 +399,7 @@ async def list_hotels(
         featured=featured,
         country=country,
         passenger_count=passenger_count,
+        query=q,
         limit=page_size,
         offset=offset,
     )

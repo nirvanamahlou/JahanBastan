@@ -23,7 +23,6 @@ const serviceBanners: Record<ServiceType, string> = {
 type Option = { label: string; value: string };
 
 type HomepageHeroProps = {
-  hotelCountries: Option[];
   visaCountries: Option[];
   destinations: Option[];
   departures: Option[];
@@ -32,7 +31,6 @@ type HomepageHeroProps = {
 };
 
 export function HomepageHero({
-  hotelCountries,
   visaCountries,
   destinations,
   departures,
@@ -49,7 +47,7 @@ export function HomepageHero({
         </div>
         <div className={styles.content}>
           <div id="trip-search" tabIndex={-1} data-home-search="true" className={styles.search}>
-            <TravelSearch key={serviceType} hotelCountries={hotelCountries} visaCountries={visaCountries}
+            <TravelSearch key={serviceType} visaCountries={visaCountries}
               destinations={destinations} departures={departures} transportOptions={transportOptions}
               tourTransportOptions={tourTransportOptions} serviceType={serviceType} onServiceTypeChange={setServiceType} />
           </div>

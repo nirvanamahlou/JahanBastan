@@ -594,11 +594,21 @@ class HotelRepository:
         limit: int,
         offset: int,
         passenger_count: int | None = None,
+        query: str | None = None,
     ) -> tuple[list[Hotel], int]:
         filters = [
             Hotel.status == PublicationStatus.PUBLISHED,
             Destination.status == PublicationStatus.PUBLISHED,
         ]
+        if query and (term := query.strip()):
+            normalized = term.replace("ي", "ی").replace("ك", "ک")
+            fields = (Hotel.name, Hotel.region, Destination.title, Destination.country,
+                      Hotel.avina_profile["englishName"].as_string())
+            filters.append(or_(*(
+                func.replace(func.replace(field, "ي", "ی"), "ك", "ک")
+                .icontains(normalized, autoescape=True)
+                for field in fields
+            )))
         if destination_slug:
             filters.append(Destination.slug == destination_slug)
         if min_stars is not None:

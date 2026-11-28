@@ -236,7 +236,6 @@ export default async function HomePage() {
       ],
     }));
 
-  const hotelCountries = countryOptionsFor(hotelDirectory.map((item) => item.country));
   const visaCountries = countryOptionsFor(visaExplorerItems.map((visa) => visa.country));
   const transportServiceTypes = ["flight", "bus", "train"] as const;
   const publishedTransportServices = servicePayload.items.filter((service) =>
@@ -450,7 +449,6 @@ export default async function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(homeJsonLd).replace(/</g, "\\u003c") }}
       />
       <HomepageHero
-        hotelCountries={hotelCountries.map((country) => ({ label: country.name, value: country.name }))}
         visaCountries={visaCountries.map((country) => ({ label: country.name, value: country.name }))}
         destinations={searchDestinationPayload.items.map((destination) => ({ label: destination.title, value: destination.slug }))}
         departures={filterOptions.origins}

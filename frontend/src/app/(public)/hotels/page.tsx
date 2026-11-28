@@ -25,12 +25,14 @@ type DestinationOption = { id: number; title: string; slug: string; country: str
 export default async function HotelsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ country?: string; passengerCount?: string; destinationSlug?: string; page?: string }>;
+  searchParams: Promise<{ country?: string; passengerCount?: string; destinationSlug?: string; page?: string; hotelQuery?: string }>;
 }) {
-  const { country = "", passengerCount = "", destinationSlug = "", page = "1" } = await searchParams;
+  const { country = "", passengerCount = "", destinationSlug = "", page = "1", hotelQuery = "" } = await searchParams;
   const pageSize = 24;
   const currentPage = Math.max(1, Number.parseInt(page, 10) || 1);
   const query = new URLSearchParams({ pageSize: String(pageSize), offset: String((currentPage - 1) * pageSize) });
+  const hotelSearch = typeof hotelQuery === "string" ? hotelQuery.trim().slice(0, 180) : "";
+  if (hotelSearch) query.set("q", hotelSearch);
   if (country) query.set("country", country);
   if (passengerCount) query.set("passengerCount", passengerCount);
   if (destinationSlug) query.set("destinationSlug", destinationSlug);
@@ -74,7 +76,7 @@ export default async function HotelsPage({
           <Pagination
             basePath="/hotels/"
             currentPage={currentPage}
-            searchParams={{ country, passengerCount, destinationSlug }}
+            searchParams={{ country, passengerCount, destinationSlug, hotelQuery: hotelSearch }}
             totalPages={Math.ceil(hotelPayload.total / pageSize)}
           />
         </Container>

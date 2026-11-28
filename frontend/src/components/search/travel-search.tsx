@@ -157,7 +157,6 @@ export function TravelSearch({
   departures,
   transportOptions,
   tourTransportOptions,
-  hotelCountries,
   visaCountries,
   serviceType,
   onServiceTypeChange,
@@ -166,7 +165,6 @@ export function TravelSearch({
   departures: Option[];
   transportOptions: TransportSearchOptions;
   tourTransportOptions: TransportSearchOptions;
-  hotelCountries: Option[];
   visaCountries: Option[];
   serviceType: ServiceType;
   onServiceTypeChange: (serviceType: ServiceType) => void;
@@ -232,6 +230,7 @@ export function TravelSearch({
     const params = new URLSearchParams();
 
     for (const key of [
+      "hotelQuery",
       "visaType",
       "destination",
       "country",
@@ -338,11 +337,18 @@ export function TravelSearch({
           className={`travel-search-form ${styles.form}`}
           data-service={serviceType}
         >
-          {serviceType === "hotel" || serviceType === "visa" ? (
+          {serviceType === "hotel" ? (
+            <div className={styles.field} data-country-field>
+              <LocationIcon className={styles.fieldIcon} />
+              <input aria-label="نام شهر، هتل یا منطقه" name="hotelQuery" maxLength={180}
+                placeholder="نام شهر، هتل یا منطقه" type="search"
+                className="w-full min-h-10 min-w-0 rounded-xl border border-border bg-white ps-8 pe-3 text-sm text-brand placeholder:text-muted" />
+            </div>
+          ) : serviceType === "visa" ? (
             <div className={styles.field} data-country-field>
               <LocationIcon className={styles.fieldIcon} />
               <Select id={`${serviceType}-destination`} name="country" label="کشور مقصد"
-                options={serviceType === "hotel" ? hotelCountries : visaCountries}
+                options={visaCountries}
                 placeholder="انتخاب کشور مقصد" className={fieldClassName} searchable />
             </div>
           ) : (
