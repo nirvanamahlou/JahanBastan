@@ -1,7 +1,7 @@
 import { TourProfileFacts } from "@/components/content/tour-profile-facts";
 import { hasBookableTourPackage } from "@/lib/tour-departure-availability";
 import { TourProfileHero } from "@/components/content/tour-profile-hero";
-import { DatedCombinedPackages } from "@/components/content/dated-combined-packages";
+import { CombinedDepartureSelect, DatedCombinedPackages } from "@/components/content/dated-combined-packages";
 import type { PublicCombinedPackage } from "@/types/combined-pricing";
 import type { Metadata } from "next";
 import Image from "next/image";
@@ -477,7 +477,12 @@ export default async function TourPage({ params, searchParams }: Props) {
       <Container className={`-mt-4 relative z-10 pb-14 ${tourStyles.profileContent}`} data-scroll-reveal-skip>
         <TourProfileFacts facts={facts} />
 
-        <TourDetailTabs sections={tourSections} sticky={!hasCombinedHotels} />
+        <TourDetailTabs
+          sections={tourSections}
+          sticky
+          departure={hasCombinedHotels ? <CombinedDepartureSelect key={initialDepartureId} departures={item.departures} packages={item.combinedPackages ?? []} initialDepartureId={initialDepartureId} /> : undefined}
+          downloadHref={hasCombinedHotels ? `${PUBLIC_API_BASE_URL}/tours/${encodeURIComponent(item.slug)}/package.pdf` : undefined}
+        />
         {hasDates || flightDepartures.length ? (
           <div className="tour-tab-panel mt-8" data-tour-section="dates">
             <TourDepartureCalendar key={initialDepartureId} initialDepartureId={initialDepartureId} departures={item.departures.map((departure) => ({

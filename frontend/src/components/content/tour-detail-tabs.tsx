@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 
 export type TourSection = "overview" | "dates" | "hotels" | "documents";
 
@@ -19,7 +19,7 @@ function sectionFromHash(
   return visibleItems.find((item) => item.hash === value)?.id ?? null;
 }
 
-export function TourDetailTabs({ sections, sticky = false }: { sections: TourSection[]; sticky?: boolean }) {
+export function TourDetailTabs({ sections, sticky = false, departure, downloadHref }: { sections: TourSection[]; sticky?: boolean; departure?: ReactNode; downloadHref?: string }) {
   const visibleItems = useMemo(
     () => items.filter((item) => sections.includes(item.id)),
     [sections],
@@ -27,7 +27,7 @@ export function TourDetailTabs({ sections, sticky = false }: { sections: TourSec
   const defaultSection = sections.includes("hotels")
     ? "hotels"
     : (visibleItems[0]?.id ?? "overview");
-  const tabsRef = useRef<HTMLElement>(null);
+  const tabsRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState<TourSection>(defaultSection);
   const [showHotelsUnderDates, setShowHotelsUnderDates] = useState(false);
 
@@ -63,7 +63,8 @@ export function TourDetailTabs({ sections, sticky = false }: { sections: TourSec
 
   return (
     <>
-      <nav ref={tabsRef} data-inline-tour-hotels={active === "dates" && showHotelsUnderDates ? "true" : undefined} aria-label="بخش‌های تور" className={`mt-6 flex scroll-mt-24 gap-1 overflow-x-auto rounded-xl border border-border bg-surface p-1.5 shadow-sm ${sticky ? "sticky top-[calc(5rem+env(safe-area-inset-top,0px)+5px)] z-30 lg:top-2" : ""}`} role="tablist">
+      <div ref={tabsRef} data-inline-tour-hotels={active === "dates" && showHotelsUnderDates ? "true" : undefined} className={`mt-6 grid scroll-mt-24 gap-1.5 rounded-xl border border-border bg-surface p-1.5 shadow-sm ${sticky ? "sticky top-[calc(5rem+env(safe-area-inset-top,0px)+5px)] z-30 lg:top-2" : ""}`}>
+        <nav aria-label="بخش‌های تور" className="flex min-w-0 gap-1 overflow-x-auto" role="tablist">
         {visibleItems.map((item) => (
           <button
             aria-controls={item.hash}
@@ -77,7 +78,14 @@ export function TourDetailTabs({ sections, sticky = false }: { sections: TourSec
             {item.label}
           </button>
         ))}
-      </nav>
+        </nav>
+        {(departure || downloadHref) && (
+          <div className="flex flex-wrap items-end gap-2 border-t border-border pt-1.5">
+            {departure && <div className="min-w-0 max-w-sm flex-1">{departure}</div>}
+            {downloadHref && <a className="inline-flex min-h-9 shrink-0 items-center rounded-lg border border-border px-2.5 text-xs font-bold text-brand hover:bg-brand-soft" href={downloadHref}>دانلود PDF پکیج</a>}
+          </div>
+        )}
+      </div>
       <style jsx global>{`
         .tour-tab-panel { display: none; }
         .tour-tab-panel[data-tour-section="${active}"] { display: block !important; }
