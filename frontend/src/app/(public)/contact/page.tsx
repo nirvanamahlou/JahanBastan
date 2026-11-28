@@ -139,7 +139,7 @@ export default async function ContactPage() {
           </a>
         </div>
 
-        <div className="mt-4 grid gap-3 md:grid-cols-3">
+        <div className="mt-4 grid gap-3">
           {sections.map((section) => (
             <Card className="h-full" key={section.id}>
               <h3 className="text-base font-black text-brand">{section.title}</h3>
