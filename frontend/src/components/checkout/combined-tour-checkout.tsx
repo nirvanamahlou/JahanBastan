@@ -13,12 +13,12 @@ import { formatPersianDate } from "@/lib/persian-date";
 import { formatCurrency } from "@/lib/currency";
 import { directTourAmount, finishDirectTourRequest, pendingDirectTourRequest } from "@/lib/direct-tour-request";
 import type { TourPriceSummary } from "@/lib/currency-conversion";
-import { Dialog } from "@/components/ui/dialog";
+import { FlightCheckoutSteps } from "@/components/content/flight-checkout-steps";
 import { PUBLIC_API_BASE_URL } from "@/lib/api/client";
 import { readCustomerSession } from "@/lib/customer-session";
 import { getTourPassengerCounts } from "@/lib/tour-passenger-counts";
 
-type Props = {
+export type TourCheckoutSelection = {
   hotelSummary?: string;
   departureDate?: string | null;
   priceSummary: TourPriceSummary;
@@ -27,12 +27,11 @@ type Props = {
   combinedDeparturePriceId?: number;
   tourHotelPriceId?: number;
   departureId: number;
-  onClose: () => void;
   roomSelection: Record<string, number>;
   tourId: number;
 };
 
-export function CombinedTourCheckout({ hotelSummary, departureDate, country, lastTravelDay, priceSummary, combinedDeparturePriceId, departureId, onClose, roomSelection, tourHotelPriceId, tourId }: Props) {
+export function CombinedTourCheckout({ hotelSummary, departureDate, country, lastTravelDay, priceSummary, combinedDeparturePriceId, departureId, roomSelection, tourHotelPriceId, tourId }: TourCheckoutSelection) {
   const router = useRouter();
   const [bookingId, setBookingId] = useState<number | null>(null);
   const [addingToCart, setAddingToCart] = useState(false);
@@ -135,7 +134,8 @@ export function CombinedTourCheckout({ hotelSummary, departureDate, country, las
   }
 
   return (
-    <Dialog open title={bookingNumber ? "درخواست رزرو ثبت شد" : "اطلاعات مسافران"} onClose={busy ? () => undefined : onClose}>
+    <div className="grid gap-4">
+      <FlightCheckoutSteps current={bookingNumber || cartItem ? 2 : passengers.length && !editing ? 1 : 0} label="مراحل رزرو تور" />
       {bookingNumber ? (
         <div className="space-y-3 text-sm">
           <p>شمارهٔ پیگیری <bdi>{bookingNumber}</bdi></p>
@@ -155,7 +155,7 @@ export function CombinedTourCheckout({ hotelSummary, departureDate, country, las
       ) : cartItem ? <TravelCheckout selection={{itemId: cartItem, passengers}} /> : (
         <div className="space-y-3">
           <PassengerCheckoutModal inline lastTravelDay={lastTravelDay} requiresPassport={!!country?.trim() && !/^(ایران|ايران|iran|irn|ir)$/i.test(country.trim())} fixedPassengerCounts={counts} initialPassengers={passengers} open={editing || !passengers.length}
-            onClose={onClose} onComplete={value => { setPassengers(value); setEditing(false); setConfirmedAmount(null); }} />
+            onClose={() => undefined} onComplete={value => { setPassengers(value); setEditing(false); setConfirmedAmount(null); }} />
           {passengers.length && !editing ? (
             <div className="grid min-w-0 gap-4 sm:grid-cols-2">
               <h2 className="text-lg font-black text-brand sm:col-span-2">بازبینی مسافران و مبلغ</h2>
@@ -199,6 +199,6 @@ export function CombinedTourCheckout({ hotelSummary, departureDate, country, las
           {notice ? <p role="alert" className="text-sm text-red-700">{notice}</p> : null}
         </div>
       )}
-    </Dialog>
+    </div>
   );
 }

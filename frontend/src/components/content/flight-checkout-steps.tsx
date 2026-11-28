@@ -1,8 +1,8 @@
 const steps = ["اطلاعات مسافران", "بازبینی و تأیید", "پیگیری درخواست"];
 
-export function FlightCheckoutSteps({ current }: { current: 0 | 1 | 2 }) {
+export function FlightCheckoutSteps({ current, label = "مراحل خرید پرواز" }: { current: 0 | 1 | 2; label?: string }) {
   return (
-    <ol aria-label="مراحل خرید پرواز" className="grid grid-cols-3 gap-1 rounded-xl border border-border bg-surface p-1.5 text-xs sm:gap-2 sm:p-2 sm:text-sm">
+    <ol aria-label={label} className="grid grid-cols-3 gap-1 rounded-xl border border-border bg-surface p-1.5 text-xs sm:gap-2 sm:p-2 sm:text-sm">
       {steps.map((label, index) => {
         const active = index === current;
         const complete = index < current;

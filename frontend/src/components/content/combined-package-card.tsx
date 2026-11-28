@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { type ReactNode, useState } from "react";
 
-import { CombinedTourCheckout } from "@/components/checkout/combined-tour-checkout";
+import { TourCheckoutButton } from "@/components/checkout/tour-checkout-button";
 import { useOnlineSalesEnabled } from "@/components/online-sales-provider";
 import { isFinalLocalTourPrice } from "@/lib/tour-price-currency";
 import { formatCurrency } from "@/lib/currency";
@@ -64,7 +64,6 @@ export function CombinedPackageCard({ item, tourId, departureId, capacityRemaini
   exchangeRates?: ExchangeRates;
 }) {
   const onlineSalesEnabled = useOnlineSalesEnabled();
-  const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [selection, setSelection] = useState<Selection>(emptySelection);
   const childFlightPrice = item.childWithBedFlightPrice ?? item.childWithoutBedFlightPrice ?? null;
   const childFlightCurrency = item.childWithBedFlightCurrency ?? item.childWithoutBedFlightCurrency;
@@ -149,16 +148,14 @@ export function CombinedPackageCard({ item, tourId, departureId, capacityRemaini
         <p>برای دریافت قیمت نهایی و ثبت درخواست با کارشناسان ما تماس بگیرید.</p>
         <Link className="mt-3 inline-flex rounded-xl bg-brand px-4 py-2 font-black text-white" href="/contact/">تماس با کارشناسان</Link>
       </div> : null}
-      {canPurchase && selectedCount > 0 && !requiresFlightQuote ? <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border bg-white p-2.5">
+      {tourId && departureId && item.combinedDeparturePriceId && selectedCount > 0 && !requiresFlightQuote ? <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border bg-white p-2.5">
         <TourPriceBreakdown compact summary={priceSummary} />
-        <button className="account-primary min-h-10 rounded-lg bg-brand px-3 text-xs font-bold text-white disabled:opacity-50" disabled={!onlineSalesEnabled || bookingDisabled || capacityExceeded} onClick={() => setCheckoutOpen(true)} type="button">
+        <TourCheckoutButton className="account-primary min-h-10 rounded-lg bg-brand px-3 text-xs font-bold text-white disabled:opacity-50"
+          disabled={!onlineSalesEnabled || bookingDisabled || capacityExceeded}
+          selection={{ hotelSummary: item.hotels.map(row => [row.hotel.name, row.roomType].filter(Boolean).join(" · ")).join("، "), country, lastTravelDay, priceSummary, combinedDeparturePriceId: item.combinedDeparturePriceId, departureId, roomSelection: selection, tourId }}>
           {!onlineSalesEnabled ? "تماس حاصل فرمایید" : bookingDisabled ? "این تاریخ قابل رزرو نیست" : capacityExceeded ? "ظرفیت کافی نیست" : "خرید و ادامه ورود اطلاعات مسافران"}
-        </button>
+        </TourCheckoutButton>
       </div> : null}
-      {checkoutOpen && tourId && departureId && item.combinedDeparturePriceId ? (
-        <CombinedTourCheckout hotelSummary={item.hotels.map(row => [row.hotel.name, row.roomType].filter(Boolean).join(" · ")).join("، ")} country={country} lastTravelDay={lastTravelDay} priceSummary={priceSummary} combinedDeparturePriceId={item.combinedDeparturePriceId} departureId={departureId}
-          onClose={() => setCheckoutOpen(false)} roomSelection={selection} tourId={tourId} />
-      ) : null}
     </article>
   );
 }

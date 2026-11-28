@@ -11,7 +11,7 @@ import { useEffect, useMemo, useState } from "react";
 import { HotelAmenities } from "@/components/content/hotel-amenities";
 import { hotelMapSearchUrl } from "@/components/content/hotel-location-map";
 import { SiteSelect } from "@/components/ui/site-select";
-import { CombinedTourCheckout } from "@/components/checkout/combined-tour-checkout";
+import { TourCheckoutButton } from "@/components/checkout/tour-checkout-button";
 import { useOnlineSalesEnabled } from "@/components/online-sales-provider";
 import { PUBLIC_API_BASE_URL } from "@/lib/api/client";
 import { formatCurrency } from "@/lib/currency";
@@ -167,7 +167,6 @@ export function TourHotelFilter({
   const minimumRangePercent = (minimumRangeValue / priceRangeLimit) * 100;
   const maximumRangePercent = (maximumRangeValue / priceRangeLimit) * 100;
   const onlineSalesEnabled = useOnlineSalesEnabled();
-  const [checkoutOfferId, setCheckoutOfferId] = useState<number | null>(null);
   const [selections, setSelections] = useState<Record<number, RoomSelection>>({});
   const faqItems = faqs ?? [];
 
@@ -362,18 +361,20 @@ export function TourHotelFilter({
                   <div className={hotelStyles.inlineBooking} data-inline-hotel-booking>
                     <TourPriceBreakdown compact summary={priceSummary} />
                     {onlineSalesEnabled ? (
-                      <button className="account-primary min-h-10 w-full rounded-lg bg-brand px-3 text-xs font-bold text-white disabled:opacity-50 sm:w-auto"
+                      <TourCheckoutButton className="account-primary min-h-10 w-full rounded-lg bg-brand px-3 text-xs font-bold text-white disabled:opacity-50 sm:w-auto"
                         disabled={Object.values(selection).reduce((total, value) => total + value, selection.double) > 20}
-                        onClick={() => setCheckoutOfferId(offer.id)} type="button">
+                        selection={{
+                          hotelSummary: [offer.hotel.name, offer.roomType, offer.serviceType].filter(Boolean).join(" · "),
+                          departureDate: offer.departure.departureDate,
+                          country,
+                          lastTravelDay: offer.departure.departureDate ? tourReturnDate(offer.departure.departureDate, offer.departure.returnDate ?? null, offer.departure.nights) ?? offer.departure.departureDate : null,
+                          priceSummary, departureId: offer.departure.id, roomSelection: selection, tourHotelPriceId: offer.id, tourId,
+                        }}>
                         خرید و ادامه ورود اطلاعات مسافران
-                      </button>
+                      </TourCheckoutButton>
                     ) : <Link className="account-primary rounded-lg bg-brand px-3 py-2 text-xs font-bold text-white" href="/contact/">تماس با کارشناسان</Link>}
                   </div>
                 ) : !canSelectRoom ? <p className={hotelStyles.bookingUnavailable}>{!offer.isAvailable || offer.capacityRemaining === 0 ? "تکمیل ظرفیت" : "استعلام قیمت و ظرفیت"}</p> : null}
-                {checkoutOfferId === offer.id && roomCount > 0 && canSelectRoom ? (
-                  <CombinedTourCheckout hotelSummary={[offer.hotel.name, offer.roomType, offer.serviceType].filter(Boolean).join(" · ")} departureDate={offer.departure.departureDate} country={country} lastTravelDay={offer.departure.departureDate ? tourReturnDate(offer.departure.departureDate, offer.departure.returnDate ?? null, offer.departure.nights) ?? offer.departure.departureDate : null} priceSummary={priceSummary} departureId={offer.departure.id} onClose={() => setCheckoutOfferId(null)}
-                    roomSelection={selection} tourHotelPriceId={offer.id} tourId={tourId} />
-                ) : null}
               </article>
             );
           })}
