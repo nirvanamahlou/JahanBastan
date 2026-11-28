@@ -9,8 +9,8 @@ export const metadata: Metadata = {
 };
 
 export default function InstallPage() {
-  return <Container className="max-w-4xl py-8 sm:py-12">
-    <Image src="/pwa/icon-192.png" width={96} height={96} alt="نشان جهان باستان" className="mx-auto mb-6 rounded-2xl" />
+  return <Container className="py-5 [--container-max:54rem] sm:py-7">
+    <Image src="/pwa/icon-192.png" width={64} height={64} alt="نشان جهان باستان" className="mx-auto mb-3 rounded-xl" />
     <InstallPanel />
   </Container>;
 }
