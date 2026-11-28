@@ -37,13 +37,6 @@ export function TourHotelGallery({ name, gallery }: { name: string; gallery: str
           </button>
         </>}
       </div>
-      {gallery.length > 1 && <div aria-label="انتخاب تصویر هتل" className={styles.galleryThumbs} role="group">
-        {gallery.map((src, i) => (
-          <button aria-label={`نمایش تصویر ${i + 1} از ${name}`} aria-pressed={index === i} className={styles.galleryThumb} key={src} onClick={() => setActiveIndex(i)} type="button">
-            <Image alt="" fill sizes="40px" unoptimized={src.startsWith("https://")} src={src} />
-          </button>
-        ))}
-      </div>}
     </section>
   );
 }

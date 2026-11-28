@@ -62,17 +62,6 @@
 }
 .galleryArrow:first-of-type { inset-inline-start: .25rem; }
 .galleryArrow:last-of-type { inset-inline-end: .25rem; }
-.galleryThumbs { display: flex; gap: .24rem; overflow-x: auto; padding: 2px 0; }
-.galleryThumb {
-  position: relative;
-  flex: 0 0 2rem;
-  aspect-ratio: 4 / 3;
-  overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: .28rem;
-}
-.galleryThumb img { object-fit: cover; }
-.galleryThumb[aria-pressed="true"] { border-color: var(--accent-strong); box-shadow: inset 0 0 0 1px var(--accent-strong); }
 .gallery :is(button):focus-visible,
 .location:focus-visible { outline: 2px solid var(--accent-strong); outline-offset: 2px; }
 
