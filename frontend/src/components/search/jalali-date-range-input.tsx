@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { loadRouteCalendarDates } from "@/components/search/route-calendar-dates";
 import { TravelSearchIcon } from "@/components/search/travel-search-icon";
 
@@ -102,6 +102,7 @@ export function JalaliDateRangeInput({
   const [hoverDate, setHoverDate] = useState<string | null>(null);
   const [view, setView] = useState(initial);
   const [open, setOpen] = useState(false);
+  const closePicker = useCallback(() => setOpen(false), []);
   const root = useRef<HTMLDivElement>(null);
   const [availableDates, setAvailableDates] = useState<ReadonlySet<string>>(new Set());
   const originLabel = routeLabels?.origin;
@@ -245,16 +246,16 @@ export function JalaliDateRangeInput({
       <input name="departureFrom" type="hidden" value={departure ?? ""} />
       <input name="departureTo" type="hidden" value={tripType === "round_trip" ? returnDate ?? "" : ""} />
       {open ? (
-        <JalaliCalendarModal ariaLabel="انتخاب بازه تاریخ شمسی" onClose={() => setOpen(false)}>
+        <JalaliCalendarModal ariaLabel="انتخاب بازه تاریخ شمسی" fitViewport onClose={closePicker}>
         <div
-          className={`${calendarSize === "compact" ? "max-h-[25rem] w-[min(22rem,calc(100vw-1.5rem))]" : "max-h-[min(34rem,calc(100dvh-2rem))] w-[min(34rem,calc(100vw-1.5rem))]"} overscroll-contain overflow-y-auto rounded-2xl border-2 border-brand/45 bg-white text-[#082f74] shadow-2xl`}
+          className={`w-[calc(100vw-1rem)] rounded-2xl border border-border bg-white text-brand shadow-2xl ${calendarSize === "regular" ? "max-w-[25rem] md:max-w-[46rem]" : "max-w-[25rem]"}`}
           dir="rtl"
         >
-          <header className="bg-[#174891] px-3 py-2 text-center text-white">
-            <div>
-              <strong id="jalali-range-dialog-title" className={`block ${compact ? "text-xs" : "text-sm"}`}>{tripType === "one_way" ? "انتخاب تاریخ بلیت رفت" : "انتخاب تاریخ رفت و برگشت"}</strong>
-              <span className="text-[10px] text-white/80">{tripType === "one_way" ? "تاریخ بلیت رفت را انتخاب کنید" : selectionStep === "departure" ? "ابتدا تاریخ بلیت رفت را انتخاب کنید" : "اکنون تاریخ بلیت برگشت را انتخاب کنید"}</span>
-            </div>
+          <header className="flex items-center justify-between gap-2 rounded-t-2xl border-b border-border px-3 py-1.5">
+            <strong className="text-sm font-black">
+              {selectionStep === "departure" ? labels.departure : labels.return}
+            </strong>
+            <button aria-label="بستن تقویم" className="grid size-8 place-items-center rounded-full text-xl text-muted hover:bg-brand-soft" onClick={closePicker} type="button">×</button>
           </header>
           <JalaliMonthYearPicker
             maxYear={maximumJalaliYear}
@@ -264,9 +265,9 @@ export function JalaliDateRangeInput({
             onChange={setView}
             year={view.year}
           />
-          <div className={`grid gap-1 p-2.5 ${calendarSize === "regular" ? "md:grid-cols-2 md:divide-x md:divide-x-reverse md:divide-border" : ""}`}>
+          <div className={`grid gap-2 px-2.5 py-1 ${calendarSize === "regular" && canShowSecondMonth ? "md:grid-cols-2 md:divide-x md:divide-x-reverse md:divide-border" : ""}`}>
             <MonthCalendar
-                availableDates={availableDates}
+              availableDates={availableDates}
               departure={departure}
               hoverDate={hoverDate}
               month={view}
@@ -277,6 +278,7 @@ export function JalaliDateRangeInput({
             />
             {calendarSize === "regular" && canShowSecondMonth ? (
               <MonthCalendar
+                className="hidden md:block"
                 availableDates={availableDates}
                 departure={departure}
                 hoverDate={hoverDate}
@@ -288,21 +290,20 @@ export function JalaliDateRangeInput({
               />
             ) : null}
           </div>
-          {availableDates.size > 0 && (
-            <p className="flex items-center gap-1.5 px-3 pb-2 text-[11px] text-muted">
-              <span aria-hidden="true" className="size-1.5 rounded-full bg-red-600" />
-              {routeAvailability === "tour" ? "روزهای دارای حرکت تور" : "روزهای دارای بلیت"}
-            </p>
-          )}
-          <footer className="flex flex-col gap-2 border-t border-border bg-surface-muted px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-[11px] text-muted">
-              {departure ? `رفت ${isoToJalaliInput(departure)}` : "رفت انتخاب نشده"}
-              {tripType === "round_trip" ? returnDate ? ` — برگشت ${isoToJalaliInput(returnDate)}` : " — برگشت انتخاب نشده" : " — سفر یک‌طرفه"}
-            </p>
-            <div className="flex gap-2">
-              <button className="rounded-lg px-3 py-1.5 text-xs font-bold text-muted hover:bg-white" onClick={() => { setDeparture(null); setReturnDate(null); setHoverDate(null); if (root.current?.closest("form[data-live-flight-form]")) { setOpen(false); applyFlightDates(); } }} type="button">پاک کردن</button>
-              <button className="rounded-lg bg-[#174891] px-5 py-1.5 text-xs font-black text-white disabled:cursor-not-allowed disabled:opacity-40" disabled={!departure || (tripType === "round_trip" && !returnDate)} onClick={() => { setOpen(false); applyFlightDates(); }} type="button">تأیید تاریخ بلیت</button>
+          <footer className="flex min-h-11 items-center justify-between gap-2 rounded-b-2xl border-t border-border bg-surface-muted px-3 py-1">
+            <div className="grid gap-0.5 text-[11px] text-muted">
+              <p>
+                {departure ? isoToJalaliInput(departure) : "تاریخ را انتخاب کنید"}
+                {tripType === "round_trip" && returnDate && ` تا ${isoToJalaliInput(returnDate)}`}
+              </p>
+              {availableDates.size > 0 && (
+                <p className="flex items-center gap-1.5">
+                  <span aria-hidden="true" className="size-1.5 rounded-full bg-red-600" />
+                  {routeAvailability === "tour" ? "روزهای دارای حرکت تور" : "روزهای دارای بلیت"}
+                </p>
+              )}
             </div>
+            <button className="min-h-8 shrink-0 rounded-lg bg-brand px-3 text-xs font-bold text-white disabled:opacity-40" disabled={!departure || (tripType === "round_trip" && !returnDate)} onClick={() => { closePicker(); applyFlightDates(); }} type="button">تأیید تاریخ</button>
           </footer>
         </div>
         </JalaliCalendarModal>
@@ -312,6 +313,7 @@ export function JalaliDateRangeInput({
 }
 
 function MonthCalendar({
+  className = "",
   availableDates,
   month,
   minDate,
@@ -321,6 +323,7 @@ function MonthCalendar({
   onSelect,
   onHover,
 }: {
+  className?: string;
   availableDates: ReadonlySet<string>;
   month: JalaliMonth;
   minDate: string;
@@ -343,14 +346,14 @@ function MonthCalendar({
   );
 
   return (
-    <section className="p-1.5" aria-label={`${JALALI_MONTH_NAMES[month.month - 1]} ${persianNumber(month.year)}`}>
-      <h3 className="mb-1.5 text-center text-xs font-black">{JALALI_MONTH_NAMES[month.month - 1]} {persianNumber(month.year)}</h3>
-      <div className="grid grid-cols-7 text-center text-[10px] text-slate-500">
+    <section className={`min-w-0 px-1 py-0.5 ${className}`} aria-label={`${JALALI_MONTH_NAMES[month.month - 1]} ${persianNumber(month.year)}`}>
+      <h3 className="mb-1 text-center text-sm font-bold">{JALALI_MONTH_NAMES[month.month - 1]} {persianNumber(month.year)}</h3>
+      <div className="grid grid-cols-7 text-center text-[11px] font-medium text-muted">
         {weekDays.map((day, index) => <span className="py-0.5" key={`${day}-${index}`}>{day}</span>)}
       </div>
-      <div className="grid grid-cols-7" onMouseLeave={() => onHover(null)} role="grid">
+      <div className="grid grid-cols-7 gap-0.5 [--day-height:clamp(1.25rem,calc((100dvh-13rem)/6),2.625rem)]" onMouseLeave={() => onHover(null)} role="grid">
         {days.map((day, index) => {
-          if (!day) return <span aria-hidden="true" className="aspect-square" key={`empty-${index}`} />;
+          if (!day) return <span aria-hidden="true" className="h-(--day-height)" key={`empty-${index}`} />;
           const jalaliValue = `${month.year}/${String(month.month).padStart(2, "0")}/${String(day).padStart(2, "0")}`;
           const isoValue = jalaliInputToIso(jalaliValue);
           if (!isoValue) return null;
@@ -365,14 +368,14 @@ function MonthCalendar({
             <button
               aria-label={`${persianNumber(day)} ${JALALI_MONTH_NAMES[month.month - 1]} ${persianNumber(month.year)}${available ? "، دارای حرکت" : ""}`}
               aria-selected={endpoint}
-              className={`relative aspect-square text-[11px] transition first:rounded-r-lg last:rounded-l-lg disabled:cursor-not-allowed disabled:text-slate-300 ${
+              className={`relative grid h-(--day-height) place-items-center rounded-lg text-sm font-semibold tabular-nums leading-none transition focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:text-slate-400 ${
                 endpoint
-                  ? "rounded-lg bg-[#174891] font-black text-white"
+                  ? "bg-brand font-bold text-white"
                   : previewEndpoint
-                    ? "rounded-lg bg-[#2E69B2] font-black text-white"
+                    ? "bg-brand/80 font-bold text-white"
                     : inRange
                       ? "bg-[#D8EAFF] text-[#174891]"
-                      : "rounded-lg hover:bg-[#EAF3FF]"
+                      : "bg-surface-muted hover:bg-brand-soft disabled:bg-transparent"
               }`}
               disabled={disabled}
               key={day}
@@ -381,8 +384,8 @@ function MonthCalendar({
               role="gridcell"
               type="button"
             >
-              {persianNumber(day)}
-              {available && <span aria-hidden="true" data-available-date={isoValue} className="absolute bottom-[12%] left-1/2 size-1 -translate-x-1/2 rounded-full bg-red-600 ring-1 ring-white/70" />}
+              <span className={available ? "-translate-y-0.5" : undefined}>{persianNumber(day)}</span>
+              {available && <span aria-hidden="true" data-available-date={isoValue} className="absolute bottom-0.5 left-1/2 size-1.5 -translate-x-1/2 rounded-full bg-red-600 ring-1 ring-white/70" />}
             </button>
           );
         })}

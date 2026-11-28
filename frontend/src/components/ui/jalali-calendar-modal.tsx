@@ -3,7 +3,7 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 
-export function JalaliCalendarModal({ ariaLabel, children, onClose }: { ariaLabel: string; children: ReactNode; onClose: () => void }) {
+export function JalaliCalendarModal({ ariaLabel, children, fitViewport = false, onClose }: { ariaLabel: string; children: ReactNode; fitViewport?: boolean; onClose: () => void }) {
   const dialogRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -50,7 +50,7 @@ export function JalaliCalendarModal({ ariaLabel, children, onClose }: { ariaLabe
     <div
       aria-label={ariaLabel}
       aria-modal="true"
-      className="fixed inset-0 z-[1100] grid place-items-center overflow-y-auto bg-slate-950/35 p-3 backdrop-blur-md sm:p-6"
+      className={`fixed inset-0 z-[1100] grid place-items-center bg-slate-950/35 backdrop-blur-md ${fitViewport ? "p-2" : "overflow-y-auto p-3 sm:p-6"}`}
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
