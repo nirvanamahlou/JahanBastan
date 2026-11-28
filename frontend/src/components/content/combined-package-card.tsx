@@ -22,7 +22,6 @@ function CombinedPackagePrice({
   addFlight,
   flightPrice,
   flightCurrency,
-  supplement = false,
   children,
 }: {
   label: string;
@@ -31,20 +30,20 @@ function CombinedPackagePrice({
   addFlight: boolean;
   flightPrice: string | null;
   flightCurrency: string;
-  supplement?: boolean;
   children?: ReactNode;
 }) {
   return (
     <div className="flex min-w-0 flex-col rounded-xl border border-border bg-white p-1.5 text-center">
       <p className="text-xs text-muted">{label}</p>
-      <strong className="mb-1 mt-0.5 block text-xs leading-snug text-brand">
-        {formatCurrency(price, currency)}
+      <strong className="mb-1 mt-0.5 flex min-w-0 flex-wrap items-center justify-center gap-x-1 gap-y-0.5 text-xs leading-snug text-brand">
+        <bdi className="whitespace-nowrap">{formatCurrency(price, currency)}</bdi>
+        {addFlight && flightPrice !== null && Number(flightPrice) > 0 && (
+          <span className="inline-flex items-center gap-1 whitespace-nowrap">
+            <span>+</span>
+            <bdi>{formatCurrency(flightPrice, flightCurrency)}</bdi>
+          </span>
+        )}
       </strong>
-      {addFlight && flightPrice !== null && Number(flightPrice) > 0 ? (
-        <span className="mb-1 block text-xs font-bold leading-snug text-brand">
-          + {supplement ? "" : "پرواز "}{formatCurrency(flightPrice, flightCurrency)}
-        </span>
-      ) : null}
       {children}
     </div>
   );
@@ -133,10 +132,10 @@ export function CombinedPackageCard({ item, tourId, departureId, capacityRemaini
           );
         })}
       </div>
-      {availablePrices.length ? <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,6rem),1fr))] gap-2 border-t border-border p-2.5">
+      {availablePrices.length ? <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,10rem),1fr))] gap-2 border-t border-border p-2.5">
         {availablePrices.map(([key, label, price, currency, addFlight, flightPrice, flightCurrency]) => (
           <CombinedPackagePrice key={key} addFlight={addFlight} currency={currency} flightCurrency={flightCurrency}
-            flightPrice={flightPrice} label={label} price={price ?? ""} supplement={key === "infant"}>
+            flightPrice={flightPrice} label={label} price={price ?? ""}>
             {canPurchase ? <div className="mx-auto mt-auto flex w-full max-w-28 items-center overflow-hidden rounded-md border border-border bg-surface-muted">
               <button aria-label={`کم کردن ${label}`} className="grid h-8 min-w-0 flex-1 place-items-center font-bold text-brand disabled:opacity-35" disabled={selection[key] === 0} onClick={() => updateSelection(key, -1)} type="button">−</button>
               <output className="grid h-8 w-8 place-items-center border-x border-border text-xs font-bold text-brand">{(key === "double" ? selection[key] * 2 : selection[key]).toLocaleString("fa-IR")}</output>
