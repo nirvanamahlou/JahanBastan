@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { loadRouteCalendarDates } from "@/components/search/route-calendar-dates";
 import { TravelSearchIcon } from "@/components/search/travel-search-icon";
 
 import { JalaliCalendarModal } from "@/components/ui/jalali-calendar-modal";
@@ -41,6 +42,8 @@ type TripType = "one_way" | "round_trip";
 type SelectionStep = "departure" | "return";
 
 type JalaliDateRangeInputProps = {
+  routeAvailability?: "tour" | "flight";
+  routeLabels?: { origin: string; destination: string };
   compact?: boolean;
   calendarSize?: "compact" | "regular";
   initialDeparture?: string | null;
@@ -57,6 +60,8 @@ type JalaliDateRangeInputProps = {
 };
 
 export function JalaliDateRangeInput({
+  routeAvailability,
+  routeLabels,
   compact = false,
   calendarSize = compact ? "compact" : "regular",
   initialDeparture = null,
@@ -98,6 +103,33 @@ export function JalaliDateRangeInput({
   const [view, setView] = useState(initial);
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
+  const [availableDates, setAvailableDates] = useState<ReadonlySet<string>>(new Set());
+  const originLabel = routeLabels?.origin;
+  const destinationLabel = routeLabels?.destination;
+  const outboundDay = routeAvailability === "flight" && selectionStep === "return" ? departure : null;
+
+  useEffect(() => {
+    const form = root.current?.closest("form");
+    if (!open || !routeAvailability || !form) return;
+    const fields = new FormData(form);
+    const field = (name: string) => String(fields.get(name) ?? "").trim();
+    const origin = (routeAvailability === "flight" ? originLabel : undefined) || field("origin") || field("departure");
+    const place = field("place");
+    const destination = place.startsWith("city:") ? place.slice(5) : field("destination");
+    const country = place.startsWith("country:") ? place.slice(8) : field("country");
+    if (!origin || (!destination && (routeAvailability === "flight" || !country))) return;
+    const controller = new AbortController();
+    void loadRouteCalendarDates(
+      routeAvailability, origin,
+      (routeAvailability === "flight" ? destinationLabel : undefined) || destination,
+      destinationLabel ?? "", country,
+      Boolean(destination), outboundDay,
+      controller.signal,
+    ).then(dates => {
+      if (!controller.signal.aborted) setAvailableDates(dates);
+    }).catch(() => undefined);
+    return () => controller.abort();
+  }, [open, routeAvailability, originLabel, destinationLabel, outboundDay]);
 
   function applyFlightDates() {
     window.requestAnimationFrame(() => root.current?.closest<HTMLFormElement>("form[data-live-flight-form]")?.requestSubmit());
@@ -105,6 +137,7 @@ export function JalaliDateRangeInput({
 
   function selectDate(isoValue: string) {
     if (isoValue < today) return;
+    if (routeAvailability === "flight" && tripType === "round_trip" && (selectionStep === "departure" || !departure || isoValue < departure)) setAvailableDates(new Set());
     if (tripType === "one_way" && selectionStep === "return") {
       setSelectionStep("departure");
       return;
@@ -142,6 +175,7 @@ export function JalaliDateRangeInput({
     const selectedDate = step === "return" ? returnDate ?? departure : departure;
     setView(selectedDate && selectedDate >= today ? parseJalali(isoToJalaliInput(selectedDate)) : todayJalali);
     setSelectionStep(step === "return" && !departure ? "departure" : step);
+    setAvailableDates(new Set());
     setOpen(true);
   }
 
@@ -232,6 +266,7 @@ export function JalaliDateRangeInput({
           />
           <div className={`grid gap-1 p-2.5 ${calendarSize === "regular" ? "md:grid-cols-2 md:divide-x md:divide-x-reverse md:divide-border" : ""}`}>
             <MonthCalendar
+                availableDates={availableDates}
               departure={departure}
               hoverDate={hoverDate}
               month={view}
@@ -242,6 +277,7 @@ export function JalaliDateRangeInput({
             />
             {calendarSize === "regular" && canShowSecondMonth ? (
               <MonthCalendar
+                availableDates={availableDates}
                 departure={departure}
                 hoverDate={hoverDate}
                 month={secondView}
@@ -252,6 +288,12 @@ export function JalaliDateRangeInput({
               />
             ) : null}
           </div>
+          {availableDates.size > 0 && (
+            <p className="flex items-center gap-1.5 px-3 pb-2 text-[11px] text-muted">
+              <span aria-hidden="true" className="size-1.5 rounded-full bg-red-600" />
+              {routeAvailability === "tour" ? "روزهای دارای حرکت تور" : "روزهای دارای بلیت"}
+            </p>
+          )}
           <footer className="flex flex-col gap-2 border-t border-border bg-surface-muted px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-[11px] text-muted">
               {departure ? `رفت ${isoToJalaliInput(departure)}` : "رفت انتخاب نشده"}
@@ -270,6 +312,7 @@ export function JalaliDateRangeInput({
 }
 
 function MonthCalendar({
+  availableDates,
   month,
   minDate,
   departure,
@@ -278,6 +321,7 @@ function MonthCalendar({
   onSelect,
   onHover,
 }: {
+  availableDates: ReadonlySet<string>;
   month: JalaliMonth;
   minDate: string;
   departure: string | null;
@@ -311,6 +355,7 @@ function MonthCalendar({
           const isoValue = jalaliInputToIso(jalaliValue);
           if (!isoValue) return null;
           const disabled = isoValue < minDate;
+          const available = !disabled && availableDates.has(isoValue);
           const endpoint = isoValue === departure || isoValue === returnDate;
           const previewEndpoint = !returnDate && isoValue === rangeEnd;
           const inRange = Boolean(
@@ -318,9 +363,9 @@ function MonthCalendar({
           );
           return (
             <button
-              aria-label={`${persianNumber(day)} ${JALALI_MONTH_NAMES[month.month - 1]} ${persianNumber(month.year)}`}
+              aria-label={`${persianNumber(day)} ${JALALI_MONTH_NAMES[month.month - 1]} ${persianNumber(month.year)}${available ? "، دارای حرکت" : ""}`}
               aria-selected={endpoint}
-              className={`aspect-square text-[11px] transition first:rounded-r-lg last:rounded-l-lg disabled:cursor-not-allowed disabled:text-slate-300 ${
+              className={`relative aspect-square text-[11px] transition first:rounded-r-lg last:rounded-l-lg disabled:cursor-not-allowed disabled:text-slate-300 ${
                 endpoint
                   ? "rounded-lg bg-[#174891] font-black text-white"
                   : previewEndpoint
@@ -337,6 +382,7 @@ function MonthCalendar({
               type="button"
             >
               {persianNumber(day)}
+              {available && <span aria-hidden="true" data-available-date={isoValue} className="absolute bottom-[12%] left-1/2 size-1 -translate-x-1/2 rounded-full bg-red-600 ring-1 ring-white/70" />}
             </button>
           );
         })}

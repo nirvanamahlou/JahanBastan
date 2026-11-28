@@ -372,6 +372,11 @@ export function TravelSearch({
                 ]} />
             </div>
           ) : <JalaliDateRangeInput key={serviceType} compact layout="hero"
+            routeAvailability={serviceType === "tour" || serviceType === "flight" ? serviceType : undefined}
+            routeLabels={{
+              origin: transportOriginOptions.find(option => option.value === routeOrigin)?.label || routeOrigin,
+              destination: transportDestinationOptions.find(option => option.value === routeDestination)?.label || "",
+            }}
             initialTripType={serviceType === "bus" ? "one_way" : "round_trip"}
             showTripType={["flight", "train", "bus"].includes(serviceType)}
             dateLabels={serviceType === "hotel"

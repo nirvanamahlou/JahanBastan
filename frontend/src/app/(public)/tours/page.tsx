@@ -217,7 +217,7 @@ export default async function ToursPage({ searchParams }: { searchParams: Promis
             ]} searchable />
           </div>
           <div className={styles.tourSearchDates}>
-            <JalaliDateRangeInput key={`${departureFrom}:${departureTo}`} compact initialDeparture={departureFrom || null} initialReturn={departureTo || null} showTripType={false} dateLabels={{ field: "بازهٔ تاریخ حرکت", departure: "از تاریخ", return: "تا تاریخ" }} />
+            <JalaliDateRangeInput routeAvailability="tour" key={`${departureFrom}:${departureTo}`} compact initialDeparture={departureFrom || null} initialReturn={departureTo || null} showTripType={false} dateLabels={{ field: "بازهٔ تاریخ حرکت", departure: "از تاریخ", return: "تا تاریخ" }} />
           </div>
           <label className={styles.tourSearchPassengers}>
             <span>تعداد مسافر</span>
