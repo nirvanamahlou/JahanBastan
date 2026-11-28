@@ -409,7 +409,9 @@ export default async function FlightsPage({ searchParams }: { searchParams: Prom
     for (const name of names) if (name) minAirlinePrices.set(name, Math.min(price, minAirlinePrices.get(name) ?? price));
   }
   const showStops = Boolean(maxStops) || allFlightTickets.some(({ flight }) => flight.stopsCount !== null);
-  const chooseErpRoundTrip = !browseAllTripTypes && tripType === "round_trip" && Boolean(origin && destination);
+  // Both dates already identify the result set; show complete ERP pairs immediately.
+  const showErpRoundTripPicker = !browseAllTripTypes && tripType === "round_trip"
+    && Boolean(origin && destination) && !(departureFrom && departureTo);
   const availableDates = new Set<string>();
   const dailyFares = new Map<string, Map<string, number>>();
   function recordFare(day: string, raw: string | null, currency: string) {
@@ -515,7 +517,7 @@ export default async function FlightsPage({ searchParams }: { searchParams: Prom
               ) : null}
               <TicketSelectionProvider kind="flight" roundTrip={!browseAllTripTypes && tripType === "round_trip" && flightTickets.length > 0}>
                 <div className="mt-5 space-y-4">
-                  {chooseErpRoundTrip ? (
+                  {showErpRoundTripPicker ? (
                     <ErpRoundTripPicker
                       key={`${origin}/${destination}/${departureFrom}/${departureTo}`}
                       flights={visibleErpFlights}
@@ -524,7 +526,7 @@ export default async function FlightsPage({ searchParams }: { searchParams: Prom
                     />
                   ) : null}
                   {[
-                    ...(chooseErpRoundTrip ? [] : visibleErpFlights.map((flight) => ({
+                    ...(showErpRoundTripPicker ? [] : visibleErpFlights.map((flight) => ({
                       price: erpAmountInToman(flight.amount, flight.currency),
                       departure: Date.parse(flight.departure),
                       card: (
