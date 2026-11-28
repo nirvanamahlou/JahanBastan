@@ -565,6 +565,12 @@ function TourFlightTickets({
   departures: TourDeparture[];
   item: Tour;
 }) {
+  const normalizeAirline = (name: string | null | undefined) =>
+    name?.toLowerCase().replace(/[\s\u200c\u200d]+/g, "").replace(/ي/g, "ی").replace(/ك/g, "ک");
+  const tourAirline = normalizeAirline(item.airlineName);
+  const fallbackLogo = (airline: string | null | undefined) =>
+    tourAirline && normalizeAirline(airline) === tourAirline ? item.airlineLogoImageId : null;
+
   const flights = departures.flatMap((departure) => {
     const hasOutbound = [
       departure.outboundFlightNumber,
@@ -603,7 +609,7 @@ function TourFlightTickets({
             destinationAirport: departure.outboundDestinationAirport,
             destinationAirportCode: departure.outboundDestinationAirportCode,
             airline: departure.outboundAirlineName,
-            airlineLogoImageId: departure.outboundAirlineLogoImageId,
+            airlineLogoImageId: departure.outboundAirlineLogoImageId ?? fallbackLogo(departure.outboundAirlineName),
             number: departure.outboundFlightNumber,
             departureTime: departure.outboundDepartureTime,
             arrivalTime: departure.outboundArrivalTime,
@@ -625,7 +631,7 @@ function TourFlightTickets({
             destinationAirport: departure.returnDestinationAirport,
             destinationAirportCode: departure.returnDestinationAirportCode,
             airline: departure.returnAirlineName,
-            airlineLogoImageId: departure.returnAirlineLogoImageId,
+            airlineLogoImageId: departure.returnAirlineLogoImageId ?? fallbackLogo(departure.returnAirlineName),
             number: departure.returnFlightNumber,
             departureTime: departure.returnDepartureTime,
             arrivalTime: departure.returnArrivalTime,
@@ -655,7 +661,7 @@ function TourFlightTickets({
               {flight.airline || flight.airlineLogoImageId ? (
                 <div className={tourStyles.ticketAirline}>
                   {flight.airlineLogoImageId ? (
-                    <Image alt={flight.airline ? "" : "لوگوی ایرلاین"} height={40} width={64}
+                    <Image unoptimized alt={flight.airline ? "" : "لوگوی ایرلاین"} height={40} width={64}
                       src={`${PUBLIC_API_BASE_URL}/media/${flight.airlineLogoImageId}`} />
                   ) : null}
                   {flight.airline && <span>{flight.airline}</span>}
