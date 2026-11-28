@@ -108,7 +108,8 @@ export function JalaliDateRangeInput({
   const [availableDates, setAvailableDates] = useState<ReadonlySet<string>>(new Set());
   const originLabel = routeLabels?.origin;
   const destinationLabel = routeLabels?.destination;
-  const outboundDay = routeAvailability === "flight" && selectionStep === "return" ? departure : null;
+  const outboundDay = routeAvailability && selectionStep === "return" ? departure : null;
+  const [checkedReturn, setCheckedReturn] = useState<string | null>(null);
 
   useEffect(() => {
     const form = root.current?.closest("form");
@@ -128,7 +129,14 @@ export function JalaliDateRangeInput({
       Boolean(destination), outboundDay,
       controller.signal,
     ).then(dates => {
-      if (!controller.signal.aborted) setAvailableDates(dates);
+      if (controller.signal.aborted) return;
+      setAvailableDates(dates);
+      setCheckedReturn(outboundDay);
+      if (outboundDay && dates.size) {
+        const first = [...dates].sort()[0];
+        const month = parseJalali(isoToJalaliInput(first));
+        setView(current => current.year === month.year && current.month === month.month ? current : month);
+      }
     }).catch(() => undefined);
     return () => controller.abort();
   }, [open, routeAvailability, originLabel, destinationLabel, outboundDay]);
@@ -139,7 +147,7 @@ export function JalaliDateRangeInput({
 
   function selectDate(isoValue: string) {
     if (isoValue < today) return;
-    if (routeAvailability === "flight" && tripType === "round_trip" && (selectionStep === "departure" || !departure || isoValue < departure)) setAvailableDates(new Set());
+    if (routeAvailability && tripType === "round_trip" && (selectionStep === "departure" || !departure || isoValue < departure)) setAvailableDates(new Set());
     if (tripType === "one_way" && selectionStep === "return") {
       setSelectionStep("departure");
       return;
@@ -178,6 +186,7 @@ export function JalaliDateRangeInput({
     setView(selectedDate && selectedDate >= today ? parseJalali(isoToJalaliInput(selectedDate)) : todayJalali);
     setSelectionStep(step === "return" && !departure ? "departure" : step);
     setAvailableDates(new Set());
+    setCheckedReturn(null);
     setOpen(true);
   }
 
@@ -297,10 +306,13 @@ export function JalaliDateRangeInput({
                 {departure ? isoToJalaliInput(departure) : "تاریخ را انتخاب کنید"}
                 {tripType === "round_trip" && returnDate && ` تا ${isoToJalaliInput(returnDate)}`}
               </p>
+              {outboundDay && checkedReturn === outboundDay && availableDates.size === 0 && (
+                <p role="status">برای این تاریخ رفت، برگشتی پیدا نشد.</p>
+              )}
               {availableDates.size > 0 && (
                 <p className="flex items-center gap-1.5">
                   <span aria-hidden="true" className="size-1.5 rounded-full bg-red-600" />
-                  {routeAvailability === "tour" ? "روزهای دارای حرکت تور" : "روزهای دارای بلیت"}
+                  {outboundDay ? "تاریخ‌های برگشت موجود" : routeAvailability === "tour" ? "روزهای دارای حرکت تور" : "روزهای دارای بلیت"}
                 </p>
               )}
             </div>

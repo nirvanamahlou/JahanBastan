@@ -1,13 +1,15 @@
 import { PUBLIC_API_BASE_URL } from "@/lib/api/client";
-import { isTourDepartureBookable, type TourDepartureAvailability } from "@/lib/tour-departure-availability";
+import { isTourDepartureBookable, tourReturnDate, type TourDepartureAvailability } from "@/lib/tour-departure-availability";
 
 type Page<T> = { items: T[]; total: number };
 type Leg = { departure: string; remaining_capacity: number | null };
 type Flight = Leg & { return_leg?: Leg | null };
 type NativeFlight = { departureDate: string | null; returnDate: string | null; availableSeats: number | null };
-type Tour = { slug: string; destination?: { title: string }; departureDate: string | null };
+type Tour = { slug: string; destination?: { title: string }; departureDate: string | null; returnDate: string | null };
+type TourDeparture = TourDepartureAvailability & { departureDate: string | null; returnDate: string | null; nights?: number | null };
 type DatedTour = {
   startsOn: string;
+  endsOn: string;
   remainingCapacity: number | null;
   salesStopped: boolean;
   previewOnly: boolean;
@@ -95,18 +97,24 @@ export async function loadRouteCalendarDates(
     pages<DatedTour>("/erp/dated-tours", new URLSearchParams(), "limit", list).catch(() => []),
   ]);
   const dates = new Set<string>();
+  function addTourDate(departure: string | null, returning: string | null, nights?: number | null) {
+    if (!departure || (outboundDay && outboundDay !== departure)) return;
+    const day = outboundDay ? tourReturnDate(departure, returning, nights) : departure;
+    if (day && day >= departure) dates.add(day);
+  }
+
   for (let index = 0; index < tours.length && !signal.aborted; index += 6) {
     await Promise.all(tours.slice(index, index + 6).map(async (tour) => {
-      const detail = await get<{ departures?: (TourDepartureAvailability & { departureDate: string | null })[] }>(
+      const detail = await get<{ departures?: TourDeparture[] }>(
         `/tours/${encodeURIComponent(tour.slug)}`,
       ).catch(() => null);
       if (!detail) return;
       if (detail.departures?.length) {
-        detail.departures.filter(isTourDepartureBookable).forEach(({ departureDate }) => {
-          if (departureDate) dates.add(departureDate);
+        detail.departures.filter(isTourDepartureBookable).forEach(({ departureDate, returnDate, nights }) => {
+          addTourDate(departureDate, returnDate, nights);
         });
       } else if (tour.departureDate) {
-        dates.add(tour.departureDate);
+        addTourDate(tour.departureDate, tour.returnDate);
       }
     }));
   }
@@ -117,9 +125,7 @@ export async function loadRouteCalendarDates(
     const places = tour.hotels.flatMap(hotel => hotel.city ? [hotel.city] : []);
     if (country && !places.some(place => normalize(place.country.name) === normalize(country))) continue;
     if (singleDestination && ![tour.outbound.destinationName, ...places.map(place => place.name)].some(name => normalize(name) === city)) continue;
-    dates.add(tour.startsOn.slice(0, 10));
+    addTourDate(tour.startsOn.slice(0, 10), tour.endsOn.slice(0, 10));
   }
   return dates;
 }
-
-
