@@ -380,7 +380,7 @@ export function TourHotelFilter({
                   </div>} />
                 {canSelectRoom && roomCount > 0 ? (
                   <div className={hotelStyles.inlineBooking} data-inline-hotel-booking>
-                    <TourPriceBreakdown summary={priceSummary} />
+                    <TourPriceBreakdown compact summary={priceSummary} />
                     {onlineSalesEnabled ? (
                       <button className="account-primary min-h-10 w-full rounded-lg bg-brand px-3 text-xs font-bold text-white disabled:opacity-50 sm:w-auto"
                         disabled={Object.values(selection).reduce((total, value) => total + value, selection.double) > 20}

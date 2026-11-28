@@ -1,7 +1,22 @@
 import { formatCurrency } from "@/lib/currency";
 import type { TourPriceSummary } from "@/lib/currency-conversion";
 
-export function TourPriceBreakdown({ summary }: { summary: TourPriceSummary }) {
+export function TourPriceBreakdown({ summary, compact = false }: { summary: TourPriceSummary; compact?: boolean }) {
+  if (compact) {
+    const amounts = summary.foreign.map(({ amount, currency }) => formatCurrency(amount, currency));
+    if (summary.local !== 0 || !amounts.length) amounts.push(formatCurrency(summary.local, "IRT"));
+    return (
+      <strong className="flex min-w-0 flex-wrap items-center gap-x-1.5 text-sm text-brand">
+        {amounts.map((amount, index) => (
+          <span className="inline-flex items-center gap-1.5" key={index}>
+            {index > 0 && <span aria-hidden="true">+</span>}
+            <bdi>{amount}</bdi>
+          </span>
+        ))}
+      </strong>
+    );
+  }
+
   return (
     <div className="grid min-w-0 gap-1 text-sm text-brand">
       {summary.foreign.length > 0 && (

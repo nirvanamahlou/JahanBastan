@@ -151,7 +151,7 @@ export function CombinedPackageCard({ item, tourId, departureId, capacityRemaini
         <Link className="mt-3 inline-flex rounded-xl bg-brand px-4 py-2 font-black text-white" href="/contact/">تماس با کارشناسان</Link>
       </div> : null}
       {canPurchase && selectedCount > 0 && !requiresFlightQuote ? <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border bg-white p-2.5">
-        <TourPriceBreakdown summary={priceSummary} />
+        <TourPriceBreakdown compact summary={priceSummary} />
         <button className="account-primary min-h-10 rounded-lg bg-brand px-3 text-xs font-bold text-white disabled:opacity-50" disabled={!onlineSalesEnabled || bookingDisabled || capacityExceeded} onClick={() => setCheckoutOpen(true)} type="button">
           {!onlineSalesEnabled ? "تماس حاصل فرمایید" : bookingDisabled ? "این تاریخ قابل رزرو نیست" : capacityExceeded ? "ظرفیت کافی نیست" : "خرید و ادامه ورود اطلاعات مسافران"}
         </button>
