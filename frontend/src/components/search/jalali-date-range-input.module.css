@@ -1,0 +1,51 @@
+@media (max-height: 500px) {
+  .calendar > header,
+  .calendar > footer {
+    padding-block: 3px;
+  }
+
+  .calendar > header button {
+    width: 28px;
+    height: 28px;
+  }
+
+  .calendar > section {
+    padding: 4px 10px;
+  }
+
+  .calendar > section > div > button,
+  .calendar > section [role="combobox"] {
+    min-height: 32px !important;
+    height: 32px;
+  }
+
+  .calendar > section > div > button {
+    width: 32px;
+  }
+
+  .calendar > div {
+    padding-block: 2px;
+  }
+
+  .calendar h3 {
+    margin-bottom: 0;
+    line-height: 20px;
+  }
+
+  .calendar [role="grid"] {
+    --day-height: clamp(19px, calc((100dvh - 204px) / 6), 40px);
+  }
+
+  .calendar [data-available-date] {
+    width: 4px;
+    height: 4px;
+  }
+
+  .calendar > footer {
+    min-height: 36px;
+  }
+
+  .calendar > footer button {
+    min-height: 30px;
+  }
+}

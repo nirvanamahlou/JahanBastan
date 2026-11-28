@@ -10,6 +10,7 @@ import {
   JalaliMonthYearPicker,
 } from "@/components/ui/jalali-month-year-picker";
 import { isoToJalaliInput, jalaliInputToIso } from "@/lib/persian-date";
+import styles from "./jalali-date-range-input.module.css";
 
 const weekDays = ["ش", "ی", "د", "س", "چ", "پ", "ج"];
 
@@ -248,7 +249,7 @@ export function JalaliDateRangeInput({
       {open ? (
         <JalaliCalendarModal ariaLabel="انتخاب بازه تاریخ شمسی" fitViewport onClose={closePicker}>
         <div
-          className={`w-[calc(100vw-1rem)] rounded-2xl border border-border bg-white text-brand shadow-2xl ${calendarSize === "regular" ? "max-w-[25rem] md:max-w-[46rem]" : "max-w-[25rem]"}`}
+          className={`${styles.calendar} w-[calc(100vw-1rem)] rounded-2xl border border-border bg-white text-brand shadow-2xl ${calendarSize === "regular" ? "max-w-[25rem] md:max-w-[46rem]" : "max-w-[25rem]"}`}
           dir="rtl"
         >
           <header className="flex items-center justify-between gap-2 rounded-t-2xl border-b border-border px-3 py-1.5">
