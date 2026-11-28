@@ -49,16 +49,16 @@ export const serviceTabs: ReadonlyArray<{
     route: "/tours/",
   },
   {
-    key: "hotel",
-    label: "هتل",
-    icon: <TravelSearchIcon icon="hotel" className="size-7 sm:size-8" />,
-    route: "/hotels/",
-  },
-  {
     key: "flight",
     label: "پرواز",
     icon: <TravelSearchIcon icon="flight" className="size-7 sm:size-8" />,
     route: "/services/flights/",
+  },
+  {
+    key: "hotel",
+    label: "هتل",
+    icon: <TravelSearchIcon icon="hotel" className="size-7 sm:size-8" />,
+    route: "/hotels/",
   },
   {
     key: "bus",
